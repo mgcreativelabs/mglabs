@@ -1,0 +1,58 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BookOpen, Clock, Star, Users, ArrowRight, Brain, Zap, Bot } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "AI Learning Hub",
+  description: "Free structured AI courses for beginners and professionals.",
+};
+
+const courses = [
+  { title: "AI Foundations: How LLMs Actually Work", description: "Understand transformers, training, and why GPT-4 does what it does.", duration: "3h 20m", lessons: 12, level: "Beginner", rating: 4.9, students: 12840, free: true, icon: Brain },
+  { title: "Prompt Engineering Masterclass", description: "Write prompts that get 10x better results. Chain-of-thought, few-shot, system prompting.", duration: "5h 45m", lessons: 22, level: "Intermediate", rating: 4.9, students: 21300, free: true, icon: Zap },
+  { title: "AI Automation with n8n & Make", description: "Build automated workflows that save hours every week.", duration: "4h 15m", lessons: 16, level: "Intermediate", rating: 4.8, students: 8920, free: true, icon: Bot },
+  { title: "Introduction to AI Agents", description: "Build autonomous AI agents that complete multi-step tasks without supervision.", duration: "6h 30m", lessons: 24, level: "Advanced", rating: 4.8, students: 6430, free: false, icon: Brain },
+];
+
+export default function AILearningHubPage() {
+  return (
+    <div className="pt-16 min-h-screen">
+      <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-sm font-medium mb-5">
+          <BookOpen className="h-3.5 w-3.5" /> Free courses
+        </span>
+        <h1 className="text-5xl font-bold text-white mb-5">AI Learning <span className="text-gradient">Hub</span></h1>
+        <p className="text-gray-400 text-xl max-w-2xl mx-auto">Structured courses that take you from AI curious to AI capable. Every course is free and built for 2025.</p>
+      </section>
+
+      <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto pb-20">
+        <div className="grid md:grid-cols-2 gap-5">
+          {courses.map((course) => (
+            <div key={course.title} className="rounded-2xl bg-surface-1 border border-white/[0.06] hover:border-brand-blue/30 transition-all p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 rounded-xl bg-surface-3"><course.icon className="h-5 w-5 text-brand-blue" /></div>
+                <div className="flex gap-2">
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${course.free ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-brand-purple/10 text-brand-purple border border-brand-purple/20"}`}>
+                    {course.free ? "Free" : "Pro"}
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-surface-3 text-gray-400 border border-white/10">{course.level}</span>
+                </div>
+              </div>
+              <h3 className="font-semibold text-white text-lg mb-2">{course.title}</h3>
+              <p className="text-gray-500 text-sm mb-4">{course.description}</p>
+              <div className="flex items-center gap-4 text-xs text-gray-600 mb-4 border-t border-white/[0.04] pt-4">
+                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{course.duration}</span>
+                <span>{course.lessons} lessons</span>
+                <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-400" />{course.rating}</span>
+                <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.students.toLocaleString()}</span>
+              </div>
+              <Link href="/signup" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-brand text-white text-sm font-semibold hover:scale-[1.02] transition-all">
+                {course.free ? "Start free" : "Unlock with Pro"} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
