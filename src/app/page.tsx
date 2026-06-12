@@ -1,31 +1,121 @@
+// =============================================
+// HOME PAGE — src/app/page.tsx
+// =============================================
+import type { Metadata } from "next";
+import { Hero } from "@/components/sections/Hero";
+import { Features } from "@/components/sections/Features";
+import { Testimonials } from "@/components/sections/Testimonials";
+import { Newsletter } from "@/components/sections/Newsletter";
+import { ArrowRight, BookOpen, Code, Palette, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, BookOpen, Code, Palette, Brain, Zap, Star } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
-const stats = [
-  { value: "50K+", label: "Learners" },
-  { value: "1,200+", label: "AI Prompts" },
-  { value: "80+", label: "Tutorials" },
-  { value: "Free", label: "To start" },
-];
+export const metadata: Metadata = {
+  title: "MG Creative Labs — Master AI, Prompt Engineering & AI Design",
+  description: "The #1 platform to learn AI, prompt engineering, AI coding, AI design, and automation. Join 50,000+ creators.",
+};
 
-const features = [
-  { icon: Brain, title: "AI Learning Hub", description: "Structured courses on AI fundamentals, GPT-4, Claude, and the latest models.", href: "/ai-learning-hub", color: "text-brand-blue", bg: "bg-brand-blue/10", border: "border-brand-blue/20" },
-  { icon: Sparkles, title: "Prompt Library", description: "1,200+ hand-crafted prompts for writing, coding, business and creativity.", href: "/prompt-library", color: "text-brand-purple", bg: "bg-brand-purple/10", border: "border-brand-purple/20" },
-  { icon: Code, title: "AI Coding Academy", description: "Build real apps with Cursor, v0, Bolt and AI coding tools.", href: "/ai-coding-academy", color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" },
-  { icon: Palette, title: "AI Design Academy", description: "Master Midjourney, DALL-E and Figma AI without a design degree.", href: "/ai-design-academy", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20" },
-  { icon: Zap, title: "Automation", description: "Build n8n and Zapier workflows. Automate your business and save hours.", href: "/ai-learning-hub", color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
-  { icon: Star, title: "Community", description: "Connect with 50K+ AI creators. Share, learn and grow together.", href: "/community", color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
-];
-
-const testimonials = [
-  { name: "Sarah Chen", role: "Freelance Designer", content: "MG Creative Labs transformed how I work. I landed 3x my old freelance rate within 2 months.", badge: "AI Design" },
-  { name: "Marcus Williams", role: "Software Engineer", content: "The prompt library alone saved me 10 hours a week. Most practical AI tutorials I've found.", badge: "AI Coding" },
-  { name: "Priya Patel", role: "Startup Founder", content: "I automated my entire customer onboarding with the automation course. Life-changing.", badge: "Automation" },
+const learningPaths = [
+  {
+    step: "01",
+    title: "Learn AI fundamentals",
+    description: "Understand how LLMs work, what you can build, and where to start.",
+    icon: BookOpen,
+    href: "/ai-learning-hub",
+    time: "2–4 hours",
+  },
+  {
+    step: "02",
+    title: "Master prompt engineering",
+    description: "Learn to write prompts that get 10x better results from any AI.",
+    icon: Sparkles,
+    href: "/prompt-library",
+    time: "4–8 hours",
+  },
+  {
+    step: "03",
+    title: "Build with AI",
+    description: "Create real projects using Cursor, v0, Bolt, and AI coding tools.",
+    icon: Code,
+    href: "/ai-coding-academy",
+    time: "10–20 hours",
+  },
+  {
+    step: "04",
+    title: "Design with AI",
+    description: "Generate professional visuals, brand assets, and UI with AI design tools.",
+    icon: Palette,
+    href: "/ai-design-academy",
+    time: "6–12 hours",
+  },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* HERO */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden mesh-bg pt-16">
-        <div className="absolute top-1/4 left-1/4 h
+      <Hero />
+      <Features />
+
+      {/* Learning Path Section */}
+      <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <Badge variant="blue" className="mb-4">Structured learning</Badge>
+            <h2 className="text-4xl font-display font-bold text-white mb-5 leading-tight">
+              A clear path from beginner to AI creator
+            </h2>
+            <p className="text-gray-500 text-lg leading-relaxed mb-8">
+              No random tutorials. No overwhelm. A proven 4-step path that takes you from &ldquo;I&apos;ve heard of ChatGPT&rdquo; to building real AI-powered projects.
+            </p>
+            <Link href="/ai-learning-hub">
+              <Button variant="primary" size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                Start your path
+              </Button>
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {learningPaths.map((path, i) => (
+              <Link key={path.step} href={path.href}>
+                <div className="group flex items-start gap-4 p-5 rounded-2xl bg-surface-1 border border-white/[0.06] hover:border-brand-blue/30 hover:bg-surface-2 transition-all duration-200">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-surface-3 flex items-center justify-center">
+                    <span className="text-xs font-mono font-bold text-brand-blue">{path.step}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-white text-sm">{path.title}</h3>
+                      <span className="text-xs text-gray-600 ml-auto">{path.time}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">{path.description}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-600 group-hover:text-brand-blue group-hover:translate-x-1 transition-all flex-shrink-0 mt-0.5" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Testimonials />
+      <Newsletter />
+
+      {/* Final CTA */}
+      <section className="py-24 px-4 sm:px-6 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl sm:text-5xl font-display font-bold text-white mb-5">
+            The future belongs to AI-fluent creators.
+          </h2>
+          <p className="text-gray-500 text-lg mb-8">
+            Start today. It&apos;s free.
+          </p>
+          <Link href="/signup">
+            <Button size="xl" variant="primary" rightIcon={<ArrowRight className="h-5 w-5" />}>
+              Create your free account
+            </Button>
+          </Link>
+        </div>
+      </section>
+    </>
+  );
+}

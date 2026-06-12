@@ -1,8 +1,14 @@
+// =============================================
+// NAVBAR — src/components/layout/Navbar.tsx
+// =============================================
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Sparkles, BookOpen, Code, Palette, Users, Newspaper, Zap } from "lucide-react";
+import { Menu, X, ChevronDown, Sparkles, BookOpen, Code, Palette, Users, Newspaper, Zap } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 const navLinks = [
@@ -21,70 +27,131 @@ export function Navbar() {
   const { user, signOut, loading } = useAuth();
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => { setIsOpen(false); }, [pathname]);
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-surface/90 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/50" : "bg-transparent"}`}>
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        scrolled
+          ? "bg-surface/90 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/50"
+          : "bg-transparent"
+      )}
+    >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
               <Zap className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-white text-base tracking-tight">
+            <span className="font-display font-bold text-white text-base tracking-tight">
               MG <span className="text-gradient">Creative Labs</span>
             </span>
           </Link>
 
+          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${pathname === link.href ? "text-white bg-surface-3" : "text-gray-400 hover:text-white hover:bg-surface-2"}`}>
-                <link.icon className="h-3.5 w-3.5" />{link.label}
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                  pathname === link.href
+                    ? "text-white bg-surface-3"
+                    : "text-gray-400 hover:text-white hover:bg-surface-2"
+                )}
+              >
+                <link.icon className="h-3.5 w-3.5" />
+                {link.label}
               </Link>
             ))}
           </div>
 
+          {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            {!loading && (user ? (
+            {!loading && (
               <>
-                <Link href="/dashboard" className="px-4 py-2 rounded-xl bg-surface-2 border border-white/10 text-gray-100 text-sm font-medium hover:border-brand-blue/40 transition-all">Dashboard</Link>
-                <button onClick={() => signOut()} className="text-sm text-gray-400 hover:text-white transition-colors">Sign out</button>
+                {user ? (
+                  <>
+                    <Link href="/dashboard">
+                      <Button variant="secondary" size="sm">Dashboard</Button>
+                    </Link>
+                    <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                      Sign out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button variant="ghost" size="sm">Sign in</Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button variant="primary" size="sm">
+                        Get started free
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-2">Sign in</Link>
-                <Link href="/signup" className="px-4 py-2 rounded-xl bg-gradient-brand text-white text-sm font-semibold shadow-lg shadow-brand-blue/20 hover:scale-[1.02] transition-all">Get started free</Link>
-              </>
-            ))}
+            )}
           </div>
 
-          <button className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors" onClick={() => setIsOpen(!isOpen)}>
+          {/* Mobile Menu Toggle */}
+          <button
+            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
+        {/* Mobile Menu */}
         {isOpen && (
           <div className="lg:hidden pb-4 border-t border-white/[0.06] mt-2">
             <div className="pt-4 space-y-1">
               {navLinks.map((link) => (
-                <Link key={link.href} href={link.href}
-                  className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === link.href ? "text-white bg-surface-3" : "text-gray-400 hover:text-white hover:bg-surface-2"}`}>
-                  <link.icon className="h-4 w-4" />{link.label}
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                    pathname === link.href
+                      ? "text-white bg-surface-3"
+                      : "text-gray-400 hover:text-white hover:bg-surface-2"
+                  )}
+                >
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
                 </Link>
               ))}
               <div className="pt-3 border-t border-white/[0.06] flex flex-col gap-2">
                 {user ? (
-                  <Link href="/dashboard" className="text-center py-3 rounded-xl bg-surface-2 border border-white/10 text-gray-100 text-sm font-medium">Dashboard</Link>
+                  <>
+                    <Link href="/dashboard">
+                      <Button variant="secondary" className="w-full">Dashboard</Button>
+                    </Link>
+                    <Button variant="ghost" className="w-full" onClick={() => signOut()}>
+                      Sign out
+                    </Button>
+                  </>
                 ) : (
                   <>
-                    <Link href="/login" className="text-center py-3 rounded-xl text-gray-400 text-sm">Sign in</Link>
-                    <Link href="/signup" className="text-center py-3 rounded-xl bg-gradient-brand text-white text-sm font-semibold">Get started free</Link>
+                    <Link href="/login">
+                      <Button variant="ghost" className="w-full">Sign in</Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button variant="primary" className="w-full">Get started free</Button>
+                    </Link>
                   </>
                 )}
               </div>

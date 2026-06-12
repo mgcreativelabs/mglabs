@@ -1,3 +1,6 @@
+// =============================================
+// BADGE — src/components/ui/Badge.tsx
+// =============================================
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
@@ -22,7 +25,10 @@ const badgeVariants = cva(
         lg: "px-3 py-1.5 text-sm",
       },
     },
-    defaultVariants: { variant: "default", size: "md" },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+    },
   }
 );
 
@@ -31,7 +37,9 @@ export interface BadgeProps
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, size, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ variant, size, className }))} {...props} />;
+  return (
+    <span className={cn(badgeVariants({ variant, size, className }))} {...props} />
+  );
 }
 
 export { Badge, badgeVariants };

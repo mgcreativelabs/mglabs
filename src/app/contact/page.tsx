@@ -1,6 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { Mail, Share2, GitBranch, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Mail, MessageSquare, Share2, GitBranch, CheckCircle } from "lucide-react";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
@@ -18,24 +22,32 @@ export default function ContactPage() {
   return (
     <div className="pt-16 min-h-screen">
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
-        <h1 className="text-5xl font-bold text-white mb-4">
+        <Badge variant="blue" className="mb-5">Get in touch</Badge>
+        <h1 className="text-5xl font-display font-bold text-white mb-4">
           Contact <span className="text-gradient">Us</span>
         </h1>
-        <p className="text-gray-400 text-lg">Questions, partnerships, feedback — we read every message.</p>
+        <p className="text-gray-400 text-lg max-w-xl mx-auto">
+          Questions, partnerships, feedback, or just want to say hi — we read every message.
+        </p>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-20 grid md:grid-cols-2 gap-12">
-        <div className="space-y-5">
-          <h2 className="text-2xl font-bold text-white">Let&apos;s talk</h2>
-          <p className="text-gray-500">We respond within 24–48 hours.</p>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-20 grid md:grid-cols-2 gap-12 items-start">
+        {/* Contact info */}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-display font-bold text-white mb-4">Let&apos;s talk</h2>
+            <p className="text-gray-500 leading-relaxed">
+              We&apos;re a small team that cares deeply about our community. We respond to every message within 24–48 hours.
+            </p>
+          </div>
           {[
             { icon: Mail, label: "Email", value: "hello@mgcreativelabs.com", href: "mailto:hello@mgcreativelabs.com" },
-            { icon: Share2, label: "Twitter", value: "@mgcreativelabs", href: "https://twitter.com/mgcreativelabs" },
+            { icon: Share2, label: "Twitter / X", value: "@mgcreativelabs", href: "https://twitter.com/mgcreativelabs" },
             { icon: GitBranch, label: "GitHub", value: "github.com/mgcreativelabs", href: "https://github.com/mgcreativelabs" },
           ].map(({ icon: Icon, label, value, href }) => (
             <a key={label} href={href} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-2xl bg-surface-1 border border-white/[0.06] hover:border-brand-blue/30 transition-all group">
-              <div className="p-2.5 rounded-xl bg-surface-3">
+              <div className="p-2.5 rounded-xl bg-surface-3 group-hover:bg-brand-blue/10 transition-colors">
                 <Icon className="h-5 w-5 text-brand-blue" />
               </div>
               <div>
@@ -44,11 +56,22 @@ export default function ContactPage() {
               </div>
             </a>
           ))}
+
+          <div className="p-5 rounded-2xl bg-gradient-brand-subtle border border-brand-blue/20">
+            <h3 className="font-semibold text-white mb-2">Partnership inquiries</h3>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Interested in sponsoring content, co-creating courses, or building integrations? Email us at{" "}
+              <a href="mailto:partnerships@mgcreativelabs.com" className="text-brand-blue hover:underline">
+                partnerships@mgcreativelabs.com
+              </a>
+            </p>
+          </div>
         </div>
 
+        {/* Form */}
         <div className="glass rounded-3xl p-8 border border-white/[0.06]">
           {success ? (
-            <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="flex flex-col items-center justify-center text-center py-8 gap-4">
               <div className="h-14 w-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
                 <CheckCircle className="h-7 w-7 text-green-400" />
               </div>
@@ -58,30 +81,15 @@ export default function ContactPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <h3 className="text-lg font-semibold text-white mb-2">Send a message</h3>
-              {[
-                { field: "name", label: "Name", type: "text", placeholder: "Your name" },
-                { field: "email", label: "Email", type: "email", placeholder: "you@email.com" },
-                { field: "subject", label: "Subject", type: "text", placeholder: "What's this about?" },
-              ].map(({ field, label, type, placeholder }) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">{label}</label>
-                  <input type={type} placeholder={placeholder} required
-                    value={form[field as keyof typeof form]}
-                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                    className="w-full h-11 rounded-xl bg-surface-2 border border-white/10 text-gray-100 placeholder:text-gray-600 px-4 text-sm focus:outline-none focus:border-brand-blue/60 focus:ring-2 focus:ring-brand-blue/20" />
-                </div>
-              ))}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
-                <textarea rows={4} placeholder="Tell us more..." required
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full rounded-xl bg-surface-2 border border-white/10 text-gray-100 placeholder:text-gray-600 px-4 py-3 text-sm focus:outline-none focus:border-brand-blue/60 focus:ring-2 focus:ring-brand-blue/20 resize-none" />
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Name" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <Input label="Email" type="email" placeholder="you@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
               </div>
-              <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl bg-gradient-brand text-white font-semibold shadow-lg shadow-brand-blue/20 hover:scale-[1.02] disabled:opacity-50 transition-all">
-                {loading ? "Sending..." : "Send message"}
-              </button>
+              <Input label="Subject" placeholder="What's this about?" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required />
+              <Textarea label="Message" placeholder="Tell us more..." rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+              <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading}>
+                Send message
+              </Button>
             </form>
           )}
         </div>
