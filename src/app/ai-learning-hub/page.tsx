@@ -101,15 +101,26 @@ export default function AILearningHubPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
-          {courses.map((course) => (
-            <Card key={course.id} className="card-hover border border-white/[0.06] p-6">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-2.5 rounded-xl bg-surface-3">
-                    <course.icon className="h-5 w-5 text-brand-blue" />
-                    </Card>
-                  </div>
-                  <div className="flex items-center gap-2">
+         {courses.map((course) => (
+  <Card
+    key={course.id}
+    className="card-hover border border-white/[0.06] p-6"
+  >
+    <div className="flex items-start justify-between mb-4">
+      <div className="p-2.5 rounded-xl bg-surface-3">
+        <course.icon className="h-5 w-5 text-brand-blue" />
+      </div>
+
+      <div className="flex items-center gap-2">
+        {course.isFree ? (
+          <Badge variant="success">Free</Badge>
+        ) : (
+          <Badge variant="secondary">Paid</Badge>
+        )}
+      </div>
+    </div>
+  </Card>
+))}
                     {course.isFree ? (
                       <Badge variant="success">Free</Badge>
                     ) : (

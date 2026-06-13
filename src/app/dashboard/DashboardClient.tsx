@@ -75,25 +75,32 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             { label: "Learning streak", value: "7 days", icon: TrendingUp, color: "text-green-400" },
           ].map((stat) => (
             <Card key={stat.label} className="glass border border-white/[0.06]" p-4>
-              <div className="flex items-center justify-between mb-2">
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              <Card className="border border-white/[0.06] p-6">
-  <h3 className="text-lg font-semibold">Continue learning</h3>
+<div className="flex items-center justify-between mb-4">
+  <h3 className="text-lg font-semibold">Saved prompts</h3>
 
-  <div className="grid grid-cols-2 gap-3">
-    {quickLinks.map(({ icon: Icon, label, href, color }) => (
-      <Link key={href} href={href}>
-        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-2 border border-white/[0.04] hover:border-brand-blue/30 hover:bg-surface-3 transition-all group">
-          <Icon className={`h-5 w-5 ${color}`} />
-          <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
-            {label}
-          </span>
-          <ArrowRight className="h-3.5 w-3.5 text-gray-600 group-hover:text-brand-blue ml-auto transition-colors" />
-        </div>
-      </Link>
+  <Link href="/prompt-library">
+    <Button
+      variant="ghost"
+      size="sm"
+      rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
+    >
+      Browse all
+    </Button>
+  </Link>
+</div>
+
+{savedPrompts.length === 0 ? (
+  <div className="text-center py-8">
+    <Bookmark className="h-8 w-8 text-gray-700 mx-auto mb-3" />
+    <p className="text-gray-600 text-sm">No saved prompts yet.</p>
+  </div>
+) : (
+  <div className="space-y-2">
+    {savedPrompts.map((prompt) => (
+      <div key={prompt.id}>{prompt.title}</div>
     ))}
   </div>
-</Card>
+)}
                   <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
                     Browse all
                   </Button>
