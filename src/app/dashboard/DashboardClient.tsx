@@ -74,7 +74,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             { label: "Community posts", value: "5", icon: Zap, color: "text-cyan-400" },
             { label: "Learning streak", value: "7 days", icon: TrendingUp, color: "text-green-400" },
           ].map((stat) => (
-            <Card key={stat.label} className="glass border border-white/[0.06]" padding="md">
+            <Card key={stat.label} className="glass border border-white/[0.06]" p-4>
               <div className="flex items-center justify-between mb-2">
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
@@ -144,7 +144,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           {/* Sidebar */}
           <div className="space-y-5">
             {/* Achievement */}
-            <Card className="bg-gradient-brand-subtle border border-brand-blue/20" padding="md">
+            <Card className="bg-gradient-brand-subtle border border-brand-blue/20" p-4>
               <div className="flex items-center gap-3 mb-3">
                 <Award className="h-5 w-5 text-brand-blue" />
                 <span className="text-sm font-semibold text-white">This week</span>
@@ -160,7 +160,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             </Card>
 
             {/* Recent activity */}
-            <Card className="border border-white/[0.06]" padding="md">
+            <Card className="border border-white/[0.06]" p-4>
               <h3 className="text-lg font-semibold">Recent activity</h3>
               <div className="space-y-3">
                 {recentActivity.map((item, i) => (
@@ -180,7 +180,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
 
             {/* Upgrade CTA if free */}
             {tier === "free" && (
-              <Card className="border border-brand-purple/20 bg-brand-purple/5" padding="md">
+              <Card className="border border-brand-purple/20 bg-brand-purple/5" p-4>
                 <h3 className="text-sm font-semibold text-white mb-2">Unlock Pro</h3>
                 <ul className="text-xs text-gray-500 space-y-1.5 mb-4">
                   <li>✅ All premium courses</li>
