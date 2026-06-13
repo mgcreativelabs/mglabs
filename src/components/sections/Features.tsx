@@ -89,7 +89,7 @@ export function Features() {
             <Card
               className={`h-full bg-gradient-to-br ${feature.gradient} ${feature.border} border hover:scale-[1.02] transition-all duration-300 hover:shadow-xl`}
               className="p-6" />
-            >
+            </Card>
               <div className="flex items-start gap-4">
                 <div className={`p-2.5 rounded-xl bg-surface-2 border border-white/[0.06]`}>
                   <feature.icon className={`h-5 w-5 ${feature.color === "blue" ? "text-brand-blue" : "text-brand-purple"}`} />

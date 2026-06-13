@@ -107,6 +107,7 @@ export default function AILearningHubPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-2.5 rounded-xl bg-surface-3">
                     <course.icon className="h-5 w-5 text-brand-blue" />
+                    </Card>
                   </div>
                   <div className="flex items-center gap-2">
                     {course.isFree ? (
