@@ -64,7 +64,7 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {statCards.map((s) => (
-                <Card key={s.label} className="glass border border-white/[0.06]" padding="md">
+                <Card key={s.label} className="glass border border-white/[0.06]" p-4>
                   <div className="flex items-center justify-between mb-3">
                     <s.icon className={`h-5 w-5 ${s.color}`} />
                     <TrendingUp className="h-4 w-4 text-green-400" />
@@ -77,7 +77,7 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
             </div>
 
             {/* Recent users */}
-            <Card className="border border-white/[0.06]" padding="lg">
+            <Card className="glass border border-white/[0.06] p-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-semibold">RECENT SIGNUP</h3>
                 <Button variant="ghost" size="sm">View all users</Button>
