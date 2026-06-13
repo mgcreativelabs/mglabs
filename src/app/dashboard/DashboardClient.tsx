@@ -77,37 +77,23 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             <Card key={stat.label} className="glass border border-white/[0.06]" p-4>
               <div className="flex items-center justify-between mb-2">
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-              <div className="text-2xl font-display font-bold text-white">{stat.value}</div>
-              <div className="text-xs text-gray-600 mt-0.5">{stat.label}</div>
-            </Card>
-          ))}
+              <Card className="border border-white/[0.06] p-6">
+  <h3 className="text-lg font-semibold">Continue learning</h3>
+
+  <div className="grid grid-cols-2 gap-3">
+    {quickLinks.map(({ icon: Icon, label, href, color }) => (
+      <Link key={href} href={href}>
+        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-2 border border-white/[0.04] hover:border-brand-blue/30 hover:bg-surface-3 transition-all group">
+          <Icon className={`h-5 w-5 ${color}`} />
+          <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+            {label}
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 text-gray-600 group-hover:text-brand-blue ml-auto transition-colors" />
         </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick links */}
-            <Card className="border border-white/[0.06] p-6">
-              <h3 className="text-lg font-semibold">Continue learning</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {quickLinks.map(({ icon: Icon, label, href, color }) => (
-                  <Link key={href} href={href}>
-                    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-2 border border-white/[0.04] hover:border-brand-blue/30 hover:bg-surface-3 transition-all group">
-                      <Icon className={`h-5 w-5 ${color}`} />
-                      <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">{label}</span>
-                      <ArrowRight className="h-3.5 w-3.5 text-gray-600 group-hover:text-brand-blue ml-auto transition-colors" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </Card>
-
-            {/* Saved prompts */}
-            <Card className="border border-white/[0.06] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Saved prompts</h3>
-                <Link href="/prompt-library">
+      </Link>
+    ))}
+  </div>
+</Card>
                   <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
                     Browse all
                   </Button>
