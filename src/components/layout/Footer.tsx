@@ -1,6 +1,4 @@
-// =============================================
-// FOOTER — src/components/layout/Footer.tsx
-// =============================================
+"use client";
 import React from "react";
 import Link from "next/link";
 import { Zap, Share2, GitBranch, Building2, Play, Mail } from "lucide-react";

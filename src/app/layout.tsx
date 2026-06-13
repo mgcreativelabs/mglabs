@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
@@ -40,8 +41,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const structuredData = generateStructuredData("website", {});
-
+const structuredData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "MG Creative Labs",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://mgcreativelabs.com",
+});
   return (
     <html lang="en" className="dark">
       <head>
