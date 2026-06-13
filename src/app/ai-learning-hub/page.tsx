@@ -102,7 +102,7 @@ export default function AILearningHubPage() {
 
         <div className="grid md:grid-cols-2 gap-5">
           {courses.map((course) => (
-            <Card key={course.id} className="glass glass-hover border border-white/[0.06]" padding="none">
+            <Card key={course.id} className="card-hover border border-white/[0.06] p-6">
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-2.5 rounded-xl bg-surface-3">

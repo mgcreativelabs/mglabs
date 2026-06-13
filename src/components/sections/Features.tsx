@@ -88,7 +88,7 @@ export function Features() {
           <Link key={feature.title} href={feature.href} className="group">
             <Card
               className={`h-full bg-gradient-to-br ${feature.gradient} ${feature.border} border hover:scale-[1.02] transition-all duration-300 hover:shadow-xl`}
-              padding="lg"
+              className="p-6" />
             >
               <div className="flex items-start gap-4">
                 <div className={`p-2.5 rounded-xl bg-surface-2 border border-white/[0.06]`}>

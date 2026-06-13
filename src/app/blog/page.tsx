@@ -120,7 +120,7 @@ const categoryColors: Record<string, "blue" | "purple" | "success" | "warning"> 
 function PostCard({ post, featured = false }: { post: typeof BLOG_POSTS[0]; featured?: boolean }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group block">
-      <Card className="h-full glass glass-hover border border-white/[0.06] overflow-hidden" padding="none">
+      <Card className="card-hover border border-white/[0.06] p-6">
         {/* Cover placeholder */}
         <div className={`${featured ? "h-52" : "h-36"} bg-gradient-to-br from-brand-blue/10 to-brand-purple/10 relative flex items-end p-4`}>
           <div className="absolute inset-0 bg-gradient-to-t from-surface-1/80 to-transparent" />

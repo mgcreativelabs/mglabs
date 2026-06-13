@@ -72,7 +72,7 @@ export default function AICodingAcademyPage() {
         <h2 className="text-3xl font-display font-bold text-white mb-8">Learning Tracks</h2>
         <div className="grid md:grid-cols-2 gap-5">
           {tracks.map((track) => (
-            <Card key={track.title} className="glass border border-white/[0.06] card-hover" padding="lg">
+            <Card key={track.title} className="glass border border-white/[0.06] card-hover" className="p-6" />
               <div className="flex items-start justify-between mb-4">
                 <div className="p-2.5 rounded-xl bg-surface-3">
                   <track.icon className="h-5 w-5 text-brand-blue" />

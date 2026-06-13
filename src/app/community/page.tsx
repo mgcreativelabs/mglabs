@@ -170,7 +170,7 @@ export default function CommunityPage() {
           </div>
 
           {POSTS.map((post) => (
-            <Card key={post.id} className="glass glass-hover border border-white/[0.06]" padding="none">
+            <Card key={post.id} className="card-hover border border-white/[0.06] p-6">
               <div className="p-5">
                 <div className="flex items-start gap-3">
                   <Avatar fallback={post.author.full_name} size="sm" />

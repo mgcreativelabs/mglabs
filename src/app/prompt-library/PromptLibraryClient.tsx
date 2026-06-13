@@ -139,7 +139,7 @@ function PromptCard({ prompt }: { prompt: typeof MOCK_PROMPTS[0] }) {
   }[prompt.difficulty];
 
   return (
-    <Card className="h-full flex flex-col glass glass-hover border border-white/[0.06]" padding="none">
+    <Card className="card-hover border border-white/[0.06] p-6">
       <div className="p-5 flex-1">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
