@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card, CardTitle } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { Users, FileText, Sparkles, Mail, Shield, TrendingUp, Plus, Settings, BarChart2 } from "lucide-react";
 import { formatRelativeDate } from "@/lib/utils/format";

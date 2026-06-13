@@ -9,29 +9,28 @@ export const metadata: Metadata = {
     default: "MG Creative Labs — Master AI, Prompt Engineering & AI Design",
     template: "%s | MG Creative Labs",
   },
-  description: "The #1 platform to learn AI, prompt engineering, AI coding, AI design, and automation.",
+  description:
+    "The #1 platform to learn AI, prompt engineering, AI coding, AI design, and automation.",
   openGraph: {
     type: "website",
     siteName: "MG Creative Labs",
   },
-  twitter: { card: "summary_large_image", site: "@mgcreativelabs" },
+  twitter: {
+    card: "summary_large_image",
+    site: "@mgcreativelabs",
+  },
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      </head>
-<body className="min-h-screen bg-black text-white antialiased">
-  <div className="mx-auto max-w-6xl px-6">
-    <Navbar />
-    <main className="py-12">{children}</main>
-    <Footer />
-  </div>
-</body>        <Navbar />
+      <body className="antialiased min-h-screen bg-black text-white">
+        <Navbar />
         <main>{children}</main>
         <Footer />
       </body>
