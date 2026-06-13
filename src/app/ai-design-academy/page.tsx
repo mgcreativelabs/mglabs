@@ -33,18 +33,15 @@ export default function AIDesignAcademyPage() {
       <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-5">
           {modules.map((mod) => (
-            <Card key={mod.title} className="glass border border-white/[0.06] card-hover p-6" />
-              <div className="p-2.5 rounded-xl bg-surface-3 w-fit mb-4">
-                <mod.icon className="h-5 w-5 text-brand-purple" />
-              </div>
-              <h3 className="font-semibold text-white text-lg mb-2">{mod.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed mb-4">{mod.description}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {mod.tools.map((tool) => (
-                  <span key={tool} className="text-xs text-brand-purple bg-brand-purple/10 px-2 py-0.5 rounded-md border border-brand-purple/20">{tool}</span>
-                ))}
-              </div>
-            </Card>
+      <Card key={mod.title} className="glass border border-white/[0.06] card-hover p-6">
+  <div className="p-2.5 rounded-xl bg-surface-3 w-fit mb-4">
+    <mod.icon className="h-5 w-5 text-brand-purple" />
+  </div>
+
+  <h3 className="font-semibold text-white text-lg mb-2">
+    {mod.title}
+  </h3>
+</Card>
           ))}
         </div>
 
