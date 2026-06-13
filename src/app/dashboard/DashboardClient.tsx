@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
@@ -89,7 +89,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           <div className="lg:col-span-2 space-y-6">
             {/* Quick links */}
             <Card className="border border-white/[0.06]" padding="lg">
-              <CardTitle className="mb-4">Continue learning</CardTitle>
+              <h3 className="text-lg font-semibold">Continue learning</h3>
               <div className="grid grid-cols-2 gap-3">
                 {quickLinks.map(({ icon: Icon, label, href, color }) => (
                   <Link key={href} href={href}>
@@ -106,7 +106,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             {/* Saved prompts */}
             <Card className="border border-white/[0.06]" padding="lg">
               <div className="flex items-center justify-between mb-4">
-                <CardTitle>Saved prompts</CardTitle>
+                <h3 className="text-lg font-semibold">Saved prompts</h3>
                 <Link href="/prompt-library">
                   <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
                     Browse all
@@ -161,7 +161,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
 
             {/* Recent activity */}
             <Card className="border border-white/[0.06]" padding="md">
-              <CardTitle className="mb-4">Recent activity</CardTitle>
+              <h3 className="text-lg font-semibold">Recent activity</h3>
               <div className="space-y-3">
                 {recentActivity.map((item, i) => (
                   <div key={i} className="flex gap-3">

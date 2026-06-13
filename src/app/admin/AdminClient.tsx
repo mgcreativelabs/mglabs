@@ -79,7 +79,7 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
             {/* Recent users */}
             <Card className="border border-white/[0.06]" padding="lg">
               <div className="flex items-center justify-between mb-5">
-                <CardTitle>Recent signups</CardTitle>
+                <h3 className="text-lg font-semibold">RECENT SIGNUP</h3>
                 <Button variant="ghost" size="sm">View all users</Button>
               </div>
               <div className="space-y-3">
