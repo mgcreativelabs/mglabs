@@ -88,7 +88,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick links */}
-            <Card className="border border-white/[0.06]" className="p-6" />>
+            <Card className="border border-white/[0.06] p-6">
               <h3 className="text-lg font-semibold">Continue learning</h3>
               <div className="grid grid-cols-2 gap-3">
                 {quickLinks.map(({ icon: Icon, label, href, color }) => (
@@ -104,7 +104,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             </Card>
 
             {/* Saved prompts */}
-            <Card className="border border-white/[0.06]" className="p-6" />>
+            <Card className="border border-white/[0.06] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Saved prompts</h3>
                 <Link href="/prompt-library">

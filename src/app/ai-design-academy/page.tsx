@@ -33,7 +33,7 @@ export default function AIDesignAcademyPage() {
       <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-5">
           {modules.map((mod) => (
-            <Card key={mod.title} className="glass border border-white/[0.06] card-hover" className="p-6" />
+            <Card key={mod.title} className="glass border border-white/[0.06] card-hover p-6" />
               <div className="p-2.5 rounded-xl bg-surface-3 w-fit mb-4">
                 <mod.icon className="h-5 w-5 text-brand-purple" />
               </div>
