@@ -1,8 +1,20 @@
-export function Card({ title, description }: { title: string; description: string }) {
+import { cn } from "@/lib/utils";
+
+type CardProps = {
+  className?: string;
+  children: React.ReactNode;
+};
+
+export function Card({ className, children }: CardProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-white/60 mt-2 text-sm">{description}</p>
+    <div
+      className={cn(
+        "rounded-2xl border border-white/10 bg-white/5 p-6",
+        "backdrop-blur-xl",
+        className
+      )}
+    >
+      {children}
     </div>
   );
 }
