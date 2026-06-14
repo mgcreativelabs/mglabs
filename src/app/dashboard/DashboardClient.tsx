@@ -1,15 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
-import { Skeleton } from "@/components/ui/Skeleton";
 import {
   BookOpen, Sparkles, Code, Palette, ArrowRight,
-  Bookmark, Settings, Bell, TrendingUp, Award, Zap
+  Bookmark, Settings, TrendingUp, Award, Zap
 } from "lucide-react";
 
 interface DashboardClientProps {
@@ -19,16 +18,16 @@ interface DashboardClientProps {
 }
 
 const quickLinks = [
-  { icon: BookOpen, label: "AI Learning Hub", href: "/ai-learning-hub", color: "text-brand-blue" },
-  { icon: Sparkles, label: "Prompt Library", href: "/prompt-library", color: "text-brand-purple" },
+  { icon: BookOpen, label: "AI Learning Hub", href: "/ai-learning-hub", color: "text-blue-400" },
+  { icon: Sparkles, label: "Prompt Library", href: "/prompt-library", color: "text-purple-400" },
   { icon: Code, label: "Coding Academy", href: "/ai-coding-academy", color: "text-cyan-400" },
   { icon: Palette, label: "Design Academy", href: "/ai-design-academy", color: "text-pink-400" },
 ];
 
 const recentActivity = [
   { action: "Saved prompt", item: "Expert Blog Post Writer", time: "2h ago", icon: Bookmark },
-  { action: "Completed lesson", item: "Prompt Engineering Masterclass — Ch. 3", time: "1d ago", icon: BookOpen },
-  { action: "Joined discussion", item: "Best Midjourney prompts for product photography", time: "2d ago", icon: Zap },
+  { action: "Completed lesson", item: "Prompt Engineering Masterclass", time: "1d ago", icon: BookOpen },
+  { action: "Joined discussion", item: "Best Midjourney prompts", time: "2d ago", icon: Zap },
 ];
 
 export function DashboardClient({ user, profile, savedPrompts }: DashboardClientProps) {
@@ -43,11 +42,11 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           <div className="flex items-center gap-4">
             <Avatar fallback={displayName} size="lg" />
             <div>
-              <h1 className="text-2xl font-display font-bold text-white">
+              <h1 className="text-2xl font-bold text-white">
                 Welcome back, {displayName.split(" ")[0]} 👋
               </h1>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm text-gray-500">{user.email}</span>
+                <span className="text-sm text-gray-400">{user.email}</span>
                 <Badge variant={tier === "pro" ? "gradient" : "default"} size="sm">
                   {tier === "pro" ? "Pro" : "Free plan"}
                 </Badge>
@@ -56,60 +55,67 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           </div>
           <div className="flex gap-2">
             <Link href="/settings">
-              <Button variant="secondary" size="sm" leftIcon={<Settings className="h-4 w-4" />}>Settings</Button>
+              <Button variant="secondary" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
             </Link>
             {tier === "free" && (
-              <Button variant="primary" size="sm" leftIcon={<Zap className="h-4 w-4" />}>
+              <Button variant="primary" size="sm">
+                <Zap className="h-4 w-4 mr-2" />
                 Upgrade to Pro
               </Button>
             )}
           </div>
         </div>
 
+        {/* Quick Links */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {quickLinks.map((link) => (
+            <Link key={link.label} href={link.href}>
+              <Card className="border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors cursor-pointer">
+                <link.icon className={`h-6 w-6 ${link.color} mb-2`} />
+                <p className="text-sm font-semibold text-white">{link.label}</p>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Prompts saved", value: savedPrompts.length, icon: Bookmark, color: "text-brand-blue" },
-            { label: "Courses started", value: "2", icon: BookOpen, color: "text-brand-purple" },
+            { label: "Prompts saved", value: savedPrompts.length, icon: Bookmark, color: "text-blue-400" },
+            { label: "Courses started", value: "2", icon: BookOpen, color: "text-purple-400" },
             { label: "Community posts", value: "5", icon: Zap, color: "text-cyan-400" },
             { label: "Learning streak", value: "7 days", icon: TrendingUp, color: "text-green-400" },
           ].map((stat) => (
-            <Card key={stat.label} className="glass border border-white/[0.06]" p-4>
-<div className="flex items-center justify-between mb-4">
-  <h3 className="text-lg font-semibold">Saved prompts</h3>
+            <Card key={stat.label} className="border border-white/10 bg-white/5 p-4">
+              <stat.icon className={`h-5 w-5 ${stat.color} mb-2`} />
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-xs text-gray-400">{stat.label}</p>
+            </Card>
+          ))}
+        </div>
 
-  <Link href="/prompt-library">
-    <Button
-      variant="ghost"
-      size="sm"
-      rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
-    >
-      Browse all
-    </Button>
-  </Link>
-</div>
-
-{savedPrompts.length === 0 ? (
-  <div className="text-center py-8">
-    <Bookmark className="h-8 w-8 text-gray-700 mx-auto mb-3" />
-    <p className="text-gray-600 text-sm">No saved prompts yet.</p>
-  </div>
-) : (
-  <div className="space-y-2">
-    {savedPrompts.map((prompt) => (
-      <div key={prompt.id}>{prompt.title}</div>
-    ))}
-  </div>
-)}
-                  <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Saved Prompts */}
+            <Card className="border border-white/10 bg-white/5 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Saved prompts</h3>
+                <Link href="/prompt-library">
+                  <Button variant="ghost" size="sm">
                     Browse all
+                    <ArrowRight className="h-3.5 w-3.5 ml-2" />
                   </Button>
                 </Link>
               </div>
+
               {savedPrompts.length === 0 ? (
                 <div className="text-center py-8">
-                  <Bookmark className="h-8 w-8 text-gray-700 mx-auto mb-3" />
-                  <p className="text-gray-600 text-sm">No saved prompts yet.</p>
+                  <Bookmark className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm">No saved prompts yet.</p>
                   <Link href="/prompt-library">
                     <Button variant="secondary" size="sm" className="mt-3">Browse prompts</Button>
                   </Link>
@@ -119,11 +125,11 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
                   {savedPrompts.slice(0, 4).map((sp: Record<string, unknown>, i) => {
                     const prompt = sp.prompt as Record<string, unknown> | null;
                     return (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-surface-2 border border-white/[0.04]">
-                        <Sparkles className="h-4 w-4 text-brand-purple flex-shrink-0" />
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                        <Sparkles className="h-4 w-4 text-purple-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-300 truncate">{(prompt?.title as string) || "Untitled prompt"}</p>
-                          <p className="text-xs text-gray-600">{(prompt?.category as string) || ""}</p>
+                          <p className="text-sm text-gray-200 truncate">{(prompt?.title as string) || "Untitled prompt"}</p>
+                          <p className="text-xs text-gray-500">{(prompt?.category as string) || ""}</p>
                         </div>
                         <Badge variant="default" size="sm">{(prompt?.difficulty as string) || "beginner"}</Badge>
                       </div>
@@ -137,34 +143,34 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           {/* Sidebar */}
           <div className="space-y-5">
             {/* Achievement */}
-            <Card className="bg-gradient-brand-subtle border border-brand-blue/20" p-4>
+            <Card className="border border-blue-500/20 bg-blue-500/5 p-4">
               <div className="flex items-center gap-3 mb-3">
-                <Award className="h-5 w-5 text-brand-blue" />
+                <Award className="h-5 w-5 text-blue-400" />
                 <span className="text-sm font-semibold text-white">This week</span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                You&apos;ve been on a <strong className="text-white">7-day learning streak</strong>! Keep it going.
+              <p className="text-gray-400 text-sm">
+                You&apos;ve been on a <strong className="text-white">7-day learning streak</strong>!
               </p>
               <div className="flex gap-1 mt-3">
                 {Array.from({ length: 7 }).map((_, i) => (
-                  <div key={i} className={`h-2 flex-1 rounded-full ${i < 7 ? "bg-brand-blue" : "bg-surface-3"}`} />
+                  <div key={i} className={`h-2 flex-1 rounded-full ${i < 7 ? "bg-blue-500" : "bg-white/10"}`} />
                 ))}
               </div>
             </Card>
 
             {/* Recent activity */}
-            <Card className="border border-white/[0.06]" p-4>
-              <h3 className="text-lg font-semibold">Recent activity</h3>
+            <Card className="border border-white/10 bg-white/5 p-4">
+              <h3 className="text-lg font-semibold text-white mb-4">Recent activity</h3>
               <div className="space-y-3">
                 {recentActivity.map((item, i) => (
                   <div key={i} className="flex gap-3">
-                    <div className="h-7 w-7 rounded-lg bg-surface-3 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="h-3.5 w-3.5 text-gray-500" />
+                    <div className="h-7 w-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-3.5 w-3.5 text-gray-400" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400">{item.action}</p>
-                      <p className="text-xs text-gray-600 line-clamp-1">{item.item}</p>
-                      <p className="text-[10px] text-gray-700 mt-0.5">{item.time}</p>
+                      <p className="text-xs text-gray-300">{item.action}</p>
+                      <p className="text-xs text-gray-500">{item.item}</p>
+                      <p className="text-[10px] text-gray-600 mt-0.5">{item.time}</p>
                     </div>
                   </div>
                 ))}
@@ -173,9 +179,9 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
 
             {/* Upgrade CTA if free */}
             {tier === "free" && (
-              <Card className="border border-brand-purple/20 bg-brand-purple/5" p-4>
+              <Card className="border border-purple-500/20 bg-purple-500/5 p-4">
                 <h3 className="text-sm font-semibold text-white mb-2">Unlock Pro</h3>
-                <ul className="text-xs text-gray-500 space-y-1.5 mb-4">
+                <ul className="text-xs text-gray-400 space-y-1.5 mb-4">
                   <li>✅ All premium courses</li>
                   <li>✅ Unlimited saved prompts</li>
                   <li>✅ Priority community access</li>
