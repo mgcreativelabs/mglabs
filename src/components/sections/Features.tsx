@@ -1,6 +1,3 @@
-// =============================================
-// FEATURES — src/components/sections/Features.tsx
-// =============================================
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Sparkles, Code, Palette, Users, ArrowRight, Zap, Brain, Rocket } from "lucide-react";
@@ -75,10 +72,10 @@ export function Features() {
     <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
       <div className="text-center mb-16">
         <Badge variant="purple" className="mb-4">Everything you need</Badge>
-        <h2 className="text-4xl sm:text-5xl font-display font-bold text-white mb-4">
+        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
           One platform. Every AI skill.
         </h2>
-        <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
           Whether you want to write better, code faster, design smarter, or automate everything — we have the resources.
         </p>
       </div>
@@ -86,21 +83,18 @@ export function Features() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {features.map((feature) => (
           <Link key={feature.title} href={feature.href} className="group">
-            <Card
-              className={`h-full bg-gradient-to-br ${feature.gradient} ${feature.border} border hover:scale-[1.02] transition-all duration-300 hover:shadow-xl`}
-              className="p-6" />
-            </Card>
+            <Card className={`h-full bg-gradient-to-br ${feature.gradient} ${feature.border} border hover:scale-[1.02] transition-all duration-300 p-6`}>
               <div className="flex items-start gap-4">
-                <div className={`p-2.5 rounded-xl bg-surface-2 border border-white/[0.06]`}>
-                  <feature.icon className={`h-5 w-5 ${feature.color === "blue" ? "text-brand-blue" : "text-brand-purple"}`} />
+                <div className={`p-2.5 rounded-xl bg-white/10 border border-white/10`}>
+                  <feature.icon className={`h-5 w-5 ${feature.color === "blue" ? "text-blue-400" : "text-purple-400"}`} />
                 </div>
                 <Badge variant={feature.color === "blue" ? "blue" : "purple"} size="sm">
                   {feature.badge}
                 </Badge>
               </div>
               <h3 className="text-lg font-semibold text-white mt-4 mb-2">{feature.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
-              <div className="flex items-center gap-1.5 mt-4 text-xs font-medium text-gray-600 group-hover:text-brand-blue transition-colors">
+              <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
+              <div className="flex items-center gap-1.5 mt-4 text-xs font-medium text-blue-400 group-hover:text-blue-300 transition-colors">
                 Explore <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Card>
