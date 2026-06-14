@@ -41,9 +41,8 @@ export function Navbar() {
           : "bg-transparent"
       )}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+<nav className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">          {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
               <Zap className="h-4 w-4 text-white" />
@@ -53,9 +52,8 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
+ {/* Desktop Nav - Centered */}
+          <div className="hidden lg:flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2">            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
