@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Sparkles, BookOpen, Code, Palette, Users, Newspaper, Zap } from "lucide-react";
+import { Menu, X, Sparkles, BookOpen, Code, Palette, Users, Newspaper, Zap } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -41,9 +41,11 @@ export function Navbar() {
           : "bg-transparent"
       )}
     >
-<nav className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+      <nav className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16 relative">
+          
+          {/* Logo - LEFT */}
+          <Link href="/" className="flex items-center gap-2.5 group z-10">
             <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
               <Zap className="h-4 w-4 text-white" />
             </div>
@@ -52,8 +54,9 @@ export function Navbar() {
             </span>
           </Link>
 
- {/* Desktop Nav - Centered */}
-          <div className="hidden lg:flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2">            {navLinks.map((link) => (
+          {/* Desktop Nav Links - CENTERED (absolute positioning) */}
+          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -70,8 +73,8 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* CTA Buttons - RIGHT */}
+          <div className="hidden lg:flex items-center gap-3 z-10">
             {!loading && (
               <>
                 {user ? (
@@ -101,7 +104,7 @@ export function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
+            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors z-10"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
