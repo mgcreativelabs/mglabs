@@ -61,12 +61,12 @@ export default function Home() {
       <section className="relative z-10 py-40 px-6">
         <div className="max-w-7xl mx-auto">
           
-   {/* CENTERED HEADER */}
-<div className="text-center mb-20">
-  <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight text-center block">
+   {/* CENTERED HEADER - INLINE STYLES */}
+<div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+  <h2 style={{ textAlign: 'center', display: 'block' }} className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
     One platform. Every AI skill.
   </h2>
-  <p className="text-gray-300 text-xl max-w-2xl mx-auto text-center block">
+  <p style={{ textAlign: 'center', display: 'block', maxWidth: '42rem', marginLeft: 'auto', marginRight: 'auto' }} className="text-gray-300 text-xl">
     Whether you want to write better, code faster, design smarter, or automate everything.
   </p>
 </div>
