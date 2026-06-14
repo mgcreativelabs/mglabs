@@ -35,33 +35,33 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
         scrolled
           ? "bg-surface/90 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/50"
           : "bg-transparent"
       )}
     >
-      <nav className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16 relative">
+      <nav className="w-full max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           
           {/* Logo - LEFT */}
-          <Link href="/" className="flex items-center gap-2.5 group z-10">
+          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
               <Zap className="h-4 w-4 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-base tracking-tight">
+            <span className="font-display font-bold text-white text-base tracking-tight hidden sm:inline">
               MG <span className="text-gradient">Creative Labs</span>
             </span>
           </Link>
 
-          {/* Desktop Nav Links - CENTERED (absolute positioning) */}
-          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+          {/* Desktop Nav Links - CENTER */}
+          <div className="hidden lg:flex items-center justify-center gap-1 flex-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap",
                   pathname === link.href
                     ? "text-white bg-surface-3"
                     : "text-gray-400 hover:text-white hover:bg-surface-2"
@@ -74,21 +74,21 @@ export function Navbar() {
           </div>
 
           {/* CTA Buttons - RIGHT */}
-          <div className="hidden lg:flex items-center gap-3 z-10">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {!loading && (
               <>
                 {user ? (
                   <>
-                    <Link href="/dashboard">
+                    <Link href="/dashboard" className="hidden sm:block">
                       <Button variant="secondary" size="sm">Dashboard</Button>
                     </Link>
-                    <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                    <Button variant="ghost" size="sm" onClick={() => signOut()} className="hidden sm:block">
                       Sign out
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Link href="/login">
+                    <Link href="/login" className="hidden sm:block">
                       <Button variant="ghost" size="sm">Sign in</Button>
                     </Link>
                     <Link href="/signup">
@@ -104,7 +104,7 @@ export function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors z-10"
+            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
