@@ -27,8 +27,8 @@ export default function Home() {
           The #1 platform to learn prompt engineering, AI coding, AI design, and automation.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <button className="group px-10 py-5 bg-white text-slate-950 rounded-full font-semibold hover:scale-105 transition-all duration-300 flex items-center gap-3 shadow-2xl shadow-blue-500/30 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 w-full max-w-2xl mx-auto">
+  <button className="group px-10 py-5 bg-white text-slate-950 rounded-full font-semibold hover:scale-105 transition-all duration-300 flex items-center gap-3 shadow-2xl shadow-blue-500/30 justify-center min-w-[200px]">
             <span>Start learning free</span>
             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -61,15 +61,15 @@ export default function Home() {
       <section className="relative z-10 py-40 px-6">
         <div className="max-w-7xl mx-auto">
           
-          {/* CENTERED HEADER */}
-          <div className="text-center mx-auto mb-20">
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              One platform. Every AI skill.
-            </h2>
-            <p className="text-gray-300 text-xl max-w-2xl mx-auto">
-              Whether you want to write better, code faster, design smarter, or automate everything.
-            </p>
-          </div>
+   {/* CENTERED HEADER */}
+<div className="text-center mb-20">
+  <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight text-center block">
+    One platform. Every AI skill.
+  </h2>
+  <p className="text-gray-300 text-xl max-w-2xl mx-auto text-center block">
+    Whether you want to write better, code faster, design smarter, or automate everything.
+  </p>
+</div>
 
           {/* Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
