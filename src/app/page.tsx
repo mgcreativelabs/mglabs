@@ -57,22 +57,21 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FEATURES - WITH HUGE BOTTOM SPACING */}
+    {/* FEATURES SECTION */}
       <section className="relative z-10 py-40 px-6">
-        <div className="max-w-7xl mx-auto">
-          
-             {/* FORCE CENTERED HEADER */}
-          <div style={{ textAlign: 'center', width: '100%' }} className="mb-20">
-            <h2 style={{ textAlign: 'center', display: 'block' }} className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              One platform. Every AI skill.
-            </h2>
-            <p style={{ textAlign: 'center', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} className="text-gray-300 text-xl max-w-2xl">
-              Whether you want to write better, code faster, design smarter, or automate everything.
-            </p>
-          </div>
+        
+        {/* CENTERED HEADER - NO WIDTH LIMIT */}
+        <div className="text-center mb-20 w-full">
+          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+            One platform. Every AI skill.
+          </h2>
+          <p className="text-gray-300 text-xl max-w-2xl mx-auto">
+            Whether you want to write better, code faster, design smarter, or automate everything.
+          </p>
+        </div>
 
-          {/* Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
+        {/* Cards - NOW WITH WIDTH LIMIT */}
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
             {/* Card 1 */}
             <div className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/30 to-blue-600/30 flex items-center justify-center mb-6">
