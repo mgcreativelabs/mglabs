@@ -133,7 +133,7 @@ export default function CommunityPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 grid lg:grid-cols-4 gap-8">
         {/* Sidebar */}
         <aside className="lg:col-span-1 space-y-4">
-          <Card p-4 className="border border-white/[0.06]">
+          <Card className="border border-white/[0.06]">
             <h3 className="text-sm font-semibold text-white mb-3">Categories</h3>
             <div className="space-y-1">
               {CATEGORIES.map((cat) => (
@@ -148,7 +148,7 @@ export default function CommunityPage() {
             </div>
           </Card>
 
-          <Card p-4 className="border border-white/[0.06]">
+          <Card className="border border-white/[0.06]">
             <h3 className="text-sm font-semibold text-white mb-3">Community rules</h3>
             <ul className="space-y-2 text-xs text-gray-600">
               <li>✅ Be respectful and helpful</li>

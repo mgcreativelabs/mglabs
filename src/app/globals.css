@@ -1,37 +1,99 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-:root {
-  --font-inter: "Inter", system-ui, sans-serif;
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
-  --border: 0 0% 15%;
-  --radius: 0.75rem;
+/* ═══════════════════════════════════════════════════════════════
+   TAILWIND v4 THEME TOKENS
+   These replace tailwind.config.ts theme.extend — custom colors
+   and fonts are now defined here so they're picked up correctly.
+═══════════════════════════════════════════════════════════════ */
+@theme {
+  --color-brand-blue:   #3B82F6;
+  --color-brand-purple: #8B5CF6;
+
+  --color-surface:   #0A0A0A;
+  --color-surface-1: #111111;
+  --color-surface-2: #1A1A1A;
+  --color-surface-3: #222222;
+  --color-surface-4: #2A2A2A;
+
+  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
+
+  --background-image-gradient-brand:
+    linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  --background-image-gradient-brand-subtle:
+    linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.15) 100%);
 }
 
-* { box-sizing: border-box; padding: 0; margin: 0; }
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE — class-based (replaces darkMode:"class" in config)
+   <html class="dark"> enables all dark: variants
+═══════════════════════════════════════════════════════════════ */
+@variant dark (&:is(.dark *));
 
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ═══════════════════════════════════════════════════════════════
+   BASE LAYER
+   ⚠️  THIS IS THE CRITICAL FIX:
+   In Tailwind v4, utilities live inside @layer utilities.
+   Any CSS written OUTSIDE a layer ALWAYS beats layered styles,
+   no matter the specificity. The old global reset:
+
+       * { padding: 0; margin: 0; }          ← was UNLAYERED
+
+   ...permanently overrode mx-auto (margin: auto) on every
+   container, which is why centering never worked no matter
+   how many times it was added in JSX.
+
+   Placing these resets inside @layer base means @layer utilities
+   (mx-auto, px-4, etc.) correctly win, as intended.
+═══════════════════════════════════════════════════════════════ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --font-inter: "Inter", system-ui, sans-serif;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --radius: 0.75rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0A0A0A;
+    color: #F9FAFB;
+    font-family: var(--font-inter);
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar              { width: 6px; }
+  ::-webkit-scrollbar-track        { background: #111111; }
+  ::-webkit-scrollbar-thumb        { background: #333; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover  { background: #3B82F6; }
+  ::selection                      { background: rgba(59, 130, 246, 0.3); color: #fff; }
+
+  :focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
-body {
-  background-color: #0A0A0A;
-  color: #F9FAFB;
-  font-family: var(--font-inter);
-  overflow-x: hidden;
-}
-
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #111111; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3B82F6; }
-::selection { background: rgba(59, 130, 246, 0.3); color: #fff; }
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM UTILITY CLASSES
+   These use class selectors (.text-gradient etc.) so their
+   specificity (0,1,0) already beats the universal reset above,
+   but keeping them outside @layer is fine — they only set
+   properties that Tailwind utilities don't touch (background-clip,
+   backdrop-filter, box-shadow, etc.).
+═══════════════════════════════════════════════════════════════ */
 
 .text-gradient {
   background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
@@ -53,7 +115,7 @@ body {
   transition: all 0.3s ease;
 }
 
-.glow-blue { box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+.glow-blue   { box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
 .glow-purple { box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
 
 .mesh-bg {
@@ -65,7 +127,35 @@ body {
     radial-gradient(at 10% 29%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
 }
 
-:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; border-radius: 4px; }
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+.animate-fade-in   { animation: fadeIn 0.5s ease-in-out; }
+.animate-fade-up   { animation: fadeUp 0.6s ease-out both; }
+.animate-float     { animation: float 6s ease-in-out infinite; }
+.animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -73,15 +163,3 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
-
-.card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
-.card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
-
-@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-
-.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-.animate-fade-up { animation: fadeUp 0.6s ease-out both; }
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
