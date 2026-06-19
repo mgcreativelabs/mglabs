@@ -402,7 +402,7 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       {/* Back */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-10">
         <Link href="/blog">

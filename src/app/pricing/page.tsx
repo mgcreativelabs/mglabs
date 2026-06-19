@@ -113,7 +113,7 @@ const faqs = [
 
 export default function PricingPage() {
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       {/* Header */}
       <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5">Simple pricing</Badge>

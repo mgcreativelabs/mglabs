@@ -79,7 +79,7 @@ const testimonials = [
 
 export default function AIDesignAcademyPage() {
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
 
       {/* ── Hero ── */}
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">

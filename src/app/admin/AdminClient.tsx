@@ -25,7 +25,7 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
   ];
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

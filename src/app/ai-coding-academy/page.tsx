@@ -56,7 +56,7 @@ const projects = [
 
 export default function AICodingAcademyPage() {
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5"><Code className="h-3 w-3" /> Build with AI</Badge>
         <h1 className="text-5xl sm:text-6xl font-display font-bold text-white mb-5 leading-tight">

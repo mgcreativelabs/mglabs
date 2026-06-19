@@ -20,7 +20,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5">Get in touch</Badge>
         <h1 className="text-5xl font-display font-bold text-white mb-4">

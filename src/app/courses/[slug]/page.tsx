@@ -150,7 +150,7 @@ export default async function CourseSlugPage({
   const freeLessons = course.modules.flatMap((m) => m.lessons).filter((l) => l.isFree);
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       {/* Header / Hero */}
       <header className="py-14 px-4 sm:px-6 border-b border-white/[0.06]">
         <div className="max-w-6xl mx-auto">

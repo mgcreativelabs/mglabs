@@ -154,7 +154,7 @@ export default function BlogPage() {
   const recent = BLOG_POSTS.filter((p) => !p.is_featured || true).slice(0, 6);
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       {/* Header */}
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5">Fresh weekly</Badge>

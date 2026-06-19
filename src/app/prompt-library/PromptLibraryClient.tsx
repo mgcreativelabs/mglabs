@@ -231,7 +231,7 @@ export function PromptLibraryClient() {
   });
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="py-16 px-4 sm:px-6 text-center max-w-4xl mx-auto mesh-bg">
         <Badge variant="purple" className="mb-4">Free to use</Badge>
