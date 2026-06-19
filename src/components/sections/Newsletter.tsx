@@ -89,6 +89,7 @@ export function Newsletter() {
                     className="flex-1"
                   />
                 </div>
+                
                 {error && <p className="text-red-400 text-sm">{error}</p>}
                 <Button
                   type="submit"
