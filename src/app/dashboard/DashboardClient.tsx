@@ -8,13 +8,35 @@ import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import {
   BookOpen, Sparkles, Code, Palette, ArrowRight,
-  Bookmark, Settings, TrendingUp, Award, Zap
+  Bookmark, Settings, TrendingUp, Award, Zap, Play,
 } from "lucide-react";
+
+interface Enrollment {
+  progress_percent: number;
+  last_accessed_at: string;
+  course: {
+    id: string;
+    title: string;
+    slug: string;
+    level: string;
+    lessons_count: number;
+  } | null;
+}
+
+interface SavedPrompt {
+  prompt: {
+    title: string;
+    category: string;
+    difficulty: string;
+  } | null;
+}
 
 interface DashboardClientProps {
   user: User;
   profile: Record<string, unknown> | null;
-  savedPrompts: Record<string, unknown>[];
+  savedPrompts: SavedPrompt[];
+  enrollments: Enrollment[];
+  savedPromptsCount: number;
 }
 
 const quickLinks = [
@@ -24,15 +46,38 @@ const quickLinks = [
   { icon: Palette, label: "Design Academy", href: "/ai-design-academy", color: "text-pink-400" },
 ];
 
-const recentActivity = [
-  { action: "Saved prompt", item: "Expert Blog Post Writer", time: "2h ago", icon: Bookmark },
-  { action: "Completed lesson", item: "Prompt Engineering Masterclass", time: "1d ago", icon: BookOpen },
-  { action: "Joined discussion", item: "Best Midjourney prompts", time: "2d ago", icon: Zap },
-];
-
-export function DashboardClient({ user, profile, savedPrompts }: DashboardClientProps) {
+export function DashboardClient({
+  user,
+  profile,
+  savedPrompts,
+  enrollments,
+  savedPromptsCount,
+}: DashboardClientProps) {
   const displayName = (profile?.full_name as string) || user.email?.split("@")[0] || "Creator";
   const tier = (profile?.subscription_tier as string) || "free";
+  const streak = (profile?.streak_count as number) ?? 0;
+  const avatarUrl = (profile?.avatar_url as string | null) ?? undefined;
+
+  const stats = [
+    { label: "Prompts saved", value: savedPromptsCount, icon: Bookmark, color: "text-blue-400" },
+    { label: "Courses enrolled", value: enrollments.length, icon: BookOpen, color: "text-purple-400" },
+    {
+      label: "Avg. progress",
+      value: enrollments.length
+        ? `${Math.round(enrollments.reduce((s, e) => s + e.progress_percent, 0) / enrollments.length)}%`
+        : "—",
+      icon: Zap,
+      color: "text-cyan-400",
+    },
+    {
+      label: "Learning streak",
+      value: streak > 0 ? `${streak} day${streak !== 1 ? "s" : ""}` : "Start today",
+      icon: TrendingUp,
+      color: "text-green-400",
+    },
+  ];
+
+  const streakDots = Math.min(streak, 7);
 
   return (
     <div className="min-h-screen">
@@ -40,7 +85,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-4">
-            <Avatar fallback={displayName} size="lg" />
+            <Avatar fallback={displayName} src={avatarUrl} size="lg" />
             <div>
               <h1 className="text-2xl font-bold text-white">
                 Welcome back, {displayName.split(" ")[0]} 👋
@@ -54,17 +99,17 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
             </div>
           </div>
           <div className="flex gap-2">
-            <Link href="/settings">
+            <Link href="/dashboard/settings">
               <Button variant="secondary" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
+                <Settings className="h-4 w-4 mr-2" /> Settings
               </Button>
             </Link>
             {tier === "free" && (
-              <Button variant="primary" size="sm">
-                <Zap className="h-4 w-4 mr-2" />
-                Upgrade to Pro
-              </Button>
+              <Link href="/pricing">
+                <Button variant="primary" size="sm">
+                  <Zap className="h-4 w-4 mr-2" /> Upgrade to Pro
+                </Button>
+              </Link>
             )}
           </div>
         </div>
@@ -73,7 +118,7 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {quickLinks.map((link) => (
             <Link key={link.label} href={link.href}>
-              <Card className="border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors cursor-pointer">
+              <Card className="border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors cursor-pointer h-full">
                 <link.icon className={`h-6 w-6 ${link.color} mb-2`} />
                 <p className="text-sm font-semibold text-white">{link.label}</p>
               </Card>
@@ -81,14 +126,9 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
           ))}
         </div>
 
-        {/* Stats row */}
+        {/* Real stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: "Prompts saved", value: savedPrompts.length, icon: Bookmark, color: "text-blue-400" },
-            { label: "Courses started", value: "2", icon: BookOpen, color: "text-purple-400" },
-            { label: "Community posts", value: "5", icon: Zap, color: "text-cyan-400" },
-            { label: "Learning streak", value: "7 days", icon: TrendingUp, color: "text-green-400" },
-          ].map((stat) => (
+          {stats.map((stat) => (
             <Card key={stat.label} className="border border-white/10 bg-white/5 p-4">
               <stat.icon className={`h-5 w-5 ${stat.color} mb-2`} />
               <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -100,14 +140,64 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Courses in progress */}
+            <Card className="border border-white/10 bg-white/5 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Your courses</h3>
+                <Link href="/courses">
+                  <Button variant="ghost" size="sm">
+                    Browse all <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+
+              {enrollments.length === 0 ? (
+                <div className="text-center py-8">
+                  <BookOpen className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm mb-1">You haven&apos;t enrolled in any courses yet.</p>
+                  <Link href="/courses">
+                    <Button variant="secondary" size="sm" className="mt-3">Browse courses</Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {enrollments.map((enrollment, i) => (
+                    enrollment.course && (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                        <div className="h-9 w-9 rounded-lg bg-brand-blue/20 flex items-center justify-center flex-shrink-0">
+                          <Play className="h-4 w-4 text-brand-blue" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-200 truncate font-medium">{enrollment.course.title}</p>
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <div className="flex-1 h-1 rounded-full bg-white/10">
+                              <div
+                                className="h-1 rounded-full bg-brand-blue transition-all"
+                                style={{ width: `${enrollment.progress_percent}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-500 flex-shrink-0">
+                              {enrollment.progress_percent}%
+                            </span>
+                          </div>
+                        </div>
+                        <Link href={`/courses/${enrollment.course.slug}`}>
+                          <Button variant="ghost" size="sm">Continue</Button>
+                        </Link>
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+            </Card>
+
             {/* Saved Prompts */}
             <Card className="border border-white/10 bg-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Saved prompts</h3>
                 <Link href="/prompt-library">
                   <Button variant="ghost" size="sm">
-                    Browse all
-                    <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                    Browse all <ArrowRight className="h-3.5 w-3.5 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -122,19 +212,16 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {savedPrompts.slice(0, 4).map((sp: Record<string, unknown>, i) => {
-                    const prompt = sp.prompt as Record<string, unknown> | null;
-                    return (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                        <Sparkles className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-200 truncate">{(prompt?.title as string) || "Untitled prompt"}</p>
-                          <p className="text-xs text-gray-500">{(prompt?.category as string) || ""}</p>
-                        </div>
-                        <Badge variant="default" size="sm">{(prompt?.difficulty as string) || "beginner"}</Badge>
+                  {savedPrompts.slice(0, 4).map((sp, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                      <Sparkles className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-200 truncate">{sp.prompt?.title ?? "Untitled"}</p>
+                        <p className="text-xs text-gray-500">{sp.prompt?.category ?? ""}</p>
                       </div>
-                    );
-                  })}
+                      <Badge variant="default" size="sm">{sp.prompt?.difficulty ?? "beginner"}</Badge>
+                    </div>
+                  ))}
                 </div>
               )}
             </Card>
@@ -142,42 +229,32 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
 
           {/* Sidebar */}
           <div className="space-y-5">
-            {/* Achievement */}
+            {/* Streak widget */}
             <Card className="border border-blue-500/20 bg-blue-500/5 p-4">
               <div className="flex items-center gap-3 mb-3">
                 <Award className="h-5 w-5 text-blue-400" />
-                <span className="text-sm font-semibold text-white">This week</span>
+                <span className="text-sm font-semibold text-white">Learning streak</span>
               </div>
-              <p className="text-gray-400 text-sm">
-                You&apos;ve been on a <strong className="text-white">7-day learning streak</strong>!
-              </p>
+              {streak > 0 ? (
+                <p className="text-gray-400 text-sm">
+                  You&apos;re on a <strong className="text-white">{streak}-day streak</strong> — keep it up!
+                </p>
+              ) : (
+                <p className="text-gray-400 text-sm">
+                  Visit the dashboard each day to build your learning streak.
+                </p>
+              )}
               <div className="flex gap-1 mt-3">
                 {Array.from({ length: 7 }).map((_, i) => (
-                  <div key={i} className={`h-2 flex-1 rounded-full ${i < 7 ? "bg-blue-500" : "bg-white/10"}`} />
+                  <div
+                    key={i}
+                    className={`h-2 flex-1 rounded-full ${i < streakDots ? "bg-blue-500" : "bg-white/10"}`}
+                  />
                 ))}
               </div>
             </Card>
 
-            {/* Recent activity */}
-            <Card className="border border-white/10 bg-white/5 p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Recent activity</h3>
-              <div className="space-y-3">
-                {recentActivity.map((item, i) => (
-                  <div key={i} className="flex gap-3">
-                    <div className="h-7 w-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="h-3.5 w-3.5 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-300">{item.action}</p>
-                      <p className="text-xs text-gray-500">{item.item}</p>
-                      <p className="text-[10px] text-gray-600 mt-0.5">{item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Upgrade CTA if free */}
+            {/* Upgrade CTA */}
             {tier === "free" && (
               <Card className="border border-purple-500/20 bg-purple-500/5 p-4">
                 <h3 className="text-sm font-semibold text-white mb-2">Unlock Pro</h3>
@@ -187,11 +264,29 @@ export function DashboardClient({ user, profile, savedPrompts }: DashboardClient
                   <li>✅ Priority community access</li>
                   <li>✅ Early feature access</li>
                 </ul>
-                <Button variant="primary" size="sm" className="w-full">
-                  Upgrade — $9/mo
-                </Button>
+                <Link href="/pricing">
+                  <Button variant="primary" size="sm" className="w-full">
+                    View pricing
+                  </Button>
+                </Link>
               </Card>
             )}
+
+            {/* Quick actions */}
+            <Card className="border border-white/10 bg-white/5 p-4">
+              <h3 className="text-sm font-semibold text-white mb-3">Quick actions</h3>
+              <div className="space-y-2">
+                <Link href="/dashboard/account" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1">
+                  <Settings className="h-4 w-4" /> Edit profile
+                </Link>
+                <Link href="/community" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1">
+                  <Zap className="h-4 w-4" /> Community
+                </Link>
+                <Link href="/prompt-library" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1">
+                  <Sparkles className="h-4 w-4" /> Explore prompts
+                </Link>
+              </div>
+            </Card>
           </div>
         </div>
       </div>

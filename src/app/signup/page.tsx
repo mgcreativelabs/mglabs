@@ -67,7 +67,7 @@ export default function SignupPage() {
             Start your AI journey today
           </h2>
           <p className="text-gray-500 mb-8 leading-relaxed">
-            Join 50,000+ creators mastering AI tools, prompt engineering, and automation. Free forever.
+            Join the creators mastering AI tools, prompt engineering, and automation. Free forever.
           </p>
           <ul className="space-y-3">
             {PERKS.map((perk) => (

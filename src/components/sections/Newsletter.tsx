@@ -102,7 +102,7 @@ export function Newsletter() {
                   Subscribe for free
                 </Button>
                 <p className="text-xs text-gray-600">
-                  No spam. Unsubscribe anytime. 12,000+ readers.
+                  No spam. Unsubscribe anytime.
                 </p>
               </form>
             )}

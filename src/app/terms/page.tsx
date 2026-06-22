@@ -146,8 +146,8 @@ export default function TermsPage() {
               Questions about these Terms? Reach out via our{" "}
               <Link href="/contact" className="text-brand-blue hover:underline">contact page</Link>{" "}
               or email{" "}
-              <a href="mailto:hello@mgcreativelabs.com" className="text-brand-blue hover:underline">
-                hello@mgcreativelabs.com
+              <a href="mailto:mgcreativelabs@technologist.com" className="text-brand-blue hover:underline">
+                mgcreativelabs@technologist.com
               </a>.
             </p>
           </section>

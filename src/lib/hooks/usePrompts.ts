@@ -10,7 +10,7 @@ import type { Prompt } from "@/types";
 interface UsePromptsOptions {
   category?: string;
   search?: string;
-  difficulty?: string;
+  difficulty?: "beginner" | "intermediate" | "advanced" | "all";
   page?: number;
   pageSize?: number;
 }

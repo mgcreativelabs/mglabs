@@ -119,7 +119,7 @@ export function Navbar() {
 
         {/* ── Mobile dropdown ── */}
         {isOpen && (
-          <div className="lg:hidden pb-4 border-t border-white/[0.06] mt-2">
+          <div className="lg:hidden pb-4 border-t border-white/[0.06] mt-2 bg-surface/95 backdrop-blur-xl -mx-6 px-6">
             <div className="pt-4 space-y-1">
               {navLinks.map((link) => (
                 <Link

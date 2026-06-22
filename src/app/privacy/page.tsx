@@ -121,8 +121,8 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-4">
               To exercise any of these rights, contact us at{" "}
-              <a href="mailto:hello@mgcreativelabs.com" className="text-brand-blue hover:underline">
-                hello@mgcreativelabs.com
+              <a href="mailto:mgcreativelabs@technologist.com" className="text-brand-blue hover:underline">
+                mgcreativelabs@technologist.com
               </a>.
             </p>
           </section>
@@ -150,8 +150,8 @@ export default function PrivacyPage() {
               Questions about this policy? Reach out via our{" "}
               <Link href="/contact" className="text-brand-blue hover:underline">contact page</Link>{" "}
               or email{" "}
-              <a href="mailto:hello@mgcreativelabs.com" className="text-brand-blue hover:underline">
-                hello@mgcreativelabs.com
+              <a href="mailto:mgcreativelabs@technologist.com" className="text-brand-blue hover:underline">
+                mgcreativelabs@technologist.com
               </a>.
             </p>
           </section>

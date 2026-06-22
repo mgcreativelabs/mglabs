@@ -91,7 +91,7 @@ const faqs = [
   },
   {
     q: "Is there a student discount?",
-    a: "We offer 50% off for verified students and educators. Email us at hello@mgcreativelabs.com with your .edu address.",
+    a: "We offer 50% off for verified students and educators. Email us at mgcreativelabs@technologist.com with your .edu address.",
   },
   {
     q: "What payment methods do you accept?",

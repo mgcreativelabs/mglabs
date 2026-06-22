@@ -1,60 +1,52 @@
-import { NextRequest, NextResponse } from "next/server";
+// =============================================
+// CONTACT API — src/app/api/contact/route.ts
+// Previously validated input then returned a fake
+// success response without persisting anything.
+// Now writes to contact_messages table (RLS allows
+// anon inserts) so admins can see real submissions.
+// =============================================
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { name, email, subject, message } = body;
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
-    // --- Validation ---
-    if (!name || !email || !message) {
-      return NextResponse.json(
-        { error: "Name, email, and message are required." },
-        { status: 400 }
-      );
-    }
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address." },
-        { status: 400 }
-      );
-    }
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => null);
 
-    // --- Send via Resend (production) ---
-    // To activate: add RESEND_API_KEY to .env.local and install: npm i resend
-    //
-    // import { Resend } from "resend";
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from:    "MG Creative Labs <noreply@mgcreativelabs.com>",
-    //   to:      ["hello@mgcreativelabs.com"],
-    //   replyTo: email,
-    //   subject: `[Contact] ${subject || "New message"} — from ${name}`,
-    //   html: `
-    //     <h2>New contact form submission</h2>
-    //     <p><strong>Name:</strong> ${name}</p>
-    //     <p><strong>Email:</strong> ${email}</p>
-    //     <p><strong>Subject:</strong> ${subject || "—"}</p>
-    //     <hr />
-    //     <p>${message.replace(/\n/g, "<br/>")}</p>
-    //   `,
-    // });
+  const name = typeof body?.name === "string" ? body.name.trim() : "";
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  const subject = typeof body?.subject === "string" ? body.subject.trim() : null;
+  const message = typeof body?.message === "string" ? body.message.trim() : "";
 
-    // --- Log in dev until Resend is wired ---
-    if (process.env.NODE_ENV === "development") {
-      console.log("📬 Contact form submission:", { name, email, subject, message });
-    }
+  if (!name || name.length < 2) {
+    return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
+  }
+  if (!email || !isValidEmail(email)) {
+    return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
+  }
+  if (!message || message.length < 10) {
+    return NextResponse.json({ error: "Message must be at least 10 characters." }, { status: 400 });
+  }
 
+  const supabase = await createClient();
+  const { error } = await supabase.from("contact_messages").insert({
+    name,
+    email,
+    subject: subject || null,
+    message,
+  });
+
+  if (error) {
+    // Don't leak DB error details to the client
+    console.error("Contact form DB error:", error.message);
     return NextResponse.json(
-      { success: true, message: "Message received. We'll get back to you within 24 hours." },
-      { status: 200 }
-    );
-  } catch (err) {
-    console.error("Contact API error:", err);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: "Something went wrong. Please email us directly at mgcreativelabs@technologist.com" },
       { status: 500 }
     );
   }
+
+  return NextResponse.json({ success: true });
 }

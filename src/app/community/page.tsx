@@ -6,10 +6,15 @@ import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSquare, ThumbsUp, Eye, Pin, ArrowRight, Users, Flame, HelpCircle, Briefcase, Star } from "lucide-react";
 import { formatRelativeDate } from "@/lib/utils/format";
+import { createPublicClient } from "@/lib/supabase/public";
+import { getPlatformStats, formatStatCountOrNull } from "@/lib/data/platform-stats";
+import { NewPostForm } from "./NewPostForm";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Community",
-  description: "Join 50,000+ AI creators. Share projects, get help, find collaborators, and grow together.",
+  description: "Join the MG Creative Labs community. Share projects, get help, find collaborators, and grow together.",
 };
 
 const CATEGORIES = [
@@ -20,69 +25,6 @@ const CATEGORIES = [
   { value: "jobs", label: "Jobs & Collab", icon: Briefcase, color: "blue" },
 ];
 
-const POSTS = [
-  {
-    id: "1",
-    title: "I built a full SaaS in 3 days using v0 + Cursor + Supabase. Here's my workflow.",
-    category: "showcase",
-    tags: ["v0", "Cursor", "SaaS"],
-    author: { full_name: "Alex Kim", avatar_url: null },
-    likes_count: 342,
-    replies_count: 87,
-    views_count: 4820,
-    is_pinned: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-  },
-  {
-    id: "2",
-    title: "Best Midjourney prompts for product photography? Share your templates!",
-    category: "resources",
-    tags: ["Midjourney", "Photography"],
-    author: { full_name: "Priya S.", avatar_url: null },
-    likes_count: 198,
-    replies_count: 64,
-    views_count: 3100,
-    is_pinned: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 14).toISOString(),
-  },
-  {
-    id: "3",
-    title: "How do I stop ChatGPT from giving generic answers? Tried everything.",
-    category: "help",
-    tags: ["ChatGPT", "Prompts"],
-    author: { full_name: "Tom R.", avatar_url: null },
-    likes_count: 76,
-    replies_count: 41,
-    views_count: 1890,
-    is_pinned: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
-  },
-  {
-    id: "4",
-    title: "Looking for a developer to co-build an AI writing tool (rev-share deal)",
-    category: "jobs",
-    tags: ["Collaboration", "Startup"],
-    author: { full_name: "Maya T.", avatar_url: null },
-    likes_count: 54,
-    replies_count: 23,
-    views_count: 2300,
-    is_pinned: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
-  },
-  {
-    id: "5",
-    title: "Weekly thread: What AI tool changed your workflow most this month?",
-    category: "general",
-    tags: ["Discussion", "Tools"],
-    author: { full_name: "MG Team", avatar_url: null },
-    likes_count: 287,
-    replies_count: 156,
-    views_count: 6700,
-    is_pinned: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-  },
-];
-
 const categoryColorMap: Record<string, "blue" | "purple" | "success" | "warning" | "default"> = {
   general: "default",
   showcase: "purple",
@@ -91,37 +33,76 @@ const categoryColorMap: Record<string, "blue" | "purple" | "success" | "warning"
   jobs: "blue",
 };
 
-export default function CommunityPage() {
+const POST_FETCH_LIMIT = 30;
+
+interface CommunityPostRow {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  likes_count: number;
+  replies_count: number;
+  views_count: number;
+  is_pinned: boolean;
+  created_at: string;
+  profiles: { full_name: string | null; avatar_url: string | null } | null;
+}
+
+async function getPosts(): Promise<CommunityPostRow[]> {
+  const supabase = createPublicClient();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from("community_posts")
+    .select("id, title, content, category, tags, likes_count, replies_count, views_count, is_pinned, created_at, profiles(full_name, avatar_url)")
+    .order("is_pinned", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(POST_FETCH_LIMIT);
+
+  return (data as unknown as CommunityPostRow[]) ?? [];
+}
+
+export default async function CommunityPage() {
+  const [posts, stats] = await Promise.all([getPosts(), getPlatformStats()]);
+
+  const membersLabel = formatStatCountOrNull(stats.learners, 10);
+  const discussionsLabel = formatStatCountOrNull(stats.communityPosts, 5);
+
+  const communityStats = [
+    membersLabel ? { n: membersLabel, label: "Members" } : { n: "Open", label: "Join free" },
+    discussionsLabel ? { n: discussionsLabel, label: "Discussions" } : { n: "New", label: "Be the first" },
+    { n: "24/7", label: "Always open" },
+    { n: "Free", label: "To join" },
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
       <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5">
-          <Users className="h-3 w-3" /> 50K+ members
+          <Users className="h-3 w-3" /> {membersLabel ? `${membersLabel} members` : "Now open"}
         </Badge>
         <h1 className="text-5xl font-display font-bold text-white mb-5 leading-tight">
           The <span className="text-gradient">Community</span>
         </h1>
         <p className="text-gray-400 text-xl max-w-2xl mx-auto mb-8">
-          Share what you&apos;re building, ask questions, find collaborators, and grow with the best AI creator community online.
+          Share what you&apos;re building, ask questions, find collaborators, and grow with other AI creators.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/signup">
             <Button size="lg" variant="primary" rightIcon={<ArrowRight className="h-4 w-4" />}>Join the community</Button>
           </Link>
-          <Button size="lg" variant="secondary">Browse discussions</Button>
+          <a href="#discussions">
+            <Button size="lg" variant="secondary">Browse discussions</Button>
+          </a>
         </div>
       </section>
 
       {/* Stats */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-10">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { n: "50K+", label: "Members" },
-            { n: "12K+", label: "Discussions" },
-            { n: "98K+", label: "Replies" },
-            { n: "Daily", label: "Active" },
-          ].map((s) => (
+          {communityStats.map((s) => (
             <div key={s.label} className="glass rounded-2xl p-5 text-center border border-white/[0.06]">
               <div className="text-2xl font-display font-bold text-white">{s.n}</div>
               <div className="text-xs text-gray-600 mt-0.5">{s.label}</div>
@@ -130,20 +111,20 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 grid lg:grid-cols-4 gap-8">
+      <div id="discussions" className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 grid lg:grid-cols-4 gap-8 scroll-mt-20">
         {/* Sidebar */}
         <aside className="lg:col-span-1 space-y-4">
           <Card className="border border-white/[0.06]">
             <h3 className="text-sm font-semibold text-white mb-3">Categories</h3>
             <div className="space-y-1">
               {CATEGORIES.map((cat) => (
-                <button
+                <div
                   key={cat.value}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-surface-3 transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400"
                 >
                   <cat.icon className="h-4 w-4" />
                   {cat.label}
-                </button>
+                </div>
               ))}
             </div>
           </Card>
@@ -164,16 +145,20 @@ export default function CommunityPage() {
         <main className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">Latest Discussions</h2>
-            <Link href="/signup">
-              <Button size="sm" variant="primary">New post</Button>
-            </Link>
+            <NewPostForm />
           </div>
 
-          {POSTS.map((post) => (
-            <Card key={post.id} className="card-hover border border-white/[0.06] p-6">
-              <div className="p-5">
+          {posts.length === 0 ? (
+            <Card className="border border-white/[0.06] p-10 text-center">
+              <MessageSquare className="h-8 w-8 text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm mb-1">No discussions yet</p>
+              <p className="text-gray-600 text-xs">Be the first to share what you&apos;re building or ask a question.</p>
+            </Card>
+          ) : (
+            posts.map((post) => (
+              <Card key={post.id} className="card-hover border border-white/[0.06] p-6">
                 <div className="flex items-start gap-3">
-                  <Avatar fallback={post.author.full_name} size="sm" />
+                  <Avatar fallback={post.profiles?.full_name ?? "?"} src={post.profiles?.avatar_url ?? undefined} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {post.is_pinned && (
@@ -181,17 +166,17 @@ export default function CommunityPage() {
                           <Pin className="h-3 w-3" /> Pinned
                         </span>
                       )}
-                      <Badge variant={categoryColorMap[post.category]} size="sm">
-                        {CATEGORIES.find((c) => c.value === post.category)?.label}
+                      <Badge variant={categoryColorMap[post.category] ?? "default"} size="sm">
+                        {CATEGORIES.find((c) => c.value === post.category)?.label ?? post.category}
                       </Badge>
                     </div>
 
-                    <h3 className="font-medium text-white text-sm leading-tight mb-2 hover:text-brand-blue cursor-pointer transition-colors">
+                    <h3 className="font-medium text-white text-sm leading-tight mb-2">
                       {post.title}
                     </h3>
 
                     <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span className="font-medium text-gray-500">{post.author.full_name}</span>
+                      <span className="font-medium text-gray-500">{post.profiles?.full_name ?? "Member"}</span>
                       <span>{formatRelativeDate(post.created_at)}</span>
                       <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" />{post.likes_count}</span>
                       <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{post.replies_count}</span>
@@ -199,13 +184,9 @@ export default function CommunityPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-
-          <div className="text-center pt-4">
-            <Button variant="secondary" size="lg">Load more discussions</Button>
-          </div>
+              </Card>
+            ))
+          )}
         </main>
       </div>
     </div>

@@ -3,9 +3,12 @@
 // =============================================
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
-import { Target, Heart, Zap, Users, BookOpen, ArrowRight } from "lucide-react";
+import { Target, Heart, Zap, Users, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { getPlatformStats, formatStatCountOrNull } from "@/lib/data/platform-stats";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "About",
@@ -35,15 +38,28 @@ const values = [
   },
 ];
 
+// Real product milestones only — no invented user counts. If you want a
+// milestone to cite a number ("X members"), pull it from getPlatformStats()
+// at render time the way the stats grid below does, don't hardcode it here.
 const timeline = [
-  { year: "2024", event: "MG Creative Labs founded with a simple idea: AI education should be free and actually good." },
-  { year: "Q1 2025", event: "Launched the Prompt Library with 500 hand-crafted prompts. 10,000 users in 30 days." },
-  { year: "Q2 2025", event: "AI Coding Academy goes live. Waitlist of 5,000 before launch day." },
-  { year: "Q3 2025", event: "Community platform launched. 50,000+ members and growing." },
+  { year: "2024", event: "MG Creative Labs founded with a simple idea: AI education should be accessible and actually good." },
+  { year: "2025", event: "Built the Prompt Library, AI Coding Academy, and AI Design Academy." },
+  { year: "2025", event: "Launched the community platform for learners to share projects and help each other." },
   { year: "2026", event: "Mobile app, AI Academy, and SaaS products on the roadmap." },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const stats = await getPlatformStats();
+  const learnersLabel = formatStatCountOrNull(stats.learners, 10);
+  const promptsLabel = formatStatCountOrNull(stats.prompts, 10);
+
+  const missionStats = [
+    learnersLabel ? { n: learnersLabel, label: "Learners worldwide" } : { n: "Open", label: "Now in beta" },
+    promptsLabel ? { n: promptsLabel, label: "Prompts published" } : { n: "Growing", label: "Prompt library" },
+    { n: "Free", label: "To start" },
+    { n: "100%", label: "Real, no filler" },
+  ];
+
   return (
     <div className="pt-16">
       {/* Hero */}
@@ -51,7 +67,7 @@ export default function AboutPage() {
         <Badge variant="blue" className="mb-5">Our story</Badge>
         <h1 className="text-5xl sm:text-6xl font-display font-bold text-white mb-6 leading-tight">
           We believe AI education{" "}
-          <span className="text-gradient">should be free</span>.
+          <span className="text-gradient">should be accessible</span>.
         </h1>
         <p className="text-gray-400 text-xl leading-relaxed max-w-2xl mx-auto">
           MG Creative Labs was built by creators who were frustrated with bad AI courses, overwhelming jargon, and paywalled tutorials. We&apos;re fixing that — one lesson at a time.
@@ -74,12 +90,7 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {[
-              { n: "50K+", label: "Learners worldwide" },
-              { n: "1,200+", label: "Prompts published" },
-              { n: "80+", label: "Free tutorials" },
-              { n: "4.9★", label: "Average rating" },
-            ].map((s) => (
+            {missionStats.map((s) => (
               <div key={s.label} className="glass rounded-2xl p-6 text-center border border-white/[0.06]">
                 <div className="text-3xl font-display font-bold text-white mb-1">{s.n}</div>
                 <div className="text-xs text-gray-600">{s.label}</div>

@@ -41,7 +41,7 @@ export default function ContactPage() {
             </p>
           </div>
           {[
-            { icon: Mail, label: "Email", value: "hello@mgcreativelabs.com", href: "mailto:hello@mgcreativelabs.com" },
+            { icon: Mail, label: "Email", value: "mgcreativelabs@technologist.com", href: "mailto:mgcreativelabs@technologist.com" },
             { icon: Share2, label: "Twitter / X", value: "@mgcreativelabs", href: "https://twitter.com/mgcreativelabs" },
             { icon: GitBranch, label: "GitHub", value: "github.com/mgcreativelabs", href: "https://github.com/mgcreativelabs" },
           ].map(({ icon: Icon, label, value, href }) => (
@@ -61,8 +61,8 @@ export default function ContactPage() {
             <h3 className="font-semibold text-white mb-2">Partnership inquiries</h3>
             <p className="text-sm text-gray-400 leading-relaxed">
               Interested in sponsoring content, co-creating courses, or building integrations? Email us at{" "}
-              <a href="mailto:partnerships@mgcreativelabs.com" className="text-brand-blue hover:underline">
-                partnerships@mgcreativelabs.com
+              <a href="mailto:mgcreativelabs@technologist.com" className="text-brand-blue hover:underline">
+                mgcreativelabs@technologist.com
               </a>
             </p>
           </div>

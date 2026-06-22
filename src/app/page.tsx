@@ -1,83 +1,124 @@
 import Link from "next/link";
 import { ArrowRight, Bot } from "lucide-react";
 import React from "react";
+import { getPlatformStats, formatStatCountOrNull } from "@/lib/data/platform-stats";
+import { Newsletter } from "@/components/sections/Newsletter";
 
-const features = [
-  {
-    href: "/ai-learning-hub",
-    gradient: "from-blue-500/30 to-blue-600/30",
-    iconColor: "text-blue-400",
-    title: "AI Learning Hub",
-    desc: "Structured courses on AI fundamentals, GPT-4, Claude, Gemini, and the latest models.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-  },
-  {
-    href: "/prompt-library",
-    gradient: "from-purple-500/30 to-purple-600/30",
-    iconColor: "text-purple-400",
-    title: "Prompt Library",
-    desc: "1,200+ hand-crafted prompts for writing, coding, business, and creativity.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/ai-coding-academy",
-    gradient: "from-cyan-500/30 to-cyan-600/30",
-    iconColor: "text-cyan-400",
-    title: "AI Coding Academy",
-    desc: "Build real apps with AI. Learn Cursor, Copilot, v0, Bolt, and pair-programming.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-      </svg>
-    ),
-  },
-  {
-    href: "/ai-design-academy",
-    gradient: "from-pink-500/30 to-pink-600/30",
-    iconColor: "text-pink-400",
-    title: "AI Design Academy",
-    desc: "Master Midjourney, DALL-E, Stable Diffusion, and Figma AI without a degree.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/ai-learning-hub",
-    gradient: "from-yellow-500/30 to-orange-600/30",
-    iconColor: "text-yellow-400",
-    title: "Automation",
-    desc: "Build n8n, Zapier, and Make workflows to reclaim hours every week.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/community",
-    gradient: "from-green-500/30 to-teal-600/30",
-    iconColor: "text-green-400",
-    title: "Community",
-    desc: "Connect with 50K+ AI creators. Share projects and grow together.",
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-  },
-];
+// Real counts are fetched from Supabase at request time but cached for an
+// hour — keeps the homepage fast (no per-visit DB round trip) while making
+// sure numbers stay truthful as the platform grows. Update this value if
+// you want fresher (or staler) numbers.
+export const revalidate = 3600;
 
-export default function Home() {
+function buildHeroStats(stats: { learners: number; prompts: number }) {
+  const learnersLabel = formatStatCountOrNull(stats.learners, 10);
+  const promptsLabel = formatStatCountOrNull(stats.prompts, 10);
+
+  const dynamic: { n: string; label: string }[] = [];
+  if (learnersLabel) dynamic.push({ n: learnersLabel, label: "Learners" });
+  if (promptsLabel) dynamic.push({ n: promptsLabel, label: "AI Prompts" });
+
+  // Evergreen, always-true badges — used to fill out the row when real
+  // numbers aren't yet meaningful to show, instead of showing literal
+  // zeros or fabricated figures.
+  const evergreen = [
+    { n: "Free", label: "To start" },
+    { n: "All levels", label: "Beginner to pro" },
+  ];
+
+  return [...dynamic, ...evergreen].slice(0, 3);
+}
+
+function buildFeatures(promptsCount: number, communityCount: number) {
+  const promptsLabel = formatStatCountOrNull(promptsCount, 10);
+  const communityLabel = formatStatCountOrNull(communityCount, 20);
+
+  return [
+    {
+      href: "/ai-learning-hub",
+      gradient: "from-blue-500/30 to-blue-600/30",
+      iconColor: "text-blue-400",
+      title: "AI Learning Hub",
+      desc: "Structured courses on AI fundamentals, GPT-4, Claude, Gemini, and the latest models.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+    },
+    {
+      href: "/prompt-library",
+      gradient: "from-purple-500/30 to-purple-600/30",
+      iconColor: "text-purple-400",
+      title: "Prompt Library",
+      desc: promptsLabel
+        ? `${promptsLabel} hand-crafted prompts for writing, coding, business, and creativity.`
+        : "Hand-crafted prompts for writing, coding, business, and creativity. New prompts added every week.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      ),
+    },
+    {
+      href: "/ai-coding-academy",
+      gradient: "from-cyan-500/30 to-cyan-600/30",
+      iconColor: "text-cyan-400",
+      title: "AI Coding Academy",
+      desc: "Build real apps with AI. Learn Cursor, Copilot, v0, Bolt, and pair-programming.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      ),
+    },
+    {
+      href: "/ai-design-academy",
+      gradient: "from-pink-500/30 to-pink-600/30",
+      iconColor: "text-pink-400",
+      title: "AI Design Academy",
+      desc: "Master Midjourney, DALL-E, Stable Diffusion, and Figma AI without a degree.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      href: "/ai-learning-hub",
+      gradient: "from-yellow-500/30 to-orange-600/30",
+      iconColor: "text-yellow-400",
+      title: "Automation",
+      desc: "Build n8n, Zapier, and Make workflows to reclaim hours every week.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+    },
+    {
+      href: "/community",
+      gradient: "from-green-500/30 to-teal-600/30",
+      iconColor: "text-green-400",
+      title: "Community",
+      desc: communityLabel
+        ? `Connect with ${communityLabel} AI creators. Share projects and grow together.`
+        : "Connect with AI creators. Share projects and grow together.",
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+  ];
+}
+
+export default async function Home() {
+  const stats = await getPlatformStats();
+  const heroStats = buildHeroStats(stats);
+  const features = buildFeatures(stats.prompts, stats.learners);
+  const ctaLabel = formatStatCountOrNull(stats.learners, 20);
+
   return (
     /*
       FIX: Changed <main> → <div> here.
@@ -101,7 +142,7 @@ export default function Home() {
         {/* Eyebrow pill */}
         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl mb-8">
           <span className="flex h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-          <span className="text-sm text-gray-200 font-medium">AI Education Platform · 2025</span>
+          <span className="text-sm text-gray-200 font-medium">AI Education Platform · 2026</span>
         </div>
 
         {/* Headline */}
@@ -145,11 +186,7 @@ export default function Home() {
 
         {/* Stats */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16 text-sm w-full">
-          {[
-            { n: "50K+",   label: "Learners"   },
-            { n: "1,200+", label: "AI Prompts" },
-            { n: "80+",    label: "Tutorials"  },
-          ].map((s, i) => (
+          {heroStats.map((s, i) => (
             <React.Fragment key={s.label}>
               {i > 0 && <div className="hidden sm:block w-px h-16 bg-white/20" />}
               <div className="text-center">
@@ -211,7 +248,9 @@ export default function Home() {
               Ready to master AI?
             </h2>
             <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-              Join 50,000+ creators who are already using AI to work smarter and build faster.
+              {ctaLabel
+                ? `Join ${ctaLabel} creators who are already using AI to work smarter and build faster.`
+                : "Join the creators already using AI to work smarter and build faster."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -230,6 +269,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Newsletter />
 
     </div>
   );

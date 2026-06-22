@@ -19,6 +19,7 @@ const footerLinks = {
   ],
   Company: [
     { label: "About", href: "/about" },
+    { label: "Meet the Founder", href: "/about-owner" },
     { label: "Contact", href: "/contact" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
@@ -94,8 +95,8 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-1.5 text-xs text-gray-600">
             <Mail className="h-3 w-3" />
-            <a href="mailto:hello@mgcreativelabs.com" className="hover:text-gray-400 transition-colors">
-              hello@mgcreativelabs.com
+            <a href="mailto:mgcreativelabs@technologist.com" className="hover:text-gray-400 transition-colors">
+              mgcreativelabs@technologist.com
             </a>
           </div>
         </div>

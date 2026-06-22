@@ -143,7 +143,7 @@ export default function AILearningHubPage() {
       </section>
 
       {/* ── AI Tools Directory ── */}
-      <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto pb-24">
+      <section id="tools" className="py-16 px-4 sm:px-6 max-w-6xl mx-auto pb-24 scroll-mt-20">
         <div className="mb-8">
           <Badge variant="purple" className="mb-3">Curated directory</Badge>
           <h2 className="text-3xl font-bold text-white">AI Tools Directory</h2>
