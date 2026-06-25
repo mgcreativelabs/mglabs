@@ -1,17 +1,36 @@
+// =============================================
+// PRICING PAGE — src/app/pricing/page.tsx
+//
+// Architecture notes:
+//  - Three standard tiers (Free / Pro / Enterprise) + the $500/mo Premium
+//    AI Guidance plan, which is rendered as a distinct full-width section.
+//  - "Trusted by Google / Microsoft / Shopify" social proof block REMOVED —
+//    it was fabricated and creates legal and trust risk.
+//  - #premium anchor enables deep-linking from course cards and the navbar.
+//  - All plan data is typed as const so TypeScript checks it at build time.
+// =============================================
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, X, Zap, Crown, Building2, ArrowRight } from "lucide-react";
+import {
+  Check, X, Zap, Crown, Building2, ArrowRight,
+  Star, ShieldCheck, MessageCircle, Sparkles,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Pricing — MG Creative Labs",
-  description: "Simple, transparent pricing. Start free forever. Upgrade when you're ready to go deeper.",
+  description:
+    "Start free, go deeper with Pro, or unlock one-on-one Premium AI Guidance at $500/month.",
+  openGraph: {
+    title: "Pricing — MG Creative Labs",
+    description:
+      "Simple, transparent pricing. Start free forever. Upgrade when you need more.",
+    type: "website",
+  },
 };
 
-// ---------------------------------------------------------------------------
-// Plan data
-// ---------------------------------------------------------------------------
+// ─── Plan data ────────────────────────────────────────────────────────────────
 const plans = [
   {
     id: "free",
@@ -30,8 +49,8 @@ const plans = [
       { text: "Unlimited course access", included: false },
       { text: "Full prompt library (1,200+)", included: false },
       { text: "AI Coding Academy", included: false },
-      { text: "AI Design Academy", included: false },
-      { text: "Save & organize prompts", included: false },
+      { text: "AI Design & Automation Academy", included: false },
+      { text: "Save & organise prompts", included: false },
       { text: "Progress tracking", included: false },
       { text: "Priority support", included: false },
     ],
@@ -53,8 +72,8 @@ const plans = [
       { text: "Unlimited course access", included: true },
       { text: "Full prompt library (1,200+)", included: true },
       { text: "AI Coding Academy", included: true },
-      { text: "AI Design Academy", included: true },
-      { text: "Save & organize prompts", included: true },
+      { text: "AI Design & Automation Academy", included: true },
+      { text: "Save & organise prompts", included: true },
       { text: "Progress tracking", included: true },
       { text: "Priority support", included: false },
     ],
@@ -64,7 +83,7 @@ const plans = [
     name: "Enterprise",
     icon: Building2,
     price: { monthly: 49, annual: 39 },
-    description: "For teams and companies investing in AI skills at scale.",
+    description: "For teams investing in AI skills at scale.",
     cta: { label: "Contact us", href: "/contact?subject=enterprise", variant: "secondary" as const },
     badge: null,
     features: [
@@ -76,56 +95,84 @@ const plans = [
       { text: "Unlimited course access", included: true },
       { text: "Full prompt library (1,200+)", included: true },
       { text: "AI Coding Academy", included: true },
-      { text: "AI Design Academy", included: true },
-      { text: "Save & organize prompts", included: true },
+      { text: "AI Design & Automation Academy", included: true },
+      { text: "Save & organise prompts", included: true },
       { text: "Progress tracking", included: true },
       { text: "Priority support + dedicated account manager", included: true },
     ],
   },
+] as const;
+
+// ─── Premium plan inclusions ──────────────────────────────────────────────────
+const PREMIUM_INCLUSIONS = [
+  "One-on-one guidance sessions across multiple AI platforms and tools",
+  "Advanced strategic AI implementation support tailored to your projects",
+  "Personalised recommendations for workflows, tools, and tech stack decisions",
+  "Access to high-level AI workflows used by top performers",
+  "Async support via direct communication channel",
+  "Guidance on AI integration for business, product, and creative work",
+  "Review and critique of your AI-built projects and workflows",
+  "Monthly strategy review to align AI adoption with your goals",
 ];
 
-const faqs = [
+// ─── FAQ data ─────────────────────────────────────────────────────────────────
+const FAQS = [
   {
-    q: "Can I cancel anytime?",
-    a: "Yes. Cancel from your dashboard at any time. You keep access until the end of the billing period. No questions asked.",
+    q: "Can I cancel my Pro or Enterprise plan anytime?",
+    a: "Yes. Cancel from your dashboard at any time. You keep access until the end of the current billing period. No questions asked.",
   },
   {
-    q: "Is there a student discount?",
-    a: "We offer 50% off for verified students and educators. Email us at mgcreativelabs@technologist.com with your .edu address.",
+    q: "What is the refund policy for Premium AI Guidance?",
+    a: "Premium AI Guidance is a personalised, time-committed service. Due to the one-on-one nature of the engagement, payments for Premium AI Guidance are non-refundable once a guidance session or period has commenced. We strongly encourage you to review the service description carefully and reach out with any questions before subscribing. This policy applies to the extent permitted by applicable law.",
+  },
+  {
+    q: "Is there a student or educator discount?",
+    a: "We offer 50% off Pro for verified students and educators. Email us at mgcreativelabs@technologist.com with your .edu address or institutional affiliation.",
   },
   {
     q: "What payment methods do you accept?",
-    a: "All major credit and debit cards (Visa, Mastercard, Amex), and PayPal. Payments are processed securely via Stripe.",
+    a: "All major credit and debit cards (Visa, Mastercard, Amex) and PayPal. Payments are processed securely via Stripe.",
   },
   {
-    q: "Can I switch plans?",
-    a: "Yes — upgrade or downgrade at any time. Upgrades are prorated immediately. Downgrades take effect at the next billing cycle.",
+    q: "Can I switch between Free, Pro, and Enterprise?",
+    a: "Yes — upgrade or downgrade at any time. Upgrades take effect immediately and are prorated. Downgrades take effect at the next billing cycle.",
   },
   {
-    q: "What happens to my saved prompts if I downgrade?",
-    a: "They're safe. Your saved prompts stay in your account. You just won't be able to save new ones beyond the free limit until you upgrade again.",
+    q: "What does the Premium AI Guidance plan actually cover?",
+    a: "Premium provides personalised, strategic AI guidance — not off-the-shelf course content. It is best suited for people building AI-powered businesses, products, or workflows who want expert advisory support. Results depend on individual goals, effort, and implementation. Outcomes are not guaranteed.",
   },
   {
-    q: "Do you offer a money-back guarantee?",
-    a: "Yes — 14-day money-back guarantee on Pro. If you don't love it, we'll refund you in full, no questions asked.",
+    q: "How do I contact you about Premium AI Guidance?",
+    a: "Click the 'Contact Us to Unlock Premium Guidance' button in the Premium section below, or email mgcreativelabs@technologist.com directly. We'll schedule a brief call to understand your needs before you commit.",
+  },
+  {
+    q: "Do you offer a money-back guarantee on Pro?",
+    a: "Yes — 14-day money-back guarantee on Pro. If you don't love it within 14 days of your first payment, we'll refund you in full, no questions asked.",
   },
 ];
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PricingPage() {
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto text-center mesh-bg">
+
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto text-center">
         <Badge variant="blue" className="mb-5">Simple pricing</Badge>
         <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
-          Start free. <span className="text-gradient">Go deeper</span> when ready.
+          Start free.{" "}
+          <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            Go deeper
+          </span>{" "}
+          when ready.
         </h1>
         <p className="text-gray-400 text-xl max-w-xl mx-auto">
-          No tricks, no paywalls on the basics. Upgrade when AI becomes your competitive advantage.
+          No tricks, no paywalls on the basics. Upgrade when AI becomes your
+          competitive advantage.
         </p>
       </section>
 
-      {/* Plans */}
+      {/* ── Standard plans ───────────────────────────────────────────────── */}
       <section className="py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="grid md:grid-cols-3 gap-6">
           {plans.map((plan) => {
@@ -151,39 +198,48 @@ export default function PricingPage() {
                 <div className="mb-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className={`p-2 rounded-lg ${isPro ? "bg-blue-500/20" : "bg-white/5"}`}>
-                      <plan.icon className={`h-4 w-4 ${isPro ? "text-blue-400" : "text-gray-400"}`} />
+                      <plan.icon
+                        className={`h-4 w-4 ${isPro ? "text-blue-400" : "text-gray-400"}`}
+                      />
                     </div>
                     <span className="font-semibold text-white text-lg">{plan.name}</span>
                   </div>
 
                   <div className="flex items-end gap-1.5 mb-2">
-                    <span className="text-5xl font-bold text-white">${plan.price.monthly}</span>
-                    {plan.price.monthly > 0 && (
-                      <span className="text-gray-500 text-sm mb-2">/month</span>
-                    )}
-                    {plan.price.monthly === 0 && (
-                      <span className="text-gray-500 text-sm mb-2">forever</span>
-                    )}
+                    <span className="text-5xl font-bold text-white">
+                      ${plan.price.monthly}
+                    </span>
+                    <span className="text-gray-500 text-sm mb-2">
+                      {plan.price.monthly === 0 ? "forever" : "/month"}
+                    </span>
                   </div>
 
                   {plan.price.annual > 0 && (
                     <p className="text-sm text-green-400">
-                      ${plan.price.annual}/mo billed annually — save {Math.round((1 - plan.price.annual / plan.price.monthly) * 100)}%
+                      ${plan.price.annual}/mo billed annually — save{" "}
+                      {Math.round(
+                        (1 - plan.price.annual / plan.price.monthly) * 100
+                      )}
+                      %
                     </p>
                   )}
 
-                  <p className="text-gray-400 text-sm mt-2 leading-relaxed">{plan.description}</p>
+                  <p className="text-gray-400 text-sm mt-2 leading-relaxed">
+                    {plan.description}
+                  </p>
                 </div>
 
-                {/* CTA */}
                 <Link href={plan.cta.href} className="mb-6">
-                  <Button variant={plan.cta.variant} size="md" className="w-full justify-center">
+                  <Button
+                    variant={plan.cta.variant}
+                    size="md"
+                    className="w-full justify-center"
+                  >
                     {plan.cta.label}
                     {isPro && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                 </Link>
 
-                {/* Features */}
                 <ul className="space-y-3 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature.text} className="flex items-start gap-3">
@@ -208,27 +264,114 @@ export default function PricingPage() {
         </div>
 
         <p className="text-center text-gray-600 text-sm mt-6">
-          All plans include SSL, 99.9% uptime, and GDPR compliance. No hidden fees.
+          All plans include SSL encryption, 99.9% uptime, and GDPR-oriented data handling.
+          No hidden fees.
         </p>
       </section>
 
-      {/* Social proof */}
-      <section className="py-16 px-4 sm:px-6 max-w-4xl mx-auto text-center">
-        <p className="text-gray-500 text-sm mb-6 uppercase tracking-widest">Trusted by learners at</p>
-        <div className="flex flex-wrap items-center justify-center gap-8 text-gray-600 font-semibold text-sm">
-          {["Google", "Microsoft", "Shopify", "Stripe", "Notion", "Figma"].map((name) => (
-            <span key={name}>{name}</span>
-          ))}
+      {/* ── PREMIUM AI GUIDANCE ──────────────────────────────────────────── */}
+      {/*
+        This section has id="premium" so it can be deep-linked from:
+          - Course detail pages: /pricing#premium
+          - Navbar "Pricing" link (direct scroll target)
+          - Homepage Premium section CTA
+      */}
+      <section
+        id="premium"
+        className="py-20 px-4 sm:px-6 max-w-6xl mx-auto scroll-mt-20"
+      >
+        <div className="relative rounded-3xl overflow-hidden border border-purple-500/30 bg-gradient-to-br from-purple-900/40 via-slate-900 to-blue-900/30">
+          {/* Decorative glow */}
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
+          <div className="relative z-10 p-8 lg:p-16">
+            <div className="max-w-3xl">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm font-medium mb-6">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium AI Guidance
+              </div>
+
+              {/* Price */}
+              <div className="flex items-end gap-3 mb-4">
+                <span className="text-7xl font-bold text-white">$500</span>
+                <span className="text-gray-400 text-lg mb-3">/month</span>
+              </div>
+
+              {/* Description */}
+              <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-2xl">
+                Receive premium one-on-one guidance across multiple platforms
+                and tools designed to unlock the full potential of your AI
+                projects. Get advanced strategic support, personalised
+                recommendations, implementation guidance, and access to
+                high-level workflows used by top performers.
+              </p>
+
+              {/* What's included */}
+              <div className="grid sm:grid-cols-2 gap-3 mb-10">
+                {PREMIUM_INCLUSIONS.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-300 text-sm leading-snug">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trust signals */}
+              <div className="flex flex-wrap gap-4 mb-10">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <ShieldCheck className="h-4 w-4 text-green-400" />
+                  Results depend on individual goals and effort. Not guaranteed.
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <MessageCircle className="h-4 w-4 text-blue-400" />
+                  We recommend reviewing the service description before subscribing.
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href="mailto:mgcreativelabs@technologist.com?subject=Premium%20AI%20Guidance%20Inquiry&body=Hi%2C%20I%20am%20interested%20in%20learning%20more%20about%20the%20Premium%20AI%20Guidance%20plan.%0A%0AMy%20goals%3A%0A%0AQuestions%3A"
+                  className="inline-flex"
+                >
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    rightIcon={<ArrowRight className="h-4 w-4" />}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 border-0"
+                  >
+                    Contact Us to Unlock Premium Guidance
+                  </Button>
+                </a>
+                <Link href="/contact?subject=premium">
+                  <Button variant="secondary" size="lg">
+                    Ask a question first
+                  </Button>
+                </Link>
+              </div>
+
+              <p className="text-gray-600 text-xs mt-4">
+                Premium AI Guidance payments are non-refundable once a guidance
+                period has commenced. Please review the{" "}
+                <Link href="/terms" className="text-gray-500 hover:text-gray-300 underline underline-offset-2">
+                  Terms of Service
+                </Link>{" "}
+                before subscribing.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section className="py-16 px-4 sm:px-6 max-w-3xl mx-auto pb-24">
         <h2 className="text-3xl font-bold text-white text-center mb-10">
           Frequently asked questions
         </h2>
         <div className="space-y-4">
-          {faqs.map((faq) => (
+          {FAQS.map((faq) => (
             <div
               key={faq.q}
               className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.07]"
