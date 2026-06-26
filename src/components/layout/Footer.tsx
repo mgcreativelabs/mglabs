@@ -1,45 +1,35 @@
 "use client";
-// =============================================
-// FOOTER — src/components/layout/Footer.tsx
-//
-// Changes in this version:
-//  - Added "Pricing" link to the Company column.
-//  - All other links, social icons, and brand copy unchanged.
-// =============================================
 import React from "react";
 import Link from "next/link";
 import { Zap, Share2, GitBranch, Building2, Play, Mail } from "lucide-react";
 
 const footerLinks = {
   Platform: [
-    { label: "AI Learning Hub",         href: "/ai-learning-hub"  },
-    { label: "Prompt Library",           href: "/prompt-library"   },
-    { label: "AI Coding Academy",        href: "/ai-coding-academy"},
-    { label: "AI Design & Automation",   href: "/ai-design-academy"},
-    { label: "Community",                href: "/community"        },
-    { label: "MG AI",                    href: "/mg-ai"            },
+    { label: "Start Building",   href: "/start"          },
+    { label: "Learn AI",         href: "/learn"          },
+    { label: "Prompt Library",   href: "/prompt-library" },
+    { label: "MG AI",            href: "/mg-ai"          },
+    { label: "Community",        href: "/community"      },
   ],
-  Resources: [
-    { label: "Blog",                     href: "/blog"                    },
-    { label: "Tutorials",                href: "/blog?category=tutorials" },
-    { label: "AI Tools Directory",       href: "/ai-learning-hub#tools"   },
-    { label: "Newsletter",               href: "/#newsletter"             },
+  Programs: [
+    { label: "Pricing",                href: "/pricing"          },
+    { label: "Launch Program — $500", href: "/pricing#launch"   },
+    { label: "Blog & Tutorials",       href: "/blog"             },
+    { label: "About the Founder",      href: "/about-owner"      },
   ],
   Company: [
-    { label: "About",                    href: "/about"       },
-    { label: "Meet the Founder",         href: "/about-owner" },
-    { label: "Pricing",                  href: "/pricing"     },
-    { label: "Contact",                  href: "/contact"     },
-    { label: "Privacy Policy",           href: "/privacy"     },
-    { label: "Terms of Service",         href: "/terms"       },
+    { label: "About",           href: "/about"   },
+    { label: "Contact",         href: "/contact" },
+    { label: "Privacy Policy",  href: "/privacy" },
+    { label: "Terms of Service", href: "/terms"  },
   ],
 };
 
 const socials = [
   { icon: Share2,    href: "https://twitter.com/mgcreativelabs",         label: "Twitter / X" },
-  { icon: GitBranch, href: "https://github.com/mgcreativelabs",          label: "GitHub"      },
-  { icon: Building2, href: "https://linkedin.com/company/mgcreativelabs",label: "LinkedIn"    },
-  { icon: Play,      href: "https://youtube.com/@mgcreativelabs",        label: "YouTube"     },
+  { icon: GitBranch, href: "https://github.com/mgcreativelabs",           label: "GitHub"      },
+  { icon: Building2, href: "https://linkedin.com/company/mgcreativelabs", label: "LinkedIn"    },
+  { icon: Play,      href: "https://youtube.com/@mgcreativelabs",         label: "YouTube"     },
 ];
 
 export function Footer() {
@@ -55,13 +45,15 @@ export function Footer() {
                 <Zap className="h-4 w-4 text-white" />
               </div>
               <span className="font-display font-bold text-white tracking-tight">
-                MG <span className="text-gradient">Creative Labs</span>
+                MG <span className="text-gradient">Labs</span>
               </span>
             </Link>
+
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-              Empowering the next generation of creators to master AI, prompt
-              engineering, coding, and design.
+              The fastest way to go from zero to your first deployed AI product.
+              Build real. Learn real. Ship real.
             </p>
+
             <div className="flex items-center gap-3 mt-5">
               {socials.map(({ icon: Icon, href, label }) => (
                 <a
@@ -102,7 +94,7 @@ export function Footer() {
 
         <div className="border-t border-white/[0.04] mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} MG Creative Labs. All rights reserved.
+            © {new Date().getFullYear()} MG Labs. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-xs text-gray-600">
             <Mail className="h-3 w-3" />

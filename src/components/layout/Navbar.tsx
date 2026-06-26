@@ -1,32 +1,25 @@
 "use client";
-// =============================================
-// NAVBAR — src/components/layout/Navbar.tsx
-//
-// Changes in this version:
-//  - Added "Pricing" link (DollarSign icon) to desktop nav + mobile menu.
-//  - All existing auth, scroll, and mobile-toggle logic is unchanged.
-// =============================================
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Menu, X, Sparkles, BookOpen, Code, Palette,
-  Users, Newspaper, Zap, Bot, DollarSign,
+  Menu, X, Sparkles, BookOpen,
+  Newspaper, Zap, Bot, Rocket, ArrowRight, Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 const navLinks = [
-  { label: "Learn",    href: "/ai-learning-hub",   icon: BookOpen    },
-  { label: "Prompts",  href: "/prompt-library",     icon: Sparkles    },
-  { label: "Coding",   href: "/ai-coding-academy",  icon: Code        },
-  { label: "Design",   href: "/ai-design-academy",  icon: Palette     },
-  { label: "Community",href: "/community",          icon: Users       },
-  { label: "Blog",     href: "/blog",               icon: Newspaper   },
-  { label: "MG AI",    href: "/mg-ai",              icon: Bot         },
-  { label: "Pricing",  href: "/pricing",            icon: DollarSign  },
-];
+  { label: "Build",   href: "/start",         icon: Rocket,    highlight: "blue"   },
+  { label: "Learn",   href: "/learn",          icon: BookOpen,  highlight: null     },
+  { label: "Prompts", href: "/prompt-library", icon: Sparkles,  highlight: null     },
+  { label: "MG AI",   href: "/mg-ai",          icon: Bot,       highlight: "purple" },
+  { label: "Blog",    href: "/blog",           icon: Newspaper, highlight: null     },
+  { label: "Pricing", href: "/pricing",        icon: Tag,       highlight: null     },
+] as const;
+
+type NavLink = (typeof navLinks)[number];
 
 export function Navbar() {
   const [isOpen, setIsOpen]     = useState(false);
@@ -35,12 +28,41 @@ export function Navbar() {
   const { user, signOut, loading } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => { setIsOpen(false); }, [pathname]);
+
+  function getLinkClass(link: NavLink) {
+    const active = pathname === link.href;
+    const base =
+      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap";
+
+    if (link.highlight === "purple") {
+      return cn(
+        base,
+        active
+          ? "text-white bg-brand-purple/20 border border-brand-purple/30"
+          : "text-brand-purple hover:text-white hover:bg-brand-purple/20 border border-brand-purple/20"
+      );
+    }
+    if (link.highlight === "blue") {
+      return cn(
+        base,
+        active
+          ? "text-white bg-brand-blue/20 border border-brand-blue/30"
+          : "text-brand-blue hover:text-white hover:bg-brand-blue/20 border border-brand-blue/20"
+      );
+    }
+    return cn(
+      base,
+      active
+        ? "text-white bg-surface-3"
+        : "text-gray-400 hover:text-white hover:bg-surface-2"
+    );
+  }
 
   return (
     <header
@@ -55,50 +77,27 @@ export function Navbar() {
         {/* 3-column grid: logo | nav | cta */}
         <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-4">
 
-          {/* ── LEFT: Logo ── */}
+          {/* LEFT — Logo */}
           <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
               <Zap className="h-4 w-4 text-white" />
             </div>
             <span className="font-display font-bold text-white text-base tracking-tight hidden sm:inline">
-              MG <span className="text-gradient">Creative Labs</span>
+              MG <span className="text-gradient">Labs</span>
             </span>
           </Link>
 
-          {/* ── CENTER: Nav links (desktop) ── */}
+          {/* CENTER — Desktop nav */}
           <div className="hidden lg:flex items-center justify-center gap-0.5">
-            {navLinks.map((link) => {
-              const isMGAI    = link.href === "/mg-ai";
-              const isPricing = link.href === "/pricing";
-              const isActive  = pathname === link.href;
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                    isMGAI
-                      ? isActive
-                        ? "text-white bg-brand-purple/20 border border-brand-purple/30"
-                        : "text-brand-purple hover:text-white hover:bg-brand-purple/20 border border-brand-purple/20"
-                      : isPricing
-                      ? isActive
-                        ? "text-white bg-blue-500/20 border border-blue-500/30"
-                        : "text-blue-400 hover:text-white hover:bg-blue-500/20 border border-blue-500/20"
-                      : isActive
-                      ? "text-white bg-surface-3"
-                      : "text-gray-400 hover:text-white hover:bg-surface-2"
-                  )}
-                >
-                  <link.icon className="h-3.5 w-3.5" />
-                  {link.label}
-                </Link>
-              );
-            })}
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={getLinkClass(link)}>
+                <link.icon className="h-3.5 w-3.5" />
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          {/* ── RIGHT: Auth buttons + hamburger ── */}
+          {/* RIGHT — Auth + CTA */}
           <div className="flex items-center gap-2">
             {!loading && (
               <>
@@ -121,26 +120,32 @@ export function Navbar() {
                     <Link href="/login" className="hidden sm:block">
                       <Button variant="ghost" size="sm">Sign in</Button>
                     </Link>
-                    <Link href="/signup" className="hidden sm:block">
-                      <Button variant="primary" size="sm">Get started free</Button>
+                    <Link href="/start" className="hidden sm:block">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
+                      >
+                        Start Building
+                      </Button>
                     </Link>
                   </>
                 )}
               </>
             )}
 
-            {/* Hamburger — always visible on mobile */}
+            {/* Hamburger */}
             <button
               className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
               onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle navigation menu"
+              aria-label="Toggle menu"
             >
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {/* ── Mobile dropdown ── */}
+        {/* Mobile dropdown */}
         {isOpen && (
           <div className="lg:hidden pb-4 border-t border-white/[0.06] mt-2 bg-surface/95 backdrop-blur-xl -mx-6 px-6">
             <div className="pt-4 space-y-1">
@@ -159,12 +164,12 @@ export function Navbar() {
                   {link.label}
                   {link.href === "/mg-ai" && (
                     <span className="ml-auto text-xs bg-brand-purple/20 text-brand-purple px-1.5 py-0.5 rounded-md border border-brand-purple/20">
-                      Free AI
+                      Free
                     </span>
                   )}
-                  {link.href === "/pricing" && (
-                    <span className="ml-auto text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-md border border-blue-500/20">
-                      Plans
+                  {link.href === "/start" && (
+                    <span className="ml-auto text-xs bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-md border border-brand-blue/20">
+                      Free
                     </span>
                   )}
                 </Link>
@@ -185,8 +190,10 @@ export function Navbar() {
                     <Link href="/login">
                       <Button variant="ghost" className="w-full">Sign in</Button>
                     </Link>
-                    <Link href="/signup">
-                      <Button variant="primary" className="w-full">Get started free</Button>
+                    <Link href="/start">
+                      <Button variant="primary" className="w-full">
+                        Start Building Free →
+                      </Button>
                     </Link>
                   </>
                 )}
