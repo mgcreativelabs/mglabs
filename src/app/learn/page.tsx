@@ -73,7 +73,7 @@ export default function LearnPage() {
           {lessons.map((lesson, index) => (
             <Link
               key={lesson.slug}
-              href={lesson.wall ? "#" : `/learn/${lesson.slug}`}
+             href={lesson.wall ? "/pricing#launch" : `/learn/${lesson.slug}`}
               className={`group block p-6 rounded-2xl border transition-all duration-200 ${
                 lesson.wall
                   ? "bg-white/[0.02] border-white/[0.05] cursor-default"

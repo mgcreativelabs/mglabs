@@ -4,13 +4,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, Copy, Heart, Bookmark, Star, ChevronDown } from "lucide-react";
+import { Search, Copy, Heart, Bookmark, Star } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardContent } from "@/components/ui/Card";
-import { usePrompts } from "@/lib/hooks/usePrompts";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { Card } from "@/components/ui/Card";
 import { capitalizeFirst, formatNumber } from "@/lib/utils/format";
 import type { PromptCategory } from "@/types";
 
@@ -34,7 +32,6 @@ const DIFFICULTIES = [
   { value: "advanced", label: "Advanced" },
 ];
 
-// Mock data for demo (replace with real Supabase data)
 const MOCK_PROMPTS = [
   {
     id: "1",
@@ -46,7 +43,6 @@ const MOCK_PROMPTS = [
     difficulty: "beginner" as const,
     likes_count: 2847,
     saves_count: 1203,
-    views_count: 18490,
     is_featured: true,
     model: "GPT-4",
   },
@@ -60,7 +56,6 @@ const MOCK_PROMPTS = [
     difficulty: "advanced" as const,
     likes_count: 1923,
     saves_count: 987,
-    views_count: 12840,
     is_featured: true,
     model: "Claude",
   },
@@ -74,7 +69,6 @@ const MOCK_PROMPTS = [
     difficulty: "intermediate" as const,
     likes_count: 1542,
     saves_count: 743,
-    views_count: 9870,
     is_featured: false,
     model: "GPT-4",
   },
@@ -88,7 +82,6 @@ const MOCK_PROMPTS = [
     difficulty: "beginner" as const,
     likes_count: 3210,
     saves_count: 1870,
-    views_count: 24600,
     is_featured: true,
     model: "Midjourney",
   },
@@ -102,7 +95,6 @@ const MOCK_PROMPTS = [
     difficulty: "intermediate" as const,
     likes_count: 1876,
     saves_count: 934,
-    views_count: 14320,
     is_featured: false,
     model: "Claude",
   },
@@ -116,7 +108,6 @@ const MOCK_PROMPTS = [
     difficulty: "intermediate" as const,
     likes_count: 1654,
     saves_count: 821,
-    views_count: 11230,
     is_featured: false,
     model: "GPT-4",
   },
@@ -159,7 +150,6 @@ function PromptCard({ prompt }: { prompt: typeof MOCK_PROMPTS[0] }) {
         <h3 className="font-semibold text-white mb-2 leading-tight">{prompt.title}</h3>
         <p className="text-gray-500 text-sm leading-relaxed mb-4">{prompt.description}</p>
 
-        {/* Preview */}
         <div className="bg-surface-2 rounded-xl p-3 border border-white/[0.04]">
           <p className="text-xs text-gray-500 leading-relaxed font-mono line-clamp-3">
             {prompt.content}
@@ -223,7 +213,8 @@ export function PromptLibraryClient() {
   const filtered = MOCK_PROMPTS.filter((p) => {
     const matchesCategory = category === "all" || p.category === category;
     const matchesDifficulty = difficulty === "all" || p.difficulty === difficulty;
-    const matchesSearch = !debouncedSearch ||
+    const matchesSearch =
+      !debouncedSearch ||
       p.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       p.description.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       p.tags.some((t) => t.toLowerCase().includes(debouncedSearch.toLowerCase()));
@@ -239,13 +230,14 @@ export function PromptLibraryClient() {
           Prompt <span className="text-gradient">Library</span>
         </h1>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          1,200+ hand-crafted prompts for every use case. Copy, customize, and get results in seconds.
+          Hand-crafted prompts for every use case. Copy, customize, and get results in seconds.
         </p>
       </div>
 
       {/* Filters */}
       <div className="sticky top-16 z-40 bg-surface/90 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          {/* Search + difficulty row */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Input
               placeholder="Search prompts..."
@@ -254,15 +246,6 @@ export function PromptLibraryClient() {
               leftIcon={<Search className="h-4 w-4" />}
               className="flex-1"
             />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="h-11 px-4 rounded-xl bg-surface-2 border border-white/10 text-gray-300 text-sm focus:outline-none focus:border-brand-blue/60 min-w-[140px]"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
@@ -273,6 +256,7 @@ export function PromptLibraryClient() {
               ))}
             </select>
           </div>
+          {/* Category pill row — single source of truth for category filter */}
           <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
             {CATEGORIES.map((c) => (
               <button
@@ -295,7 +279,8 @@ export function PromptLibraryClient() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-600">
-            Showing <span className="text-gray-300 font-medium">{filtered.length}</span> prompts
+            Showing <span className="text-gray-300 font-medium">{filtered.length}</span> of{" "}
+            <span className="text-gray-300 font-medium">{MOCK_PROMPTS.length}</span> prompts
           </p>
         </div>
 
@@ -308,7 +293,11 @@ export function PromptLibraryClient() {
         {filtered.length === 0 && (
           <div className="text-center py-20">
             <p className="text-gray-500 text-lg">No prompts found for your search.</p>
-            <Button variant="ghost" className="mt-4" onClick={() => { setSearch(""); setCategory("all"); setDifficulty("all"); }}>
+            <Button
+              variant="ghost"
+              className="mt-4"
+              onClick={() => { setSearch(""); setCategory("all"); setDifficulty("all"); }}
+            >
               Clear filters
             </Button>
           </div>

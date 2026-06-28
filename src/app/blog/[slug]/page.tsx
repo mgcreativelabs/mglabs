@@ -26,9 +26,33 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getBlogPost(slug);
   if (!post) return { title: "Post not found" };
+
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mglabs.vexr.dev";
+
   return {
     title: `${post.title} — MG Creative Labs Blog`,
     description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `${SITE_URL}/blog/${slug}`,
+      type: "article",
+      publishedTime: post.published_at,
+      authors: [post.author.full_name],
+      images: [
+        {
+          url: `${SITE_URL}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
   };
 }
 

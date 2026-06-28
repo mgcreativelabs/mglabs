@@ -17,7 +17,7 @@ import React from "react";
 // NEXT_PUBLIC_SITE_URL=https://mgcreativelabs.com in Vercel
 // → Settings → Environment Variables, then redeploy.
 // ─────────────────────────────────────────────────────────
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mglabs.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mglabs.vexr.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
