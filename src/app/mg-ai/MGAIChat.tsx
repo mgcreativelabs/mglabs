@@ -93,6 +93,7 @@ export function MGAIChat() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState("llama-3.3-70b-versatile");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -120,8 +121,12 @@ export function MGAIChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages.map(({ role, content }) => ({ role, content })),
-        }),
+  model: selectedModel,
+  messages: newMessages.map(({ role, content }) => ({
+    role,
+    content,
+  })),
+}),
       });
 
       const data = await res.json();
