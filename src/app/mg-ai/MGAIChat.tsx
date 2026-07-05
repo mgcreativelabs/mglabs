@@ -17,11 +17,30 @@ interface Message {
   id: string;
 }
 
+interface ModelOption {
+  id: string;
+  label: string;
+  emoji: string;
+  description: string;
+}
+
+// ── Model catalog ─────────────────────────────────────────────
+// All hosted on Groq's free tier (rate-limited, not credit-limited).
+// gpt-oss-120b is the default: strongest general reasoning available for free.
+const MODELS: ModelOption[] = [
+  { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B", emoji: "🧠", description: "Smartest — best for reasoning & code" },
+  { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B", emoji: "⚡", description: "Fast reasoning, lighter" },
+  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B", emoji: "🦙", description: "Well-rounded all-purpose" },
+  { id: "qwen/qwen3-32b", label: "Qwen3 32B", emoji: "💻", description: "Strong at code & logic" },
+  { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout", emoji: "👁️", description: "Vision + huge context" },
+  { id: "groq/compound", label: "Compound (Web Search)", emoji: "🌐", description: "Live web search + code execution" },
+];
+
 // ── Starter prompts ──────────────────────────────────────────
 const STARTERS = [
   { label: "Explain prompt engineering", prompt: "Explain prompt engineering in simple terms and give me 3 actionable tips to write better prompts." },
   { label: "Build a chatbot", prompt: "How do I build a simple AI chatbot using the OpenAI API and Next.js? Give me a step-by-step guide." },
-  { label: "Best AI tools 2025", prompt: "What are the best AI tools I should be using in 2025 for productivity and creativity?" },
+  { label: "Best AI tools 2026", prompt: "What are the best AI tools I should be using in 2026 for productivity and creativity?" },
   { label: "Write me a prompt", prompt: "Write me a detailed system prompt for an AI assistant that helps freelancers find clients on LinkedIn." },
   { label: "n8n automation ideas", prompt: "Give me 5 practical n8n automation workflows that would save a freelancer time every week." },
   { label: "Midjourney tips", prompt: "Share 5 advanced Midjourney prompt techniques for better, more consistent results." },
@@ -93,7 +112,7 @@ export function MGAIChat() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState("llama-3.3-70b-versatile");
+  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -102,6 +121,8 @@ export function MGAIChat() {
   }, [messages, loading]);
 
   const uid = () => Math.random().toString(36).slice(2);
+
+  const currentModel = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -121,12 +142,12 @@ export function MGAIChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  model: selectedModel,
-  messages: newMessages.map(({ role, content }) => ({
-    role,
-    content,
-  })),
-}),
+          model: selectedModel,
+          messages: newMessages.map(({ role, content }) => ({
+            role,
+            content,
+          })),
+        }),
       });
 
       const data = await res.json();
@@ -187,30 +208,24 @@ export function MGAIChat() {
             <div className="text-white font-semibold text-sm leading-none">MG Labs AI</div>
             <div className="text-gray-500 text-xs mt-0.5 flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
-              Powered by Llama 3.3 70B · Free
+              {currentModel.emoji} {currentModel.label} · Free
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-
-  <select
-    value={selectedModel}
-    onChange={(e) => setSelectedModel(e.target.value)}
-    className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
-  >
-    <option value="llama-3.3-70b-versatile">
-      🦙 Llama 3.3
-    </option>
-
-    <option value="deepseek-r1-distill-llama-70b">
-      🧠 DeepSeek
-    </option>
-
-    <option value="qwen/qwen3-32b">
-      💻 Qwen
-    </option>
-  </select>
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            title={currentModel.description}
+            className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white max-w-[160px] sm:max-w-none"
+          >
+            {MODELS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.emoji} {m.label}
+              </option>
+            ))}
+          </select>
           {messages.length > 0 && (
             <button
               onClick={clearChat}
@@ -241,8 +256,11 @@ export function MGAIChat() {
               <p className="text-gray-400 mb-2">
                 Your free AI assistant for all things AI, coding, design, and automation.
               </p>
-              <p className="text-gray-600 text-sm mb-12">
-                Powered by Llama 3.3 70B via Groq · No account needed
+              <p className="text-gray-600 text-sm mb-2">
+                Currently using {currentModel.emoji} <span className="text-gray-400">{currentModel.label}</span> — {currentModel.description}
+              </p>
+              <p className="text-gray-700 text-xs mb-12">
+                Switch models anytime from the dropdown above · No account needed
               </p>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
