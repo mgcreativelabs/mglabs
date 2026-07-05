@@ -1,13 +1,15 @@
 "use client";
 // ============================================================
 // src/app/mg-ai/MGAIChat.tsx  (Client Component)
-// Full chat UI — history, streaming feel, markdown render
+// Full chat UI — history, streaming feel, markdown render,
+// voice input/output, and free image generation.
 // ============================================================
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Bot, Send, Trash2, Copy, Check, Sparkles,
-  ArrowRight, Zap, RotateCcw,
+  ArrowRight, Zap, RotateCcw, Mic, Square, Volume2, VolumeX,
+  ImageIcon, Loader2,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────
@@ -15,6 +17,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   id: string;
+  imageUrl?: string;
 }
 
 interface ModelOption {
@@ -25,8 +28,6 @@ interface ModelOption {
 }
 
 // ── Model catalog ─────────────────────────────────────────────
-// All hosted on Groq's free tier (rate-limited, not credit-limited).
-// gpt-oss-120b is the default: strongest general reasoning available for free.
 const MODELS: ModelOption[] = [
   { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B", emoji: "🧠", description: "Smartest — best for reasoning & code" },
   { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B", emoji: "⚡", description: "Fast reasoning, lighter" },
@@ -41,10 +42,12 @@ const STARTERS = [
   { label: "Explain prompt engineering", prompt: "Explain prompt engineering in simple terms and give me 3 actionable tips to write better prompts." },
   { label: "Build a chatbot", prompt: "How do I build a simple AI chatbot using the OpenAI API and Next.js? Give me a step-by-step guide." },
   { label: "Best AI tools 2026", prompt: "What are the best AI tools I should be using in 2026 for productivity and creativity?" },
-  { label: "Write me a prompt", prompt: "Write me a detailed system prompt for an AI assistant that helps freelancers find clients on LinkedIn." },
+  { label: "Generate an image", prompt: "/image a futuristic city at sunset, cinematic lighting" },
   { label: "n8n automation ideas", prompt: "Give me 5 practical n8n automation workflows that would save a freelancer time every week." },
-  { label: "Midjourney tips", prompt: "Share 5 advanced Midjourney prompt techniques for better, more consistent results." },
+  { label: "Try voice mode", prompt: "__voice_hint__" },
 ];
+
+const IMAGE_COMMAND_PREFIX = "/image";
 
 // ── Tiny inline markdown renderer ────────────────────────────
 function renderMarkdown(text: string) {
@@ -113,20 +116,72 @@ export function MGAIChat() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+
+  // Voice mode state
+  const [voiceModeOn, setVoiceModeOn] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
   const uid = () => Math.random().toString(36).slice(2);
-
   const currentModel = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
 
+  // ── Speak assistant text aloud (Groq PlayAI TTS) ────────────
+  const speakText = useCallback(async (text: string) => {
+    try {
+      setIsSpeaking(true);
+      const res = await fetch("/api/voice-speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) {
+        setIsSpeaking(false);
+        return; // fail silently for voice — text reply is still shown
+      }
+
+      const audioBlob = await res.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+      const player = new Audio(audioUrl);
+      audioPlayerRef.current = player;
+      player.onended = () => setIsSpeaking(false);
+      player.onerror = () => setIsSpeaking(false);
+      await player.play();
+    } catch {
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  // ── Send a chat message (text or image command) ─────────────
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
     setError(null);
+
+    // Handle "/image <description>" as an image generation request
+    if (text.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
+      const prompt = text.trim().slice(IMAGE_COMMAND_PREFIX.length).trim();
+      if (!prompt) {
+        setError("Add a description after /image, e.g. /image a red fox in snow");
+        return;
+      }
+      await generateImage(prompt);
+      return;
+    }
 
     const userMsg: Message = { role: "user", content: text.trim(), id: uid() };
     const newMessages = [...messages, userMsg];
@@ -134,7 +189,6 @@ export function MGAIChat() {
     setInput("");
     setLoading(true);
 
-    // Reset textarea height
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     try {
@@ -143,10 +197,7 @@ export function MGAIChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: selectedModel,
-          messages: newMessages.map(({ role, content }) => ({
-            role,
-            content,
-          })),
+          messages: newMessages.map(({ role, content }) => ({ role, content })),
         }),
       });
 
@@ -163,11 +214,125 @@ export function MGAIChat() {
         ...prev,
         { role: "assistant", content: assistantContent, id: uid() },
       ]);
+
+      // In voice mode, speak the reply aloud automatically
+      if (voiceModeOn) {
+        speakText(assistantContent);
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // ── Generate an image via Pollinations ───────────────────────
+  const generateImage = async (prompt: string) => {
+    const userMsg: Message = { role: "user", content: `/image ${prompt}`, id: uid() };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/image-generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Image generation failed.");
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Here's your image for: "${prompt}"`,
+          id: uid(),
+          imageUrl: data.imageUrl,
+        },
+      ]);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Voice recording (mic → Groq Whisper) ─────────────────────
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        await transcribeAndSend(audioBlob);
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch {
+      setError("Microphone access denied or unavailable.");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  const transcribeAndSend = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.webm");
+
+      const res = await fetch("/api/voice-transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Transcription failed.");
+      }
+
+      const transcribed = (data.text || "").trim();
+      if (transcribed) {
+        await sendMessage(transcribed);
+      } else {
+        setError("Didn't catch that — try speaking again.");
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handleMicClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const stopSpeaking = () => {
+    audioPlayerRef.current?.pause();
+    setIsSpeaking(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -192,6 +357,7 @@ export function MGAIChat() {
   const clearChat = () => {
     setMessages([]);
     setError(null);
+    stopSpeaking();
   };
 
   const isEmpty = messages.length === 0;
@@ -214,11 +380,28 @@ export function MGAIChat() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Voice mode toggle */}
+          <button
+            onClick={() => {
+              if (voiceModeOn) stopSpeaking();
+              setVoiceModeOn((v) => !v);
+            }}
+            title={voiceModeOn ? "Voice mode on — replies will be spoken" : "Turn on voice mode"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors border ${
+              voiceModeOn
+                ? "bg-brand-purple/20 text-brand-purple border-brand-purple/40"
+                : "text-gray-400 hover:text-white hover:bg-surface-2 border-white/[0.06]"
+            }`}
+          >
+            {voiceModeOn ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+            Voice
+          </button>
+
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
             title={currentModel.description}
-            className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white max-w-[160px] sm:max-w-none"
+            className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white max-w-[120px] sm:max-w-none"
           >
             {MODELS.map((m) => (
               <option key={m.id} value={m.id}>
@@ -254,20 +437,27 @@ export function MGAIChat() {
                 MG Labs AI
               </h1>
               <p className="text-gray-400 mb-2">
-                Your free AI assistant for all things AI, coding, design, and automation.
+                Your free AI assistant — chat, voice, and image generation.
               </p>
               <p className="text-gray-600 text-sm mb-2">
                 Currently using {currentModel.emoji} <span className="text-gray-400">{currentModel.label}</span> — {currentModel.description}
               </p>
               <p className="text-gray-700 text-xs mb-12">
-                Switch models anytime from the dropdown above · No account needed
+                Tap the mic to talk · Type <code className="bg-surface-2 px-1 rounded">/image</code> to generate art · No account needed
               </p>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
                 {STARTERS.map((s) => (
                   <button
                     key={s.label}
-                    onClick={() => sendMessage(s.prompt)}
+                    onClick={() => {
+                      if (s.prompt === "__voice_hint__") {
+                        setVoiceModeOn(true);
+                        handleMicClick();
+                        return;
+                      }
+                      sendMessage(s.prompt);
+                    }}
                     className="group p-4 rounded-xl bg-surface-1 border border-white/[0.06] hover:border-brand-blue/40 hover:bg-surface-2 transition-all text-left"
                   >
                     <div className="flex items-start gap-2">
@@ -306,21 +496,39 @@ export function MGAIChat() {
                 ) : (
                   <div className="text-sm leading-relaxed space-y-0.5">
                     {renderMarkdown(msg.content)}
+                    {msg.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={msg.imageUrl}
+                        alt="AI generated"
+                        className="mt-2 rounded-xl border border-white/10 max-w-full"
+                        loading="lazy"
+                      />
+                    )}
                   </div>
                 )}
 
-                {/* Copy button */}
-                {msg.role === "assistant" && (
-                  <button
-                    onClick={() => copyMessage(msg.content, msg.id)}
-                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
-                  >
-                    {copiedId === msg.id ? (
-                      <Check className="h-3.5 w-3.5 text-green-400" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                  </button>
+                {/* Copy / speak controls */}
+                {msg.role === "assistant" && !msg.imageUrl && (
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    <button
+                      onClick={() => speakText(msg.content)}
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                      title="Read aloud"
+                    >
+                      <Volume2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => copyMessage(msg.content, msg.id)}
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                    >
+                      {copiedId === msg.id ? (
+                        <Check className="h-3.5 w-3.5 text-green-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -368,28 +576,70 @@ export function MGAIChat() {
       <div className="sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t border-white/[0.06] px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-end gap-3 bg-surface-1 border border-white/[0.06] rounded-2xl px-4 py-3 focus-within:border-brand-blue/50 transition-colors">
+            <button
+              onClick={handleMicClick}
+              disabled={isTranscribing || loading}
+              title={isRecording ? "Stop recording" : "Speak your message"}
+              className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                isRecording
+                  ? "bg-red-500 animate-pulse"
+                  : "bg-surface-2 hover:bg-surface-3 border border-white/10"
+              } disabled:opacity-40`}
+            >
+              {isTranscribing ? (
+                <Loader2 className="h-3.5 w-3.5 text-gray-300 animate-spin" />
+              ) : isRecording ? (
+                <Square className="h-3 w-3 text-white" fill="white" />
+              ) : (
+                <Mic className="h-3.5 w-3.5 text-gray-300" />
+              )}
+            </button>
+
             <textarea
               ref={textareaRef}
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about AI, coding, design, or automation…"
+              placeholder={
+                isRecording
+                  ? "Listening… tap the square to stop"
+                  : "Ask anything, or type /image to generate art…"
+              }
               rows={1}
               className="flex-1 bg-transparent text-white text-sm placeholder-gray-600 resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px]"
-              disabled={loading}
+              disabled={loading || isRecording}
             />
+
+            {isSpeaking && (
+              <button
+                onClick={stopSpeaking}
+                title="Stop speaking"
+                className="h-8 w-8 rounded-lg bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center flex-shrink-0"
+              >
+                <VolumeX className="h-3.5 w-3.5 text-brand-purple" />
+              </button>
+            )}
+
             <button
-              onClick={() => sendMessage(input)}
+              onClick={() =>
+                input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)
+                  ? sendMessage(input)
+                  : sendMessage(input)
+              }
               disabled={!input.trim() || loading}
               className="h-8 w-8 rounded-lg bg-brand-blue hover:bg-brand-blue/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95"
               aria-label="Send message"
             >
-              <Send className="h-3.5 w-3.5 text-white" />
+              {input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
+                <ImageIcon className="h-3.5 w-3.5 text-white" />
+              ) : (
+                <Send className="h-3.5 w-3.5 text-white" />
+              )}
             </button>
           </div>
           <div className="flex items-center justify-between mt-2 px-1">
             <p className="text-xs text-gray-700">
-              Press <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Shift+Enter</kbd> for new line
+              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · <code className="text-gray-600">/image</code> to create art
             </p>
             <Link href="/signup" className="text-xs text-brand-purple hover:text-white transition-colors flex items-center gap-1">
               Unlock full platform <ArrowRight className="h-3 w-3" />
