@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { messages?: unknown[] };
+let body: {
+  messages?: unknown[];
+  model?: string;
+};
   try {
     body = await req.json();
   } catch {
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+model: body.model || "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
