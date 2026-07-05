@@ -193,6 +193,24 @@ export function MGAIChat() {
         </div>
 
         <div className="flex items-center gap-2">
+
+  <select
+    value={selectedModel}
+    onChange={(e) => setSelectedModel(e.target.value)}
+    className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+  >
+    <option value="llama-3.3-70b-versatile">
+      🦙 Llama 3.3
+    </option>
+
+    <option value="deepseek-r1-distill-llama-70b">
+      🧠 DeepSeek
+    </option>
+
+    <option value="qwen/qwen3-32b">
+      💻 Qwen
+    </option>
+  </select>
           {messages.length > 0 && (
             <button
               onClick={clearChat}
