@@ -3,6 +3,7 @@
 // Groq API proxy — keeps the API key server-side only
 // ============================================================
 import { NextRequest, NextResponse } from "next/server";
+import { DEFAULT_TEXT_MODEL, isValidTextModel } from "@/lib/data/ai-models";
 
 export const runtime = "edge";
 
@@ -30,6 +31,11 @@ let body: {
     return NextResponse.json({ error: "messages array is required." }, { status: 400 });
   }
 
+  // Only allow models we actually advertise in the UI — prevents callers
+  // from passing an arbitrary/unsupported Groq model id through this route.
+  const model =
+    body.model && isValidTextModel(body.model) ? body.model : DEFAULT_TEXT_MODEL;
+
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -38,7 +44,7 @@ let body: {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-model: body.model || "llama-3.3-70b-versatile",
+        model,
         messages: [
           {
             role: "system",

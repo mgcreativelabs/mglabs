@@ -9,8 +9,14 @@ import Link from "next/link";
 import {
   Bot, Send, Trash2, Copy, Check, Sparkles,
   ArrowRight, Zap, RotateCcw, Mic, Square, Volume2, VolumeX,
-  ImageIcon, Loader2,
+  ImageIcon, Loader2, X,
 } from "lucide-react";
+import {
+  TEXT_MODELS,
+  IMAGE_MODELS,
+  DEFAULT_TEXT_MODEL,
+  DEFAULT_IMAGE_MODEL,
+} from "@/lib/data/ai-models";
 
 // ── Types ────────────────────────────────────────────────────
 interface Message {
@@ -18,24 +24,13 @@ interface Message {
   content: string;
   id: string;
   imageUrl?: string;
+  imageModelLabel?: string;
 }
 
-interface ModelOption {
-  id: string;
-  label: string;
-  emoji: string;
-  description: string;
-}
-
-// ── Model catalog ─────────────────────────────────────────────
-const MODELS: ModelOption[] = [
-  { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B", emoji: "🧠", description: "Smartest — best for reasoning & code" },
-  { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B", emoji: "⚡", description: "Fast reasoning, lighter" },
-  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B", emoji: "🦙", description: "Well-rounded all-purpose" },
-  { id: "qwen/qwen3-32b", label: "Qwen3 32B", emoji: "💻", description: "Strong at code & logic" },
-  { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout", emoji: "👁️", description: "Vision + huge context" },
-  { id: "groq/compound", label: "Compound (Web Search)", emoji: "🌐", description: "Live web search + code execution" },
-];
+// Text + image model catalogs live in src/lib/data/ai-models.ts —
+// the single source of truth shared with the API routes, so the
+// UI never offers a model the backend won't accept.
+const MODELS = TEXT_MODELS;
 
 // ── Starter prompts ──────────────────────────────────────────
 const STARTERS = [
@@ -48,6 +43,10 @@ const STARTERS = [
 ];
 
 const IMAGE_COMMAND_PREFIX = "/image";
+
+function stripImageCommand(text: string): string {
+  return text.trim().slice(IMAGE_COMMAND_PREFIX.length).trim();
+}
 
 // ── Tiny inline markdown renderer ────────────────────────────
 function renderMarkdown(text: string) {
@@ -115,7 +114,12 @@ export function MGAIChat() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_TEXT_MODEL);
+
+  // Image generation mode — toggled via the image icon next to the
+  // mic, or auto-enabled when the user types the "/image" shortcut.
+  const [imageMode, setImageMode] = useState(false);
+  const [selectedImageModel, setSelectedImageModel] = useState(DEFAULT_IMAGE_MODEL);
 
   // Voice mode state
   const [voiceModeOn, setVoiceModeOn] = useState(false);
@@ -167,19 +171,27 @@ export function MGAIChat() {
     }
   }, []);
 
-  // ── Send a chat message (text or image command) ─────────────
+  // ── Send a chat message (text, image command, or image mode) ─
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
     setError(null);
 
-    // Handle "/image <description>" as an image generation request
+    // Handle "/image <description>" as an image generation request,
+    // regardless of whether image mode is toggled on.
     if (text.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
-      const prompt = text.trim().slice(IMAGE_COMMAND_PREFIX.length).trim();
+      const prompt = stripImageCommand(text);
       if (!prompt) {
         setError("Add a description after /image, e.g. /image a red fox in snow");
         return;
       }
       await generateImage(prompt);
+      return;
+    }
+
+    // Image mode is toggled on via the image icon — treat plain text
+    // as an image prompt too, so the user doesn't have to type /image.
+    if (imageMode) {
+      await generateImage(text.trim());
       return;
     }
 
@@ -228,6 +240,14 @@ export function MGAIChat() {
 
   // ── Generate an image via Pollinations ───────────────────────
   const generateImage = async (prompt: string) => {
+    if (!prompt.trim()) {
+      setError("Add a description of the image you want.");
+      return;
+    }
+
+    const imageModel =
+      IMAGE_MODELS.find((m) => m.id === selectedImageModel) ?? IMAGE_MODELS[0];
+
     const userMsg: Message = { role: "user", content: `/image ${prompt}`, id: uid() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -238,7 +258,7 @@ export function MGAIChat() {
       const res = await fetch("/api/image-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, model: imageModel.id }),
       });
       const data = await res.json();
 
@@ -253,6 +273,7 @@ export function MGAIChat() {
           content: `Here's your image for: "${prompt}"`,
           id: uid(),
           imageUrl: data.imageUrl,
+          imageModelLabel: `${imageModel.emoji} ${imageModel.label}`,
         },
       ]);
     } catch (err) {
@@ -322,6 +343,11 @@ export function MGAIChat() {
     }
   };
 
+  const toggleImageMode = () => {
+    setImageMode((prev) => !prev);
+    setError(null);
+  };
+
   const handleMicClick = () => {
     if (isRecording) {
       stopRecording();
@@ -343,9 +369,16 @@ export function MGAIChat() {
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const value = e.target.value;
+    setInput(value);
     e.target.style.height = "auto";
     e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";
+
+    // Typing the /image shortcut auto-enables image mode so the
+    // model picker appears — keeps both entry points in sync.
+    if (value.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) && !imageMode) {
+      setImageMode(true);
+    }
   };
 
   const copyMessage = async (content: string, id: string) => {
@@ -357,6 +390,7 @@ export function MGAIChat() {
   const clearChat = () => {
     setMessages([]);
     setError(null);
+    setImageMode(false);
     stopSpeaking();
   };
 
@@ -443,7 +477,7 @@ export function MGAIChat() {
                 Currently using {currentModel.emoji} <span className="text-gray-400">{currentModel.label}</span> — {currentModel.description}
               </p>
               <p className="text-gray-700 text-xs mb-12">
-                Tap the mic to talk · Type <code className="bg-surface-2 px-1 rounded">/image</code> to generate art · No account needed
+                Tap the mic to talk · Tap the image icon (or type <code className="bg-surface-2 px-1 rounded">/image</code>) to generate art · No account needed
               </p>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
@@ -497,13 +531,20 @@ export function MGAIChat() {
                   <div className="text-sm leading-relaxed space-y-0.5">
                     {renderMarkdown(msg.content)}
                     {msg.imageUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={msg.imageUrl}
-                        alt="AI generated"
-                        className="mt-2 rounded-xl border border-white/10 max-w-full"
-                        loading="lazy"
-                      />
+                      <div className="mt-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={msg.imageUrl}
+                          alt="AI generated"
+                          className="rounded-xl border border-white/10 max-w-full"
+                          loading="lazy"
+                        />
+                        {msg.imageModelLabel && (
+                          <div className="mt-1.5 text-[11px] text-gray-600">
+                            Generated with {msg.imageModelLabel}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
@@ -575,6 +616,37 @@ export function MGAIChat() {
       {/* ── Input area ── */}
       <div className="sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t border-white/[0.06] px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto">
+
+          {/* Image mode bar — appears above the input when active,
+              lets the user pick which free image model to use. */}
+          {imageMode && (
+            <div className="flex items-center gap-2 mb-2 px-1 animate-fade-up">
+              <ImageIcon className="h-3.5 w-3.5 text-brand-purple flex-shrink-0" />
+              <span className="text-xs text-gray-400 flex-shrink-0">Image mode</span>
+              <select
+                value={selectedImageModel}
+                onChange={(e) => setSelectedImageModel(e.target.value)}
+                title={
+                  IMAGE_MODELS.find((m) => m.id === selectedImageModel)?.description
+                }
+                className="bg-surface-2 border border-white/10 rounded-lg px-2 py-1 text-xs text-white flex-1 min-w-0"
+              >
+                {IMAGE_MODELS.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.emoji} {m.label} — {m.description}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={toggleImageMode}
+                title="Exit image mode"
+                className="h-6 w-6 rounded-md flex items-center justify-center flex-shrink-0 text-gray-500 hover:text-white hover:bg-surface-2 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
           <div className="flex items-end gap-3 bg-surface-1 border border-white/[0.06] rounded-2xl px-4 py-3 focus-within:border-brand-blue/50 transition-colors">
             <button
               onClick={handleMicClick}
@@ -595,6 +667,21 @@ export function MGAIChat() {
               )}
             </button>
 
+            {/* Image icon — same treatment as the mic button. Tapping
+                toggles image mode on/off, no /image typing required. */}
+            <button
+              onClick={toggleImageMode}
+              disabled={loading}
+              title={imageMode ? "Exit image mode" : "Generate an image"}
+              className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                imageMode
+                  ? "bg-brand-purple/20 border border-brand-purple/40 text-brand-purple"
+                  : "bg-surface-2 hover:bg-surface-3 border border-white/10 text-gray-300"
+              } disabled:opacity-40`}
+            >
+              <ImageIcon className="h-3.5 w-3.5" />
+            </button>
+
             <textarea
               ref={textareaRef}
               value={input}
@@ -603,7 +690,9 @@ export function MGAIChat() {
               placeholder={
                 isRecording
                   ? "Listening… tap the square to stop"
-                  : "Ask anything, or type /image to generate art…"
+                  : imageMode
+                    ? "Describe the image you want to create…"
+                    : "Ask anything, or tap the image icon to generate art…"
               }
               rows={1}
               className="flex-1 bg-transparent text-white text-sm placeholder-gray-600 resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px]"
@@ -621,16 +710,12 @@ export function MGAIChat() {
             )}
 
             <button
-              onClick={() =>
-                input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)
-                  ? sendMessage(input)
-                  : sendMessage(input)
-              }
+              onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
               className="h-8 w-8 rounded-lg bg-brand-blue hover:bg-brand-blue/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95"
               aria-label="Send message"
             >
-              {input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
+              {imageMode || input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
                 <ImageIcon className="h-3.5 w-3.5 text-white" />
               ) : (
                 <Send className="h-3.5 w-3.5 text-white" />
@@ -639,7 +724,7 @@ export function MGAIChat() {
           </div>
           <div className="flex items-center justify-between mt-2 px-1">
             <p className="text-xs text-gray-700">
-              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · <code className="text-gray-600">/image</code> to create art
+              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · Tap 🖼️ or type <code className="text-gray-600">/image</code> to create art
             </p>
             <Link href="/signup" className="text-xs text-brand-purple hover:text-white transition-colors flex items-center gap-1">
               Unlock full platform <ArrowRight className="h-3 w-3" />
