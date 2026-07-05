@@ -14,7 +14,7 @@ const footerLinks = {
   Programs: [
     { label: "Pricing",                href: "/pricing"          },
     { label: "Launch Program — $500", href: "/pricing#launch"   },
-    { label: "Blog & Tutorials",       href: "/blog"             },
+    { label: "Services",               href: "/services"         },
     { label: "About the Founder",      href: "/about-owner"      },
   ],
   Company: [

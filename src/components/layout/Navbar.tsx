@@ -4,19 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Menu, X, Sparkles, BookOpen,
-  Newspaper, Zap, Bot, Rocket, ArrowRight, Tag
+  Briefcase, Zap, Bot, Rocket, ArrowRight, Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 const navLinks = [
-  { label: "Build",   href: "/start",         icon: Rocket,    highlight: "blue"   },
-  { label: "Learn",   href: "/learn",          icon: BookOpen,  highlight: null     },
-  { label: "Prompts", href: "/prompt-library", icon: Sparkles,  highlight: null     },
-  { label: "MG AI",   href: "/mg-ai",          icon: Bot,       highlight: "purple" },
-  { label: "Blog",    href: "/blog",           icon: Newspaper, highlight: null     },
-  { label: "Pricing", href: "/pricing",        icon: Tag,       highlight: null     },
+  { label: "Build",    href: "/start",         icon: Rocket,    highlight: "blue"   },
+  { label: "Learn",    href: "/learn",          icon: BookOpen,  highlight: null     },
+  { label: "Prompts",  href: "/prompt-library", icon: Sparkles,  highlight: null     },
+  { label: "MG AI",    href: "/mg-ai",          icon: Bot,       highlight: "purple" },
+  { label: "Services", href: "/services",       icon: Briefcase, highlight: null     },
+  { label: "Pricing",  href: "/pricing",        icon: Tag,       highlight: null     },
 ] as const;
 
 type NavLink = (typeof navLinks)[number];

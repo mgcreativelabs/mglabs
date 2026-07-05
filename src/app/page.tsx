@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Bot, Zap, BookOpen, Rocket, Play, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Bot, Zap, BookOpen, Rocket, Play, Sparkles, CheckCircle2, Video, Briefcase, Package } from "lucide-react";
 import React from "react";
 import { getPlatformStats, formatStatCountOrNull } from "@/lib/data/platform-stats";
 import { Newsletter } from "@/components/sections/Newsletter";
@@ -298,6 +298,69 @@ export default async function Home() {
                 <p className="text-gray-500 text-sm leading-relaxed flex-1">{f.desc}</p>
                 <div className="mt-5 flex items-center gap-1 text-xs text-gray-600 group-hover:text-brand-blue transition-colors">
                   Explore <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════
+          SERVICES PREVIEW
+      ═══════════════════════════ */}
+      <section className="relative z-10 py-24 px-4 sm:px-6 w-full">
+        <div className="max-w-6xl mx-auto">
+
+          <div className="text-center mb-16">
+            <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-3">
+              Need it done for you?
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Hands-on services, when speed matters
+            </h2>
+            <p className="text-gray-400 max-w-xl mx-auto">
+              Beyond the platform — content production, freelance work, and ready-made digital products.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Video className="w-6 h-6" />,
+                gradient: "from-brand-blue/20 to-brand-blue/5",
+                iconColor: "text-brand-blue",
+                title: "AI Content & Video",
+                desc: "High-converting short-form content — TikTok, Reels, YouTube Shorts, and AI-generated ads.",
+              },
+              {
+                icon: <Briefcase className="w-6 h-6" />,
+                gradient: "from-purple-500/20 to-purple-500/5",
+                iconColor: "text-purple-400",
+                title: "Freelance Services",
+                desc: "Custom video editing, copywriting, web builds, design, and virtual assistance.",
+              },
+              {
+                icon: <Package className="w-6 h-6" />,
+                gradient: "from-green-500/20 to-green-500/5",
+                iconColor: "text-green-400",
+                title: "Digital Products",
+                desc: "Ready-to-use prompts, templates, Notion workspaces, Canva templates, and e-books.",
+              },
+            ].map((s) => (
+              <Link
+                key={s.title}
+                href="/services"
+                className="group p-7 rounded-2xl bg-white/[0.02] border border-white/[0.07] hover:bg-white/[0.05] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 flex flex-col"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 ${s.iconColor}`}>
+                  {s.icon}
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-blue transition-colors">
+                  {s.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed flex-1">{s.desc}</p>
+                <div className="mt-5 flex items-center gap-1 text-xs text-gray-600 group-hover:text-brand-blue transition-colors">
+                  See services <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             ))}

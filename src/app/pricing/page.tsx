@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, ArrowRight, Zap, Layers, Rocket, Crown } from "lucide-react";
+import { Check, ArrowRight, Rocket, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { ServicesGrid } from "@/components/sections/ServicesGrid";
 
 export const metadata: Metadata = {
   title: "Pricing — MG Labs",
   description:
-    "Transparent pricing for every stage of your AI journey. Start learning for $29/mo. Build a real AI product with the $500 Launch Program.",
+    "Transparent pricing to build a real AI product. Launch Program starts at $500 — done-with-you, deployed, and yours.",
 };
 
 // ---------------------------------------------------------------------------
@@ -14,65 +15,19 @@ export const metadata: Metadata = {
 // ---------------------------------------------------------------------------
 const plans = [
   {
-    id: "starter",
-    name: "Starter",
-    Icon: Zap,
-    price: "$29",
-    period: "/month",
-    note: "or $19/mo billed annually",
-    tagline: "Start learning. Start building.",
-    badge: null as string | null,
-    featured: false,
-    forWho:
-      "Students and beginners who want to understand AI fundamentals and start experimenting before committing to a bigger plan.",
-    cta: { label: "Get Starter", href: "/signup?plan=starter" },
-    features: [
-      "AI Builder Foundation Path (5 guided lessons)",
-      "AI Playground — chat + prompt testing",
-      "8 structured AI lessons with exercises",
-      "Prompt Library — 100 curated prompts",
-      "Community access",
-      "Email support",
-    ],
-  },
-  {
-    id: "builder",
-    name: "Builder",
-    Icon: Layers,
-    price: "$99",
-    period: " one-time",
-    note: "Lifetime access. No subscription.",
-    tagline: "Build real projects. Build real skills.",
-    badge: null as string | null,
-    featured: false,
-    forWho:
-      "People ready to go beyond basics. You want to build working AI tools using structured templates and hands-on projects.",
-    cta: { label: "Get Builder Access", href: "/signup?plan=builder" },
-    features: [
-      "Everything in Starter",
-      "Full lesson library (20+ lessons)",
-      "15 AI project templates",
-      "Project Ideas Generator (unlimited)",
-      "Full Prompt Library access",
-      "2× monthly group feedback sessions",
-      "Priority email support",
-    ],
-  },
-  {
     id: "launch",
     name: "Launch Program",
     Icon: Rocket,
     price: "$500",
     period: " per project",
     note: "Done-with-you. Not a course.",
-    tagline: "Your first real AI product. Built. Deployed. Yours.",
+    tagline: "Launch your AI MVP quickly.",
     badge: "⭐ Most Popular",
     featured: true,
     forWho:
-      "People who want to go from idea to a live, working AI product — with expert guidance every step of the way. No technical experience required.",
+      "We build your first working version so you can validate your idea before investing in a full product. No technical experience required.",
     cta: { label: "Apply for Launch Program", href: "/contact?plan=launch" },
     features: [
-      "Everything in Builder",
       "Done-with-you AI project build",
       "1-on-1 guidance with Mahdi",
       "Real deployment — live URL you own",
@@ -145,18 +100,18 @@ export default function PricingPage() {
       <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto text-center">
         <Badge variant="blue" className="mb-5">Transparent pricing</Badge>
         <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
-          Start free.<br />
-          <span className="text-gradient">Build something real</span> when you&apos;re ready.
+          Build something real,<br />
+          <span className="text-gradient">starting today</span>.
         </h1>
         <p className="text-gray-400 text-xl max-w-2xl mx-auto">
           MG Labs is not a course platform. Every plan is built around one goal —
-          helping you go from zero to a real, launched AI product.
+          helping you go from idea to a real, launched AI product.
         </p>
       </section>
 
       {/* ── Plans grid ── */}
-      <section className="py-10 px-4 sm:px-6 max-w-7xl mx-auto" id="plans">
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
+      <section className="py-10 px-4 sm:px-6 max-w-4xl mx-auto" id="plans">
+        <div className="grid md:grid-cols-2 gap-5 items-start">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -243,6 +198,21 @@ export default function PricingPage() {
         <p className="text-center text-gray-700 text-xs mt-6">
           All plans include SSL, 99.9% uptime, and GDPR compliance. No hidden fees.
         </p>
+      </section>
+
+      {/* ── Services ── */}
+      <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto" id="services">
+        <div className="text-center mb-12">
+          <Badge variant="purple" className="mb-4">Also available</Badge>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+            Need something done for you instead?
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">
+            Content production, freelance work, and ready-made digital products —
+            separate from the AI Builder Platform.
+          </p>
+        </div>
+        <ServicesGrid />
       </section>
 
       {/* ── Value comparison ── */}
