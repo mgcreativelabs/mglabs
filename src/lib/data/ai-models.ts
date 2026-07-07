@@ -50,27 +50,11 @@ export const TEXT_MODELS: TextModelOption[] = [
     provider: "groq",
   },
   {
-    id: "llama-3.3-70b-versatile",
-    label: "Llama 3.3 70B",
+    id: "qwen/qwen3.6-27b",
+    label: "Qwen3.6 27B",
     emoji: "🦙",
-    description: "Well-rounded all-purpose",
+    description: "Well-rounded, multilingual & vision",
     bestFor: "General chat, writing, everyday tasks",
-    provider: "groq",
-  },
-  {
-    id: "qwen/qwen3-32b",
-    label: "Qwen3 32B",
-    emoji: "💻",
-    description: "Strong at code & logic",
-    bestFor: "Programming, math, structured logic",
-    provider: "groq",
-  },
-  {
-    id: "meta-llama/llama-4-scout-17b-16e-instruct",
-    label: "Llama 4 Scout",
-    emoji: "👁️",
-    description: "Vision + huge context",
-    bestFor: "Long documents, multi-step context",
     provider: "groq",
   },
   {
@@ -99,7 +83,28 @@ export const TEXT_MODELS: TextModelOption[] = [
   },
 ];
 
-export const DEFAULT_TEXT_MODEL = TEXT_MODELS[2].id; // Llama 3.3 70B — best all-purpose default
+export const DEFAULT_TEXT_MODEL = TEXT_MODELS[2].id; // Qwen3.6 27B — best all-purpose default
+
+// ── Auto (smart routing) ─────────────────────────────────────
+// Not a real model — a sentinel the UI offers alongside TEXT_MODELS.
+// When selected, /api/chat routes the message to whichever real model
+// (see src/lib/ai/routing.ts) best fits it, including groq/compound
+// for anything that needs live web search. Kept out of TEXT_MODELS so
+// isValidTextModel() and the provider dispatch table never see it —
+// the API route resolves it to a real id before either runs.
+export const AUTO_MODEL_ID = "auto";
+
+export const AUTO_MODEL_OPTION = {
+  id: AUTO_MODEL_ID,
+  label: "Auto",
+  emoji: "🪄",
+  description: "Smart routing — picks the best model per message",
+  bestFor: "Let MG Labs AI choose (incl. live web search when needed)",
+} as const;
+
+export function isAutoModel(id: string): boolean {
+  return id === AUTO_MODEL_ID;
+}
 
 // ── Image models (served via Pollinations — free, keyless) ──
 // Trimmed to the 4 best free, no-signup-required models.

@@ -10,8 +10,18 @@ export interface ChatMessage {
   content: string;
 }
 
+/** A single web source a compound/search-enabled model cited while
+ * answering — surfaced to the client so replies show their sources. */
+export interface Citation {
+  title: string;
+  url: string;
+}
+
 export interface ChatResult {
   content: string;
+  /** Present when the adapter used a built-in web search tool (e.g. Groq
+   * compound models). Omitted entirely when no search happened. */
+  citations?: Citation[];
   /** Raw provider response, kept for debugging — not sent to the client. */
   raw?: unknown;
 }

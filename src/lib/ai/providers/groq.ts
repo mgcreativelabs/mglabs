@@ -3,7 +3,7 @@
 // Groq adapter — same request this project already sends,
 // just wrapped behind the ChatAdapter interface.
 // ============================================================
-import type { ChatAdapter, ChatMessage, ChatResult } from "@/lib/ai/types";
+import type { ChatAdapter, ChatMessage, ChatResult, Citation } from "@/lib/ai/types";
 import { AIProviderError } from "@/lib/ai/types";
 
 const SYSTEM_PROMPT =
@@ -23,6 +23,10 @@ export const groqAdapter: ChatAdapter = {
       );
     }
 
+    // Compound models spend tokens on search/tool-use before writing the
+    // final answer, so they need more headroom than a plain chat model.
+    const isCompound = model.startsWith("groq/compound");
+
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -32,7 +36,7 @@ export const groqAdapter: ChatAdapter = {
       body: JSON.stringify({
         model,
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
-        max_tokens: 1024,
+        max_tokens: isCompound ? 3072 : 1024,
         temperature: 0.7,
       }),
     });
@@ -46,6 +50,46 @@ export const groqAdapter: ChatAdapter = {
     const content: string =
       data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
 
-    return { content, raw: data };
+    return { content, citations: extractCitations(data), raw: data };
   },
 };
+
+// ── Compound web-search citations ──────────────────────────────
+// groq/compound and groq/compound-mini report every tool they ran in
+// executed_tools[].search_results — each with a title/url per source.
+// Only these two models ever populate this, so plain chat models are
+// unaffected and this stays undefined (not an empty array) for them.
+function extractCitations(data: unknown): Citation[] | undefined {
+  const executedTools = (
+    data as {
+      choices?: {
+        message?: {
+          executed_tools?: {
+            // Groq's docs show `{ results: [...] }`, but this field isn't
+            // formally schema'd — accept a bare array too, defensively.
+            search_results?:
+              | { results?: { title?: string; url?: string }[] }
+              | { title?: string; url?: string }[];
+          }[];
+        };
+      }[];
+    }
+  ).choices?.[0]?.message?.executed_tools;
+
+  if (!executedTools?.length) return undefined;
+
+  const seen = new Set<string>();
+  const citations: Citation[] = [];
+
+  for (const tool of executedTools) {
+    const sr = tool.search_results;
+    const results = Array.isArray(sr) ? sr : sr?.results ?? [];
+    for (const result of results) {
+      if (!result.url || seen.has(result.url)) continue;
+      seen.add(result.url);
+      citations.push({ title: result.title || result.url, url: result.url });
+    }
+  }
+
+  return citations.length ? citations : undefined;
+}

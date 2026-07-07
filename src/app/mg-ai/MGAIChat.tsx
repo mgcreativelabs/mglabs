@@ -14,23 +14,37 @@ import {
 import {
   TEXT_MODELS,
   IMAGE_MODELS,
-  DEFAULT_TEXT_MODEL,
   DEFAULT_IMAGE_MODEL,
+  AUTO_MODEL_ID,
+  AUTO_MODEL_OPTION,
+  isAutoModel,
 } from "@/lib/data/ai-models";
 
 // ── Types ────────────────────────────────────────────────────
+interface Citation {
+  title: string;
+  url: string;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   id: string;
   imageUrl?: string;
   imageModelLabel?: string;
+  /** Set on assistant messages answered while "Auto" was selected —
+   * which real model actually handled this specific turn. */
+  modelUsed?: string;
+  /** Web sources the model cited, when smart routing picked the
+   * search-enabled model for this turn. */
+  citations?: Citation[];
 }
 
 // Text + image model catalogs live in src/lib/data/ai-models.ts —
 // the single source of truth shared with the API routes, so the
-// UI never offers a model the backend won't accept.
-const MODELS = TEXT_MODELS;
+// UI never offers a model the backend won't accept. "Auto" is a UI
+// + routing sentinel layered on top, not a real backend model.
+const MODELS = [AUTO_MODEL_OPTION, ...TEXT_MODELS];
 
 // ── Starter prompts ──────────────────────────────────────────
 const STARTERS = [
@@ -114,7 +128,7 @@ export function MGAIChat() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_TEXT_MODEL);
+  const [selectedModel, setSelectedModel] = useState(AUTO_MODEL_ID);
 
   // Image generation mode — toggled via the image icon next to the
   // mic, or auto-enabled when the user types the "/image" shortcut.
@@ -224,7 +238,13 @@ export function MGAIChat() {
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: assistantContent, id: uid() },
+        {
+          role: "assistant",
+          content: assistantContent,
+          id: uid(),
+          modelUsed: isAutoModel(selectedModel) ? data.modelUsed : undefined,
+          citations: data.citations,
+        },
       ]);
 
       // In voice mode, speak the reply aloud automatically
@@ -529,7 +549,33 @@ export function MGAIChat() {
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                 ) : (
                   <div className="text-sm leading-relaxed space-y-0.5">
+                    {msg.modelUsed && (
+                      <div className="mb-2 inline-flex items-center gap-1 text-[11px] text-brand-purple/80 bg-brand-purple/10 border border-brand-purple/20 rounded-full px-2 py-0.5">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        {MODELS.find((m) => m.id === msg.modelUsed)?.emoji}{" "}
+                        {MODELS.find((m) => m.id === msg.modelUsed)?.label ?? msg.modelUsed}
+                      </div>
+                    )}
                     {renderMarkdown(msg.content)}
+                    {msg.citations && msg.citations.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                        <div className="text-[11px] text-gray-600 mb-1.5">Sources</div>
+                        <div className="flex flex-col gap-1">
+                          {msg.citations.map((c, i) => (
+                            <a
+                              key={c.url + i}
+                              href={c.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-brand-blue/80 hover:text-brand-blue truncate"
+                              title={c.url}
+                            >
+                              {i + 1}. {c.title}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {msg.imageUrl && (
                       <div className="mt-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
