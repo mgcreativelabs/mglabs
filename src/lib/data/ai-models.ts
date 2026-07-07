@@ -18,6 +18,8 @@ export interface TextModelOption {
   description: string;
   /** Shown in the "best for" hint under the picker. */
   bestFor: string;
+  /** Which adapter in src/lib/ai/providers handles this model. */
+  provider: "groq" | "gemini" | "mistral";
 }
 
 export interface ImageModelOption {
@@ -37,6 +39,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "🧠",
     description: "Smartest — best for reasoning & code",
     bestFor: "Complex questions, planning, debugging",
+    provider: "groq",
   },
   {
     id: "openai/gpt-oss-20b",
@@ -44,6 +47,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "⚡",
     description: "Fast reasoning, lighter",
     bestFor: "Quick answers without heavy reasoning",
+    provider: "groq",
   },
   {
     id: "llama-3.3-70b-versatile",
@@ -51,6 +55,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "🦙",
     description: "Well-rounded all-purpose",
     bestFor: "General chat, writing, everyday tasks",
+    provider: "groq",
   },
   {
     id: "qwen/qwen3-32b",
@@ -58,6 +63,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "💻",
     description: "Strong at code & logic",
     bestFor: "Programming, math, structured logic",
+    provider: "groq",
   },
   {
     id: "meta-llama/llama-4-scout-17b-16e-instruct",
@@ -65,6 +71,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "👁️",
     description: "Vision + huge context",
     bestFor: "Long documents, multi-step context",
+    provider: "groq",
   },
   {
     id: "groq/compound",
@@ -72,6 +79,23 @@ export const TEXT_MODELS: TextModelOption[] = [
     emoji: "🌐",
     description: "Live web search + code execution",
     bestFor: "Current events, live facts, running code",
+    provider: "groq",
+  },
+  {
+    id: "gemini-2.5-flash",
+    label: "Gemini 2.5 Flash",
+    emoji: "✨",
+    description: "Google's fast multimodal model",
+    bestFor: "Quick answers, general chat, free tier",
+    provider: "gemini",
+  },
+  {
+    id: "mistral-small-latest",
+    label: "Mistral Small",
+    emoji: "🌊",
+    description: "Fast & light, strong multilingual",
+    bestFor: "Everyday tasks, translations, free tier",
+    provider: "mistral",
   },
 ];
 
