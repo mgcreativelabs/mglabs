@@ -4,141 +4,100 @@
 // dispatches to whichever provider owns the requested model
 // (Groq, Gemini, Mistral, ...). Keys stay server-side in each
 // provider adapter — this route never touches them directly.
+//
+// Streams the reply back as SSE ("data: {...}\n\n") so the UI can
+// render tokens as they arrive instead of waiting for the full
+// response. Each event is `{ delta: string }` for a text chunk, or
+// `{ done: true }` as the terminal event. On failure before any
+// content has streamed, falls back to a plain JSON error response
+// so existing error handling in the UI keeps working unchanged.
 // ============================================================
-import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_TEXT_MODEL, isValidTextModel, isAutoModel } from "@/lib/data/ai-models";
-import { routeChat, routeChatStream } from "@/lib/ai/router";
-import { routeAuto } from "@/lib/ai/routing";
-import { AIProviderError } from "@/lib/ai/types";
+import { DEFAULT_TEXT_MODEL, isValidTextModel, TEXT_MODELS } from "@/lib/data/ai-models";
+import { routeChatStream } from "@/lib/ai/router";
+import { AIProviderError, type ChatMessage } from "@/lib/ai/types";
 
 // nodejs runtime — some provider REST APIs (Gemini, Mistral) are not
 // guaranteed to work on the edge runtime the same way Groq's did.
 export const runtime = "nodejs";
 
-// Compound models' citations only show up on the final, non-streamed
-// response (see groq.ts) — stream everything else, keep this path on
-// the original buffered JSON shape.
-function isCompoundModel(modelId: string): boolean {
-  return modelId.startsWith("groq/compound");
+// Requests carrying at least one image_url part need routing to a
+// vision-capable model — silently sending them to a text-only model
+// would just have the provider ignore the image or error out.
+function messagesContainImage(messages: ChatMessage[]): boolean {
+  return messages.some(
+    (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url")
+  );
 }
 
 export async function POST(req: NextRequest) {
-  let body: unknown;
+  let body: {
+    messages?: unknown[];
+    model?: string;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  // 🛡️ Zod Validation: Prevents AI API abuse and massive token costs
-  const ChatRequestSchema = z.object({
-    messages: z.array(
-      z.object({
-        role: z.enum(["system", "user", "assistant"]),
-        content: z.string().max(4000, "Message content is too long."), // Max 4k chars per message
-      })
-    ).max(50, "Conversation history is too long."), // Max 50 messages in history
-    model: z.string().optional(),
-  });
-
-  const validationResult = ChatRequestSchema.safeParse(body);
-
-  if (!validationResult.success) {
-    return NextResponse.json(
-   { error: "Invalid request payload", details: validationResult.error.issues },      { status: 400 }
-    );
+  if (!body.messages || !Array.isArray(body.messages)) {
+    return NextResponse.json({ error: "messages array is required." }, { status: 400 });
   }
 
-  // Now we know the data is safe and correctly typed
-  const { messages, model: requestedModel } = validationResult.data;
-  const conversation = messages;
+  // Only allow models we actually advertise in the UI — prevents callers
+  // from passing an arbitrary/unsupported model id through this route.
+  let model = body.model && isValidTextModel(body.model) ? body.model : DEFAULT_TEXT_MODEL;
+  const messages = body.messages as ChatMessage[];
 
-  // "auto" isn't a real model — resolve it to one via the heuristic
-  // router before validating/dispatching. Anything else falls back
-  // to the default the same way it always has.
-  let model: string;
-  let routedReason: string | undefined;
-    if (requestedModel && isAutoModel(requestedModel)) {
-    const decision = routeAuto(conversation);
-    model = decision.modelId;
-    routedReason = decision.reason;
-  } else {
-    model = requestedModel && isValidTextModel(requestedModel) ? requestedModel : DEFAULT_TEXT_MODEL;
-  }
-
-  if (isCompoundModel(model)) {
-    try {
-      const result = await routeChat(model, conversation);
-
-      // Preserve the old response shape (data.choices[0].message.content)
-      // so existing UI code needs zero changes, while adding the new
-      // fields Auto mode and web search need — both optional, so callers
-      // that don't know about them are unaffected.
-      return NextResponse.json({
-        choices: [{ message: { role: "assistant", content: result.content } }],
-        modelUsed: model,
-        routedReason,
-        citations: result.citations,
-      });
-    } catch (err) {
-      if (err instanceof AIProviderError) {
-        return NextResponse.json({ error: err.message }, { status: err.status });
-      }
-      return NextResponse.json(
-        { error: `Network error: ${(err as Error).message}` },
-        { status: 500 }
-      );
+  // If the request includes an image but the chosen model can't see
+  // images, transparently reroute to a vision-capable model rather
+  // than failing — the client surfaces which model actually answered
+  // via the same response, so this stays visible, not silent magic.
+  if (messagesContainImage(messages)) {
+    const current = TEXT_MODELS.find((m) => m.id === model);
+    if (!current?.supportsVision) {
+      const visionModel = TEXT_MODELS.find((m) => m.supportsVision);
+      if (visionModel) model = visionModel.id;
     }
   }
 
-  // ── Streaming path (everything else) ──────────────────────────
-  // Custom SSE protocol, not the OpenAI wire format — the client owns
-  // both ends, so there's no compatibility reason to mimic it:
-  //   data: {"delta": "..."}                         zero or more
-  //   data: {"error": "..."}                          on failure, then closes
-  //   data: {"done": true, "modelUsed", "routedReason"} always last on success
   const encoder = new TextEncoder();
-  const abortController = new AbortController();
-  req.signal.addEventListener("abort", () => abortController.abort());
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (obj: unknown) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+      const send = (payload: object) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
       };
 
       try {
-        for await (const delta of routeChatStream(model, conversation, {
-          signal: abortController.signal,
-        })) {
-          send({ delta });
+        send({ model }); // tells the client which model actually answered (post-vision-reroute)
+        for await (const chunk of routeChatStream(model, messages)) {
+          if ("delta" in chunk) send({ delta: chunk.delta });
+          if ("citations" in chunk) send({ citations: chunk.citations });
         }
-        send({ done: true, modelUsed: model, routedReason });
+        send({ done: true });
       } catch (err) {
-        // AbortError just means the client hit "stop" or navigated away —
-        // not a real failure, so nothing to report back.
-        if (err instanceof Error && err.name === "AbortError") {
-          // no-op
-        } else if (err instanceof AIProviderError) {
-          send({ error: err.message });
-        } else {
-          send({ error: `Network error: ${(err as Error).message}` });
-        }
+        // Once headers are sent, we can't fall back to a JSON error
+        // response — instead emit an error event the client's SSE
+        // reader watches for, matching the shape AIProviderError
+        // would have produced as a normal HTTP error.
+        const message =
+          err instanceof AIProviderError ? err.message : `Network error: ${(err as Error).message}`;
+        send({ error: message });
       } finally {
         controller.close();
       }
     },
-    cancel() {
-      abortController.abort();
-    },
   });
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
+    status: 200,
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }

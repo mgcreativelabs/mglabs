@@ -7,7 +7,7 @@
 // adapter in ./providers, registering it below, and adding its
 // models to src/lib/data/ai-models.ts. Nothing else changes.
 // ============================================================
-import type { ChatAdapter, ChatMessage, ChatResult } from "@/lib/ai/types";
+import type { ChatAdapter, ChatMessage, ChatResult, StreamChunk } from "@/lib/ai/types";
 import { AIProviderError } from "@/lib/ai/types";
 import { groqAdapter } from "@/lib/ai/providers/groq";
 import { geminiAdapter } from "@/lib/ai/providers/gemini";
@@ -20,7 +20,10 @@ const ADAPTERS: Record<string, ChatAdapter> = {
   mistral: mistralAdapter,
 };
 
-function resolveAdapter(modelId: string): ChatAdapter {
+export async function routeChat(
+  modelId: string,
+  messages: ChatMessage[]
+): Promise<ChatResult> {
   const model = TEXT_MODELS.find((m) => m.id === modelId);
   if (!model) {
     throw new AIProviderError(`Unknown model id: ${modelId}`, 400);
@@ -34,33 +37,38 @@ function resolveAdapter(modelId: string): ChatAdapter {
     );
   }
 
-  return adapter;
+  return adapter.chat(modelId, messages);
 }
 
-export async function routeChat(
-  modelId: string,
-  messages: ChatMessage[]
-): Promise<ChatResult> {
-  return resolveAdapter(modelId).chat(modelId, messages);
-}
-
-/** Streaming counterpart of routeChat. Falls back to buffering the full
- * `chat()` reply and yielding it as one chunk if the adapter has no
- * `chatStream` — so callers never need to check adapter capabilities
- * themselves, and every model id works here even if a provider hasn't
- * been wired up for streaming yet. */
+/**
+ * Streaming counterpart to routeChat. If the resolved adapter hasn't
+ * implemented chatStream yet, falls back to a single non-streamed
+ * chunk from chat() — callers (the /api/chat route) don't need to
+ * know which path was taken, they just consume the async generator.
+ */
 export async function* routeChatStream(
   modelId: string,
-  messages: ChatMessage[],
-  opts?: { signal?: AbortSignal }
-): AsyncGenerator<string> {
-  const adapter = resolveAdapter(modelId);
+  messages: ChatMessage[]
+): AsyncGenerator<StreamChunk, void, unknown> {
+  const model = TEXT_MODELS.find((m) => m.id === modelId);
+  if (!model) {
+    throw new AIProviderError(`Unknown model id: ${modelId}`, 400);
+  }
+
+  const adapter = ADAPTERS[model.provider];
+  if (!adapter) {
+    throw new AIProviderError(
+      `No adapter registered for provider "${model.provider}".`,
+      500
+    );
+  }
 
   if (adapter.chatStream) {
-    yield* adapter.chatStream(modelId, messages, opts);
+    yield* adapter.chatStream(modelId, messages);
     return;
   }
 
   const result = await adapter.chat(modelId, messages);
-  yield result.content;
+  yield { delta: result.content };
+  if (result.citations?.length) yield { citations: result.citations };
 }

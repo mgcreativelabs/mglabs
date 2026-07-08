@@ -4,9 +4,9 @@
 // is OpenAI-compatible, same shape as the existing Groq call.
 // Free tier (rate-limited, no card required): MISTRAL_API_KEY.
 // ============================================================
-import type { ChatAdapter, ChatMessage, ChatResult } from "@/lib/ai/types";
+import type { ChatAdapter, ChatMessage, ChatResult, StreamChunk } from "@/lib/ai/types";
 import { AIProviderError } from "@/lib/ai/types";
-import { readOpenAICompatibleStream } from "@/lib/ai/sse";
+import { readOpenAICompatibleSSE } from "@/lib/ai/providers/sse";
 
 const SYSTEM_PROMPT =
   "You are MG Labs AI, a helpful AI assistant for MG Creative Labs — an AI education platform. " +
@@ -51,11 +51,7 @@ export const mistralAdapter: ChatAdapter = {
     return { content, raw: data };
   },
 
-  async *chatStream(
-    model: string,
-    messages: ChatMessage[],
-    opts?: { signal?: AbortSignal }
-  ): AsyncGenerator<string> {
+  async *chatStream(model: string, messages: ChatMessage[]): AsyncGenerator<StreamChunk, void, unknown> {
     const apiKey = process.env.MISTRAL_API_KEY;
     if (!apiKey) {
       throw new AIProviderError(
@@ -77,14 +73,13 @@ export const mistralAdapter: ChatAdapter = {
         temperature: 0.7,
         stream: true,
       }),
-      signal: opts?.signal,
     });
 
-    if (!res.ok) {
-      const errText = await res.text();
+    if (!res.ok || !res.body) {
+      const errText = await res.text().catch(() => "");
       throw new AIProviderError(`Mistral API error: ${res.status} — ${errText}`, res.status);
     }
 
-    yield* readOpenAICompatibleStream(res);
+    yield* readOpenAICompatibleSSE(res.body);
   },
 };

@@ -4,27 +4,42 @@
 // Full chat UI — history, streaming feel, markdown render,
 // voice input/output, and free image generation.
 // ============================================================
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Bot, Send, Trash2, Copy, Check, Sparkles,
   ArrowRight, Zap, RotateCcw, Mic, Square, Volume2, VolumeX,
-  ImageIcon, Loader2, X, Pencil, RefreshCw, ArrowDown,
+  ImageIcon, Loader2, X, Menu, Pencil, RefreshCw, StopCircle,
+  Paperclip, Globe,
 } from "lucide-react";
 import {
   TEXT_MODELS,
   IMAGE_MODELS,
+  DEFAULT_TEXT_MODEL,
   DEFAULT_IMAGE_MODEL,
-  AUTO_MODEL_ID,
-  AUTO_MODEL_OPTION,
-  isAutoModel,
 } from "@/lib/data/ai-models";
-import { highlightCode } from "@/lib/utils/highlight";
-import "./hljs-theme.css";
+import {
+  classifyFile,
+  fileToDataUrl,
+  fileToText,
+  formatTextAttachment,
+  MAX_IMAGE_BYTES,
+} from "@/lib/utils/attachments";
+import { useChatSession } from "@/lib/hooks/useChatSession";
+import { useChatHistory } from "@/lib/hooks/useChatHistory";
+import { readSSE } from "@/lib/ai/readSSE";
+import { ChatSidebar } from "./ChatSidebar";
+import { CodeBlock } from "./CodeBlock";
 
 // ── Types ────────────────────────────────────────────────────
+interface Attachment {
+  /** Data URL (data:image/...;base64,...) — sent to vision models as-is. */
+  dataUrl: string;
+  name: string;
+}
+
 interface Citation {
-  title: string;
+  title?: string;
   url: string;
 }
 
@@ -32,65 +47,19 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   id: string;
+  /** Generated image shown on an assistant reply (from /image or image mode). */
   imageUrl?: string;
   imageModelLabel?: string;
-  /** Set on assistant messages answered while "Auto" was selected —
-   * which real model actually handled this specific turn. */
-  modelUsed?: string;
-  /** Web sources the model cited, when smart routing picked the
-   * search-enabled model for this turn. */
+  /** Images the user attached to this (their own) message. */
+  attachments?: Attachment[];
+  /** Web search sources, when the reply came from a search-capable model. */
   citations?: Citation[];
-  /** True while this assistant reply is still receiving stream deltas —
-   * drives the typing cursor and the empty-bubble loading dots. */
-  streaming?: boolean;
-}
-
-/** One event from /api/chat's SSE stream — see route.ts for the protocol. */
-interface ChatStreamEvent {
-  delta?: string;
-  error?: string;
-  done?: boolean;
-  modelUsed?: string;
-  routedReason?: string;
-}
-
-/** Reads the custom `data: {...}` SSE protocol /api/chat streams back.
- * Not the OpenAI wire format — this project owns both ends, so the
- * event shape is whatever's simplest for the UI to consume. */
-async function* readChatSSE(res: Response): AsyncGenerator<ChatStreamEvent> {
-  if (!res.body) return;
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data:")) continue;
-        const payload = trimmed.slice(5).trim();
-        if (!payload) continue;
-        try {
-          yield JSON.parse(payload) as ChatStreamEvent;
-        } catch {
-          // Ignore a malformed/partial line — not fatal.
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
 }
 
 // Text + image model catalogs live in src/lib/data/ai-models.ts —
 // the single source of truth shared with the API routes, so the
-// UI never offers a model the backend won't accept. "Auto" is a UI
-// + routing sentinel layered on top, not a real backend model.
-const MODELS = [AUTO_MODEL_OPTION, ...TEXT_MODELS];
+// UI never offers a model the backend won't accept.
+const MODELS = TEXT_MODELS;
 
 // ── Starter prompts ──────────────────────────────────────────
 const STARTERS = [
@@ -108,27 +77,61 @@ function stripImageCommand(text: string): string {
   return text.trim().slice(IMAGE_COMMAND_PREFIX.length).trim();
 }
 
-// ── Tiny inline markdown renderer ────────────────────────────
+// ── Slash commands ───────────────────────────────────────────
+// Typing "/" at the start of an empty composer opens a small
+// autocomplete menu (see slashMenuOpen state) — /image and /search
+// insert their prefix and let the user keep typing; /clear and /new
+// act immediately since they take no argument.
+interface SlashCommand {
+  command: string;
+  label: string;
+  description: string;
+  icon: "image" | "search" | "clear" | "new";
+  /** Inserts "/command " into the composer and keeps it open for typing,
+   * vs. running immediately with no further input needed. */
+  action: "insert" | "immediate";
+}
+
+const SLASH_COMMANDS: SlashCommand[] = [
+  { command: "/image", label: "Image", description: "Generate an image from a description", icon: "image", action: "insert" },
+  { command: "/search", label: "Search", description: "Ask with live web search (Compound)", icon: "search", action: "insert" },
+  { command: "/new", label: "New chat", description: "Start a fresh conversation", icon: "new", action: "immediate" },
+  { command: "/clear", label: "Clear chat", description: "Delete this conversation", icon: "clear", action: "immediate" },
+];
+
+const WEB_SEARCH_MODEL_ID = "groq/compound";
+const SEARCH_COMMAND_PREFIX = "/search";
+
+// ── Markdown renderer ────────────────────────────────────────
+// Deliberately hand-rolled rather than a full markdown library:
+// chat replies only ever use a small, predictable subset (headers,
+// lists, bold/inline code, fenced code blocks, rules), and this
+// stays synchronous and streaming-safe — an unterminated fence
+// (still receiving tokens) renders as a live, unhighlighted block
+// instead of throwing, since CodeBlock's language detection just
+// no-ops until the language tag line has fully arrived.
 function renderMarkdown(text: string) {
   const lines = text.split("\n");
   const result: React.ReactNode[] = [];
   let inCode = false;
-  let codeLines: string[] = [];
   let codeLang = "";
+  let codeLines: string[] = [];
   let key = 0;
+
+  const flushCode = () => {
+    result.push(<CodeBlock key={key++} code={codeLines.join("\n")} language={codeLang} />);
+    codeLines = [];
+    codeLang = "";
+  };
 
   for (const line of lines) {
     if (line.startsWith("```")) {
       if (inCode) {
-        result.push(
-          <CodeBlock key={key++} code={codeLines.join("\n")} lang={codeLang} />
-        );
-        codeLines = [];
-        codeLang = "";
+        flushCode();
         inCode = false;
       } else {
-        codeLang = line.slice(3).trim();
         inCode = true;
+        codeLang = line.slice(3).trim();
       }
       continue;
     }
@@ -152,52 +155,15 @@ function renderMarkdown(text: string) {
       result.push(<p key={key++} className="text-gray-300 text-sm leading-relaxed">{renderInline(line)}</p>);
     }
   }
-  // An unclosed fence (still streaming mid-code-block) would otherwise
-  // drop everything typed so far — render what's arrived so far instead.
+
+  // A fence opened but never closed — the stream is still mid-code-block.
+  // Render what's arrived so far rather than dropping it until the
+  // closing ``` shows up.
   if (inCode && codeLines.length > 0) {
-    result.push(<CodeBlock key={key++} code={codeLines.join("\n")} lang={codeLang} />);
+    flushCode();
   }
+
   return result;
-}
-
-/** A fenced code block: language label, copy button, and real syntax
- * highlighting (see src/lib/utils/highlight.ts) instead of flat green text. */
-function CodeBlock({ code, lang }: { code: string; lang?: string }) {
-  const [copied, setCopied] = useState(false);
-  const html = useMemo(() => highlightCode(code, lang), [code, lang]);
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
-  return (
-    <div className="my-2 rounded-lg overflow-hidden border border-white/10 bg-black/40">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-white/[0.03] border-b border-white/10">
-        <span className="text-[11px] text-gray-500 font-mono">{lang || "text"}</span>
-        <button
-          onClick={copy}
-          className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-gray-300 transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="h-3 w-3 text-green-400" /> Copied
-            </>
-          ) : (
-            <>
-              <Copy className="h-3 w-3" /> Copy
-            </>
-          )}
-        </button>
-      </div>
-      <pre className="p-3 overflow-x-auto text-xs font-mono leading-relaxed">
-        {/* highlight.js output is our own escaped HTML, not user input
-            rendered verbatim — see highlightCode()'s escape fallback. */}
-        <code dangerouslySetInnerHTML={{ __html: html }} />
-      </pre>
-    </div>
-  );
 }
 
 function renderInline(text: string): React.ReactNode {
@@ -220,23 +186,46 @@ export function MGAIChat() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState(AUTO_MODEL_ID);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_TEXT_MODEL);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState("");
+  // Images staged in the composer, not yet sent — cleared once the
+  // message goes out. Text/PDF attachments aren't previewed as
+  // thumbnails; their extracted text is appended straight into the
+  // input box instead (see handleFileSelect), so this list is
+  // images only.
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Editing a previously-sent user message — see submitEdit().
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
-
-  // Whether the user is scrolled near the bottom of the chat — drives
-  // both auto-scroll-on-new-content and the floating "jump to latest"
-  // button, so streaming replies don't yank the view out from under
-  // someone who scrolled up to reread something.
-  const [isNearBottom, setIsNearBottom] = useState(true);
-  const isNearBottomRef = useRef(true);
+  // ── Conversation persistence ─────────────────────────────────
+  // sessionId identifies this browser (no login required for MG
+  // Labs AI). history is the Supabase-backed sidebar data layer —
+  // see useChatSession.ts / useChatHistory.ts for how anonymous
+  // vs signed-in ownership works.
+  const sessionId = useChatSession();
+  const history = useChatHistory(sessionId);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [conversationLoading, setConversationLoading] = useState(false);
+  // Ref mirror of activeConversationId so async send handlers always
+  // read the latest id without becoming stale closures.
+  const activeConversationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeConversationIdRef.current = activeConversationId;
+  }, [activeConversationId]);
 
   // Image generation mode — toggled via the image icon next to the
   // mic, or auto-enabled when the user types the "/image" shortcut.
   const [imageMode, setImageMode] = useState(false);
   const [selectedImageModel, setSelectedImageModel] = useState(DEFAULT_IMAGE_MODEL);
+
+  // Slash command autocomplete — opens when the composer's only
+  // content is "/" plus optional letters, closes on space, escape,
+  // selection, or once the text no longer matches a command prefix.
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashHighlightIndex, setSlashHighlightIndex] = useState(0);
 
   // Voice mode state
   const [voiceModeOn, setVoiceModeOn] = useState(false);
@@ -244,48 +233,93 @@ export function MGAIChat() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  // Streaming state — streamingId identifies which assistant message
+  // bubble is currently receiving deltas (drives the blinking cursor);
+  // abortControllerRef lets the Stop button cancel the in-flight fetch.
+  const [streamingId, setStreamingId] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (isNearBottomRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-    isNearBottomRef.current = nearBottom;
-    setIsNearBottom(nearBottom);
-  };
+  // uid() is only ever called from event handlers (send, generate image,
+  // etc.), never during render, so a fresh id per call is safe despite
+  // being "impure" in the abstract. crypto.randomUUID is standard in all
+  // modern browsers this app targets.
+  const uid = () => crypto.randomUUID();
+  const currentModel = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
 
-  const scrollToLatest = () => {
-    isNearBottomRef.current = true;
-    setIsNearBottom(true);
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const stopSpeaking = useCallback(() => {
+    audioPlayerRef.current?.pause();
+    setIsSpeaking(false);
+  }, []);
 
-  // Esc stops an in-flight generation from anywhere on the page, not
-  // just while the (disabled, while loading) textarea has focus.
+  // ── Switch to an existing conversation from the sidebar ──────
+  const selectConversation = useCallback(
+    async (id: string) => {
+      if (id === activeConversationIdRef.current) {
+        setMobileSidebarOpen(false);
+        return;
+      }
+      setConversationLoading(true);
+      setError(null);
+      stopSpeaking();
+      const stored = await history.loadMessages(id);
+      setMessages(
+        stored.map((m) => ({
+          role: m.role,
+          content: m.content,
+          id: m.id,
+          imageUrl: m.imageUrl ?? undefined,
+          imageModelLabel: m.imageModel ?? undefined,
+          attachments: m.attachments ?? undefined,
+          citations: m.citations ?? undefined,
+        }))
+      );
+      setActiveConversationId(id);
+      setMobileSidebarOpen(false);
+      setConversationLoading(false);
+    },
+    [history, stopSpeaking]
+  );
+
+  const startNewChat = useCallback(() => {
+    setMessages([]);
+    setActiveConversationId(null);
+    setError(null);
+    setImageMode(false);
+    setMobileSidebarOpen(false);
+    stopSpeaking();
+  }, [stopSpeaking]);
+
+  // ── Global keyboard shortcuts ────────────────────────────────
+  // Cmd/Ctrl+K: new chat (matches the convention used by ChatGPT,
+  // Claude, Linear, etc. for "start fresh"). Cmd/Ctrl+/: jump focus
+  // to the composer from anywhere on the page, useful after
+  // scrolling through history or clicking a sidebar chat.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && loading) {
-        abortControllerRef.current?.abort();
+      const isModKey = e.metaKey || e.ctrlKey;
+      if (!isModKey) return;
+
+      if (e.key === "k") {
+        e.preventDefault();
+        startNewChat();
+      } else if (e.key === "/") {
+        e.preventDefault();
+        textareaRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [loading]);
-
-  const uid = () => Math.random().toString(36).slice(2);
-  const currentModel = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
+  }, [startNewChat]);
 
   // ── Speak assistant text aloud (Groq PlayAI TTS) ────────────
   const speakText = useCallback(async (text: string) => {
@@ -318,140 +352,223 @@ export function MGAIChat() {
     }
   }, []);
 
-  // ── Dispatch a piece of user text: image command, image mode, or
-  // normal chat. Shared by sendMessage (typing) and submitEdit (editing
-  // a past message) so both go through identical routing logic against
-  // whatever "base" history they're building on top of. ──────────────
-  const dispatchUserText = async (text: string, base: Message[]) => {
-    const trimmed = text.trim();
-    if (!trimmed || loading) return;
+  // ── Send a chat message (text, image command, or image mode) ─
+  // editFromId: when set, this call is an "edit and resend" — the
+  // user message at that id and everything after it (in local state)
+  // is replaced rather than appended, and newMessages is truncated to
+  // just before it before calling the API.
+  const sendMessage = async (text: string, editFromId?: string) => {
+    // Edit-and-resend never carries pending attachments (those only
+    // exist for the composer's current, unsent draft) — only the
+    // fresh-send path picks them up.
+    const attachments = editFromId ? [] : pendingAttachments;
+    if ((!text.trim() && attachments.length === 0) || loading || streamingId) return;
     setError(null);
+    setAttachmentError(null);
 
-    if (trimmed.toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
-      const prompt = stripImageCommand(trimmed);
+    // Handle "/image <description>" as an image generation request,
+    // regardless of whether image mode is toggled on.
+    if (text.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
+      const prompt = stripImageCommand(text);
       if (!prompt) {
         setError("Add a description after /image, e.g. /image a red fox in snow");
         return;
       }
-      await generateImage(prompt, base);
+      await generateImage(prompt);
       return;
     }
 
+    // Image mode is toggled on via the image icon — treat plain text
+    // as an image prompt too, so the user doesn't have to type /image.
     if (imageMode) {
-      await generateImage(trimmed, base);
+      await generateImage(text.trim());
       return;
     }
 
-    await runChat(trimmed, base);
-  };
+    // "/search <question>" forces this one turn onto the web-search-
+    // capable Compound model regardless of which model is currently
+    // selected in the picker — the picker itself is left untouched so
+    // the next message goes back to whatever the user had chosen.
+    const isSearchCommand = text.trim().toLowerCase().startsWith(SEARCH_COMMAND_PREFIX);
+    const searchQuery = isSearchCommand
+      ? text.trim().slice(SEARCH_COMMAND_PREFIX.length).trim()
+      : null;
+    if (isSearchCommand && !searchQuery) {
+      setError("Add a question after /search, e.g. /search latest Next.js version");
+      return;
+    }
 
-  const sendMessage = (text: string) => dispatchUserText(text, messages);
+    const base = editFromId
+      ? messages.slice(0, messages.findIndex((m) => m.id === editFromId))
+      : messages;
 
-  const submitEdit = (idx: number) => {
-    const val = editValue.trim();
-    if (!val) return;
-    setEditingId(null);
-    dispatchUserText(val, messages.slice(0, idx));
-  };
+    const userMsg: Message = {
+      role: "user",
+      content: (searchQuery ?? text).trim(),
+      id: uid(),
+      attachments: attachments.length > 0 ? attachments : undefined,
+    };
+    const newMessages = [...base, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setPendingAttachments([]);
+    setLoading(true);
 
-  const retryMessage = (assistantIdx: number) => {
-    const userIdx = assistantIdx - 1;
-    if (userIdx < 0 || messages[userIdx]?.role !== "user") return;
-    dispatchUserText(messages[userIdx].content, messages.slice(0, userIdx));
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    // If this turn includes images but the selected model can't see
+    // images, the API route reroutes to a vision-capable model and
+    // reports back which one via the SSE "model" event — see below.
+    const apiModel = isSearchCommand ? WEB_SEARCH_MODEL_ID : selectedModel;
+
+    // First message of a fresh chat: create the conversation row now
+    // so both this message and the reply below have somewhere to land.
+    // isNewConversation short-circuits the sidebar refresh below since
+    // createConversation() already triggers it.
+    let conversationId = activeConversationIdRef.current;
+    let isNewConversation = false;
+    if (!conversationId && sessionId) {
+      conversationId = await history.createConversation(userMsg.content || "Image conversation", apiModel);
+      if (conversationId) {
+        isNewConversation = true;
+        activeConversationIdRef.current = conversationId;
+        setActiveConversationId(conversationId);
+      }
+    }
+    if (conversationId) {
+      history.saveMessage(conversationId, {
+        role: "user",
+        content: userMsg.content,
+        attachments: userMsg.attachments,
+      });
+    }
+
+    const assistantId = uid();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    // Hoisted above the try block so the AbortError branch in catch
+    // can still save whatever partial content/citations had streamed
+    // in before the user hit Stop.
+    let assistantContent = "";
+    let citations: Citation[] | undefined;
+
+    try {
+      // Only the newest user message carries image parts — earlier
+      // turns in history stay plain strings, matching how every
+      // provider expects multi-turn vision context to be shaped.
+      const apiMessages = newMessages.map(({ role, content }, i) => {
+        const isLatest = i === newMessages.length - 1;
+        if (isLatest && attachments.length > 0) {
+          return {
+            role,
+            content: [
+              ...(content ? [{ type: "text" as const, text: content }] : []),
+              ...attachments.map((a) => ({
+                type: "image_url" as const,
+                image_url: { url: a.dataUrl },
+              })),
+            ],
+          };
+        }
+        return { role, content };
+      });
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: apiModel, messages: apiMessages }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Something went wrong.");
+      }
+
+      // Placeholder bubble the streamed deltas append into — added
+      // once, then mutated via functional setState per chunk so React
+      // only ever needs to diff one changed message, not the whole list.
+      setMessages((prev) => [...prev, { role: "assistant", content: "", id: assistantId }]);
+      setLoading(false);
+      setStreamingId(assistantId);
+
+      let streamError: string | null = null;
+
+      for await (const event of readSSE(res.body)) {
+        if (event.delta) {
+          assistantContent += event.delta;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, content: assistantContent } : m))
+          );
+        }
+        if (event.citations?.length) {
+          citations = event.citations;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, citations } : m))
+          );
+        }
+        if (event.error) {
+          streamError = event.error;
+        }
+      }
+
+      if (streamError && !assistantContent) {
+        // Failed before any content arrived — drop the empty bubble
+        // and surface the error banner instead, matching the old
+        // non-streaming error UX.
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+        throw new Error(streamError);
+      }
+
+      if (conversationId && assistantContent) {
+        history.saveMessage(conversationId, { role: "assistant", content: assistantContent, citations });
+        if (!isNewConversation) history.refresh();
+      }
+
+      // In voice mode, speak the reply aloud automatically
+      if (voiceModeOn && assistantContent) {
+        speakText(assistantContent);
+      }
+    } catch (err) {
+      if ((err as Error).name === "AbortError") {
+        // User hit Stop — keep whatever streamed in so far as the
+        // final message rather than treating it as a failure. Any
+        // citations that had already arrived before the abort are
+        // captured too via the closure over `citations` above.
+        setMessages((prev) => {
+          const partial = prev.find((m) => m.id === assistantId);
+          if (partial && partial.content && conversationId) {
+            history.saveMessage(conversationId, { role: "assistant", content: partial.content, citations });
+          }
+          return prev;
+        });
+      } else {
+        setError((err as Error).message);
+      }
+    } finally {
+      setLoading(false);
+      setStreamingId(null);
+      abortControllerRef.current = null;
+    }
   };
 
   const stopGenerating = () => {
     abortControllerRef.current?.abort();
   };
 
-  // ── Send a chat message and stream the reply into a live bubble ──
-  const runChat = async (text: string, base: Message[]) => {
-    const userMsg: Message = { role: "user", content: text, id: uid() };
-    const assistantId = uid();
-    const newMessages = [...base, userMsg];
-
-    setMessages([...newMessages, { role: "assistant", content: "", id: assistantId, streaming: true }]);
-    setInput("");
-    setLoading(true);
-    isNearBottomRef.current = true;
-    setIsNearBottom(true);
-
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    const updateAssistant = (patch: Partial<Message>) => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === assistantId ? { ...m, ...patch } : m))
-      );
-    };
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: newMessages.map(({ role, content }) => ({ role, content })),
-        }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Something went wrong.");
-      }
-
-      const isStream = (res.headers.get("content-type") || "").includes("text/event-stream");
-
-      if (isStream) {
-        let full = "";
-        let modelUsed: string | undefined;
-        for await (const evt of readChatSSE(res)) {
-          if (evt.error) throw new Error(evt.error);
-          if (evt.delta) {
-            full += evt.delta;
-            updateAssistant({ content: full });
-          }
-          if (evt.done) modelUsed = evt.modelUsed;
-        }
-        updateAssistant({
-          streaming: false,
-          modelUsed: isAutoModel(selectedModel) ? modelUsed : undefined,
-        });
-        if (voiceModeOn) speakText(full);
-      } else {
-        const data = await res.json();
-        const assistantContent: string =
-          data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
-        updateAssistant({
-          content: assistantContent,
-          streaming: false,
-          modelUsed: isAutoModel(selectedModel) ? data.modelUsed : undefined,
-          citations: data.citations,
-        });
-        if (voiceModeOn) speakText(assistantContent);
-      }
-    } catch (err) {
-      const e = err as Error;
-      if (e.name === "AbortError") {
-        // User hit Stop — keep whatever streamed in so far, just drop
-        // the "still typing" state instead of treating it as a failure.
-        updateAssistant({ streaming: false });
-      } else {
-        setError(e.message);
-        // No partial content to keep — drop the empty placeholder bubble.
-        setMessages((prev) => prev.filter((m) => m.id !== assistantId || m.content));
-      }
-    } finally {
-      setLoading(false);
-      abortControllerRef.current = null;
-    }
+  const retryLastResponse = () => {
+    // Find the last user message and resend from there — drops the
+    // assistant reply that followed it (and anything after, though
+    // there normally isn't anything after the latest turn).
+    const lastUserIndex = [...messages].reverse().findIndex((m) => m.role === "user");
+    if (lastUserIndex === -1) return;
+    const idx = messages.length - 1 - lastUserIndex;
+    const lastUserMsg = messages[idx];
+    sendMessage(lastUserMsg.content, lastUserMsg.id);
   };
 
   // ── Generate an image via Pollinations ───────────────────────
-  const generateImage = async (prompt: string, base: Message[] = messages) => {
+  const generateImage = async (prompt: string) => {
     if (!prompt.trim()) {
       setError("Add a description of the image you want.");
       return;
@@ -461,20 +578,30 @@ export function MGAIChat() {
       IMAGE_MODELS.find((m) => m.id === selectedImageModel) ?? IMAGE_MODELS[0];
 
     const userMsg: Message = { role: "user", content: `/image ${prompt}`, id: uid() };
-    setMessages([...base, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
     setError(null);
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+    let conversationId = activeConversationIdRef.current;
+    let isNewConversation = false;
+    if (!conversationId && sessionId) {
+      conversationId = await history.createConversation(userMsg.content, selectedModel);
+      if (conversationId) {
+        isNewConversation = true;
+        activeConversationIdRef.current = conversationId;
+        setActiveConversationId(conversationId);
+      }
+    }
+    if (conversationId) {
+      history.saveMessage(conversationId, { role: "user", content: userMsg.content });
+    }
 
     try {
       const res = await fetch("/api/image-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, model: imageModel.id }),
-        signal: controller.signal,
       });
       const data = await res.json();
 
@@ -482,24 +609,31 @@ export function MGAIChat() {
         throw new Error(data.error || "Image generation failed.");
       }
 
+      const replyText = `Here's your image for: "${prompt}"`;
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: `Here's your image for: "${prompt}"`,
+          content: replyText,
           id: uid(),
           imageUrl: data.imageUrl,
           imageModelLabel: `${imageModel.emoji} ${imageModel.label}`,
         },
       ]);
-    } catch (err) {
-      const e = err as Error;
-      if (e.name !== "AbortError") {
-        setError(e.message);
+
+      if (conversationId) {
+        history.saveMessage(conversationId, {
+          role: "assistant",
+          content: replyText,
+          imageUrl: data.imageUrl,
+          imageModel: imageModel.id,
+        });
+        if (!isNewConversation) history.refresh();
       }
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
-      abortControllerRef.current = null;
     }
   };
 
@@ -568,6 +702,71 @@ export function MGAIChat() {
     setError(null);
   };
 
+  // ── File attachments ──────────────────────────────────────────
+  // Images become pendingAttachments (shown as thumbnails, sent as
+  // image_url content parts). Text-like files get their content read
+  // and appended straight into the composer as a fenced block — every
+  // provider already handles plain text uniformly, so no separate
+  // upload plumbing is needed for those.
+  const processFiles = async (files: FileList | File[]) => {
+    setAttachmentError(null);
+    for (const file of Array.from(files)) {
+      const kind = classifyFile(file);
+
+      if (kind === "image") {
+        if (file.size > MAX_IMAGE_BYTES) {
+          setAttachmentError(`${file.name} is too large — images must be under 8MB.`);
+          continue;
+        }
+        try {
+          const dataUrl = await fileToDataUrl(file);
+          setPendingAttachments((prev) => [...prev, { dataUrl, name: file.name }]);
+        } catch {
+          setAttachmentError(`Couldn't read ${file.name}.`);
+        }
+        continue;
+      }
+
+      if (kind === "text") {
+        try {
+          const text = await fileToText(file);
+          setInput((prev) => prev + formatTextAttachment(file.name, text));
+        } catch {
+          setAttachmentError(`Couldn't read ${file.name}.`);
+        }
+        continue;
+      }
+
+      setAttachmentError(
+        `${file.name}: only images and text-based files (.txt, .md, .csv, .json, code files) are supported right now.`
+      );
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) processFiles(e.target.files);
+    e.target.value = ""; // allow re-selecting the same file later
+  };
+
+  const removePendingAttachment = (index: number) => {
+    setPendingAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.clipboardData.files);
+    if (files.length > 0) {
+      e.preventDefault();
+      processFiles(files);
+    }
+  };
+
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingFile(false);
+    if (e.dataTransfer.files?.length) processFiles(e.dataTransfer.files);
+  };
+
   const handleMicClick = () => {
     if (isRecording) {
       stopRecording();
@@ -576,12 +775,60 @@ export function MGAIChat() {
     }
   };
 
-  const stopSpeaking = () => {
-    audioPlayerRef.current?.pause();
-    setIsSpeaking(false);
+  // Commands that filter the slash menu — "/" alone shows all of them,
+  // "/im" narrows to /image, etc. Menu closes as soon as text no longer
+  // looks like a command-in-progress (a space after the command, or
+  // the value no longer starts with "/").
+  const filteredSlashCommands = SLASH_COMMANDS.filter((c) =>
+    c.command.startsWith(input.trim().toLowerCase())
+  );
+
+  const runSlashCommand = (cmd: SlashCommand) => {
+    setSlashMenuOpen(false);
+    if (cmd.action === "insert") {
+      setInput(cmd.command + " ");
+      if (cmd.command === IMAGE_COMMAND_PREFIX) setImageMode(true);
+      textareaRef.current?.focus();
+      return;
+    }
+    if (cmd.command === "/new") {
+      startNewChat();
+    } else if (cmd.command === "/clear") {
+      clearChat();
+    }
+    setInput("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (slashMenuOpen && filteredSlashCommands.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashHighlightIndex((i) => (i + 1) % filteredSlashCommands.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashHighlightIndex((i) => (i - 1 + filteredSlashCommands.length) % filteredSlashCommands.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        runSlashCommand(filteredSlashCommands[slashHighlightIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSlashMenuOpen(false);
+        return;
+      }
+    }
+
+    if (e.key === "Escape" && (loading || streamingId)) {
+      e.preventDefault();
+      stopGenerating();
+      return;
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
@@ -599,6 +846,15 @@ export function MGAIChat() {
     if (value.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) && !imageMode) {
       setImageMode(true);
     }
+
+    // The slash menu only makes sense while the composer is a bare
+    // "/..." token being typed — as soon as there's a space (the
+    // command is complete and an argument is being typed) or the
+    // text no longer starts with "/", close it.
+    const trimmed = value.trimStart();
+    const looksLikeCommandInProgress = trimmed.startsWith("/") && !trimmed.includes(" ");
+    setSlashMenuOpen(looksLikeCommandInProgress && trimmed.length > 0);
+    setSlashHighlightIndex(0);
   };
 
   const copyMessage = async (content: string, id: string) => {
@@ -608,21 +864,72 @@ export function MGAIChat() {
   };
 
   const clearChat = () => {
-    abortControllerRef.current?.abort();
+    const idToDelete = activeConversationIdRef.current;
     setMessages([]);
     setError(null);
     setImageMode(false);
-    setEditingId(null);
+    setActiveConversationId(null);
     stopSpeaking();
+    if (idToDelete) {
+      history.deleteConversation(idToDelete);
+    }
   };
 
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex">
+      <ChatSidebar
+        conversations={history.conversations}
+        loading={history.loading}
+        activeId={activeConversationId}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((v) => !v)}
+        onSelect={selectConversation}
+        onNewChat={startNewChat}
+        onRename={history.renameConversation}
+        onTogglePinned={history.togglePinned}
+        onDelete={(id) => {
+          history.deleteConversation(id);
+          if (id === activeConversationIdRef.current) startNewChat();
+        }}
+      />
+
+      {/* Mobile sidebar overlay */}
+      {mobileSidebarOpen && (
+        <div className="sm:hidden fixed inset-0 z-40 flex">
+          <div className="w-72 bg-surface flex flex-col">
+            <ChatSidebar
+              conversations={history.conversations}
+              loading={history.loading}
+              activeId={activeConversationId}
+              collapsed={false}
+              onToggleCollapsed={() => setMobileSidebarOpen(false)}
+              onSelect={selectConversation}
+              onNewChat={startNewChat}
+              onRename={history.renameConversation}
+              onTogglePinned={history.togglePinned}
+              onDelete={(id) => {
+                history.deleteConversation(id);
+                if (id === activeConversationIdRef.current) startNewChat();
+              }}
+            />
+          </div>
+          <div className="flex-1 bg-black/60" onClick={() => setMobileSidebarOpen(false)} />
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col">
       {/* ── Top bar ── */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/[0.06] bg-surface/50 backdrop-blur-xl sticky top-16 z-30">
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="sm:hidden h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-surface-2 flex-shrink-0"
+            aria-label="Open chat history"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center shadow-lg">
             <Bot className="h-4 w-4 text-white" />
           </div>
@@ -680,15 +987,22 @@ export function MGAIChat() {
       </div>
 
       {/* ── Main chat area ── */}
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
-      >
+      <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
+          {/* Loading a conversation from the sidebar */}
+          {conversationLoading && (
+            <div className="space-y-6">
+              {[0, 1, 0].map((align, i) => (
+                <div key={i} className={align ? "flex justify-end" : "flex justify-start"}>
+                  <div className="h-16 w-2/3 max-w-sm rounded-2xl bg-surface-1 border border-white/[0.06] animate-pulse" />
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Empty state */}
-          {isEmpty && (
+          {!conversationLoading && isEmpty && (
             <div className="text-center py-16">
               <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-blue/20 to-brand-purple/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
                 <Bot className="h-8 w-8 text-brand-purple" />
@@ -733,191 +1047,205 @@ export function MGAIChat() {
           )}
 
           {/* Messages */}
-          {messages.map((msg, idx) => {
+          {!conversationLoading && messages.map((msg, index) => {
             const isLastAssistant =
-              msg.role === "assistant" && idx === messages.length - 1;
-            const isEditingThis = editingId === msg.id;
+              msg.role === "assistant" && index === messages.length - 1 && !streamingId;
+            const isStreamingThis = msg.id === streamingId;
+            const isEditingThis = msg.id === editingMessageId;
 
             return (
+            <div
+              key={msg.id}
+              className={`mb-6 ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
+            >
+              {msg.role === "assistant" && (
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1 shadow-lg">
+                  <Bot className="h-3.5 w-3.5 text-white" />
+                </div>
+              )}
+
+              <div className={isEditingThis ? "w-full max-w-[85%]" : "max-w-[85%] relative group"}>
               <div
-                key={msg.id}
-                className={`mb-6 ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
+                className={
+                  isEditingThis
+                    ? "bg-surface-1 border border-brand-blue/40 px-4 py-3 rounded-2xl"
+                    : msg.role === "user"
+                      ? "bg-brand-blue text-white px-4 py-3 rounded-2xl rounded-tr-sm"
+                      : "bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm"
+                }
               >
-                {msg.role === "assistant" && (
-                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1 shadow-lg">
-                    <Bot className="h-3.5 w-3.5 text-white" />
+                {msg.role === "user" ? (
+                  isEditingThis ? (
+                    <div className="space-y-2">
+                      <textarea
+                        autoFocus
+                        value={editingValue}
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            const value = editingValue;
+                            setEditingMessageId(null);
+                            sendMessage(value, msg.id);
+                          }
+                          if (e.key === "Escape") setEditingMessageId(null);
+                        }}
+                        rows={2}
+                        className="w-full bg-transparent text-white text-sm resize-none outline-none leading-relaxed"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setEditingMessageId(null)}
+                          className="px-2.5 py-1 rounded-md text-xs text-gray-400 hover:text-white hover:bg-surface-3"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            const value = editingValue;
+                            setEditingMessageId(null);
+                            sendMessage(value, msg.id);
+                          }}
+                          disabled={!editingValue.trim()}
+                          className="px-2.5 py-1 rounded-md text-xs bg-brand-blue text-white hover:bg-brand-blue/80 disabled:opacity-40"
+                        >
+                          Send
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {msg.attachments.map((att, i) => (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              key={i}
+                              src={att.dataUrl}
+                              alt={att.name}
+                              className="h-16 w-16 object-cover rounded-lg border border-white/20"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {msg.content && (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <div className="text-sm leading-relaxed space-y-0.5">
+                    {renderMarkdown(msg.content)}
+                    {isStreamingThis && (
+                      <span className="inline-block w-1.5 h-4 bg-brand-blue align-middle ml-0.5 animate-pulse" />
+                    )}
+                    {msg.imageUrl && (
+                      <div className="mt-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={msg.imageUrl}
+                          alt="AI generated"
+                          className="rounded-xl border border-white/10 max-w-full"
+                          loading="lazy"
+                        />
+                        {msg.imageModelLabel && (
+                          <div className="mt-1.5 text-[11px] text-gray-600">
+                            Generated with {msg.imageModelLabel}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {msg.citations && msg.citations.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 mb-1.5 text-[11px] text-gray-500">
+                          <Globe className="h-3 w-3" />
+                          Sources
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {msg.citations.map((c, i) => (
+                            <a
+                              key={i}
+                              href={c.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={c.url}
+                              className="text-[11px] px-2 py-1 rounded-md bg-surface-2 border border-white/10 text-gray-400 hover:text-brand-blue hover:border-brand-blue/40 transition-colors max-w-[180px] truncate"
+                            >
+                              {c.title || new URL(c.url).hostname.replace(/^www\./, "")}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                <div
-                  className={`max-w-[85%] relative group ${
-                    msg.role === "user"
-                      ? "bg-brand-blue text-white px-4 py-3 rounded-2xl rounded-tr-sm"
-                      : "bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm"
-                  }`}
-                >
-                  {msg.role === "user" ? (
-                    isEditingThis ? (
-                      <div className="flex flex-col gap-2 min-w-[220px]">
-                        <textarea
-                          autoFocus
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              submitEdit(idx);
-                            } else if (e.key === "Escape") {
-                              setEditingId(null);
-                            }
-                          }}
-                          rows={Math.min(8, editValue.split("\n").length + 1)}
-                          className="bg-black/20 text-white text-sm rounded-lg p-2 outline-none resize-none border border-white/20 leading-relaxed"
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="text-xs text-white/70 hover:text-white px-2 py-1"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => submitEdit(idx)}
-                            className="text-xs bg-white/20 hover:bg-white/30 rounded px-2 py-1 transition-colors"
-                          >
-                            Save & resend
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    )
-                  ) : (
-                    <div className="text-sm leading-relaxed space-y-0.5">
-                      {msg.modelUsed && (
-                        <div className="mb-2 inline-flex items-center gap-1 text-[11px] text-brand-purple/80 bg-brand-purple/10 border border-brand-purple/20 rounded-full px-2 py-0.5">
-                          <Sparkles className="h-2.5 w-2.5" />
-                          {MODELS.find((m) => m.id === msg.modelUsed)?.emoji}{" "}
-                          {MODELS.find((m) => m.id === msg.modelUsed)?.label ?? msg.modelUsed}
-                        </div>
-                      )}
-                      {msg.streaming && msg.content === "" ? (
-                        <div className="flex items-center gap-1.5 py-1">
-                          <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <span className="h-2 w-2 rounded-full bg-brand-purple animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "300ms" }} />
-                        </div>
+                {/* Copy / speak / retry controls */}
+                {msg.role === "assistant" && !msg.imageUrl && !isStreamingThis && msg.content && (
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    {isLastAssistant && (
+                      <button
+                        onClick={retryLastResponse}
+                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                        title="Retry"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => speakText(msg.content)}
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                      title="Read aloud"
+                    >
+                      <Volume2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => copyMessage(msg.content, msg.id)}
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                    >
+                      {copiedId === msg.id ? (
+                        <Check className="h-3.5 w-3.5 text-green-400" />
                       ) : (
-                        <>
-                          {renderMarkdown(msg.content)}
-                          {msg.streaming && (
-                            <span className="inline-block w-1.5 h-4 bg-brand-purple/70 ml-0.5 align-text-bottom animate-pulse" />
-                          )}
-                        </>
+                        <Copy className="h-3.5 w-3.5" />
                       )}
-                      {msg.citations && msg.citations.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                          <div className="text-[11px] text-gray-600 mb-1.5">Sources</div>
-                          <div className="flex flex-col gap-1">
-                            {msg.citations.map((c, i) => (
-                              <a
-                                key={c.url + i}
-                                href={c.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[11px] text-brand-blue/80 hover:text-brand-blue truncate"
-                                title={c.url}
-                              >
-                                {i + 1}. {c.title}
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {msg.imageUrl && (
-                        <div className="mt-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={msg.imageUrl}
-                            alt="AI generated"
-                            className="rounded-xl border border-white/10 max-w-full"
-                            loading="lazy"
-                          />
-                          {msg.imageModelLabel && (
-                            <div className="mt-1.5 text-[11px] text-gray-600">
-                              Generated with {msg.imageModelLabel}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Copy / speak / retry controls */}
-                  {msg.role === "assistant" && !msg.imageUrl && !msg.streaming && (
-                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                      {isLastAssistant && (
-                        <button
-                          onClick={() => retryMessage(idx)}
-                          disabled={loading}
-                          className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300 disabled:opacity-40"
-                          title="Retry — regenerate this reply"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => speakText(msg.content)}
-                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
-                        title="Read aloud"
-                      >
-                        <Volume2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => copyMessage(msg.content, msg.id)}
-                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
-                        title="Copy"
-                      >
-                        {copiedId === msg.id ? (
-                          <Check className="h-3.5 w-3.5 text-green-400" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Edit control */}
-                  {msg.role === "user" && !isEditingThis && (
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => {
-                          setEditingId(msg.id);
-                          setEditValue(msg.content);
-                        }}
-                        disabled={loading}
-                        className="p-1.5 rounded-md hover:bg-white/10 text-white/60 hover:text-white disabled:opacity-40"
-                        title="Edit & resend"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {msg.role === "user" && (
-                  <div className="h-7 w-7 rounded-lg bg-surface-2 border border-white/10 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-gray-400">
-                    U
+                    </button>
                   </div>
                 )}
               </div>
+
+              {/* Edit control for user messages — hidden while any
+                  message is streaming/editing to avoid overlapping
+                  edits mid-response. */}
+              {msg.role === "user" && !isEditingThis && !loading && !streamingId && (
+                <div className="flex justify-end mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => {
+                      setEditingMessageId(msg.id);
+                      setEditingValue(msg.content);
+                    }}
+                    className="p-1 rounded-md text-gray-600 hover:text-gray-300 hover:bg-surface-3 flex items-center gap-1 text-[11px]"
+                    title="Edit and resend"
+                  >
+                    <Pencil className="h-3 w-3" /> Edit
+                  </button>
+                </div>
+              )}
+              </div>
+
+              {msg.role === "user" && (
+                <div className="h-7 w-7 rounded-lg bg-surface-2 border border-white/10 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-gray-400">
+                  U
+                </div>
+              )}
+            </div>
             );
           })}
 
-          {/* Loading indicator — only for requests with no placeholder
-              bubble of their own yet (image generation in flight). Text
-              chat shows its "typing" state inline in the message above. */}
-          {loading && messages[messages.length - 1]?.role === "user" && (
+          {/* Loading indicator — shown only before the streamed reply's
+              placeholder bubble exists (see sendMessage: setLoading(false)
+              fires as soon as the stream starts, so this and the blinking
+              cursor never show at the same time). */}
+          {loading && (
             <div className="flex justify-start mb-6">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1">
                 <Bot className="h-3.5 w-3.5 text-white" />
@@ -948,21 +1276,89 @@ export function MGAIChat() {
         </div>
       </div>
 
-      {/* Floating "jump to latest" — appears once the user scrolls away
-          from the bottom, e.g. to reread something while a reply streams. */}
-      {!isNearBottom && messages.length > 0 && (
-        <button
-          onClick={scrollToLatest}
-          className="fixed bottom-28 right-4 sm:right-10 z-40 h-9 w-9 rounded-full bg-surface-2 border border-white/10 shadow-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-surface-3 transition-all"
-          title="Scroll to latest"
-        >
-          <ArrowDown className="h-4 w-4" />
-        </button>
-      )}
-
       {/* ── Input area ── */}
-      <div className="sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t border-white/[0.06] px-4 sm:px-6 py-4">
+      <div
+        className={`sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t px-4 sm:px-6 py-4 transition-colors ${
+          isDraggingFile ? "border-brand-blue/60 bg-brand-blue/[0.03]" : "border-white/[0.06]"
+        }`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDraggingFile(true);
+        }}
+        onDragLeave={() => setIsDraggingFile(false)}
+        onDrop={handleDrop}
+      >
         <div className="max-w-3xl mx-auto">
+
+          {isDraggingFile && (
+            <div className="mb-2 px-3 py-4 rounded-xl border-2 border-dashed border-brand-blue/50 bg-brand-blue/[0.06] text-center text-xs text-brand-blue">
+              Drop images or text files to attach
+            </div>
+          )}
+
+          {attachmentError && (
+            <div className="mb-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-300 flex items-center justify-between">
+              <span>{attachmentError}</span>
+              <button onClick={() => setAttachmentError(null)}>
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Staged image attachments — cleared once the message sends */}
+          {pendingAttachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2 px-1">
+              {pendingAttachments.map((att, i) => (
+                <div key={i} className="relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={att.dataUrl}
+                    alt={att.name}
+                    className="h-14 w-14 object-cover rounded-lg border border-white/10"
+                  />
+                  <button
+                    onClick={() => removePendingAttachment(i)}
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 border border-white/20 flex items-center justify-center text-gray-300 hover:text-white hover:bg-red-500/80 transition-colors"
+                    title="Remove"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Slash command menu — appears while the composer contains
+              a bare "/..." token being typed. Positioned relative to
+              the composer wrapper below via the outer relative div. */}
+          <div className="relative">
+            {slashMenuOpen && filteredSlashCommands.length > 0 && (
+              <div className="absolute bottom-full mb-2 left-0 right-0 bg-surface-1 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-20">
+                {filteredSlashCommands.map((cmd, i) => {
+                  const Icon =
+                    cmd.icon === "image" ? ImageIcon
+                    : cmd.icon === "search" ? Globe
+                    : cmd.icon === "clear" ? Trash2
+                    : Sparkles;
+                  return (
+                    <button
+                      key={cmd.command}
+                      onMouseEnter={() => setSlashHighlightIndex(i)}
+                      onClick={() => runSlashCommand(cmd)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                        i === slashHighlightIndex ? "bg-surface-3" : "hover:bg-surface-2"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-brand-blue flex-shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-white">{cmd.command}</div>
+                        <div className="text-[11px] text-gray-500 truncate">{cmd.description}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
           {/* Image mode bar — appears above the input when active,
               lets the user pick which free image model to use. */}
@@ -995,9 +1391,26 @@ export function MGAIChat() {
           )}
 
           <div className="flex items-end gap-3 bg-surface-1 border border-white/[0.06] rounded-2xl px-4 py-3 focus-within:border-brand-blue/50 transition-colors">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.txt,.md,.csv,.json,.log,.yml,.yaml,.xml,.html,.css,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.c,.cpp,.cs,.php,.sql,.sh"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading || !!streamingId}
+              title="Attach a file"
+              className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-surface-2 hover:bg-surface-3 border border-white/10 text-gray-300 disabled:opacity-40 transition-all"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+            </button>
+
             <button
               onClick={handleMicClick}
-              disabled={isTranscribing || loading}
+              disabled={isTranscribing || loading || !!streamingId}
               title={isRecording ? "Stop recording" : "Speak your message"}
               className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
                 isRecording
@@ -1018,7 +1431,7 @@ export function MGAIChat() {
                 toggles image mode on/off, no /image typing required. */}
             <button
               onClick={toggleImageMode}
-              disabled={loading}
+              disabled={loading || !!streamingId}
               title={imageMode ? "Exit image mode" : "Generate an image"}
               className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
                 imageMode
@@ -1034,6 +1447,12 @@ export function MGAIChat() {
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              onBlur={() => {
+                // Delay so a click on a menu item (which blurs the
+                // textarea first) still registers before we close it.
+                setTimeout(() => setSlashMenuOpen(false), 150);
+              }}
               placeholder={
                 isRecording
                   ? "Listening… tap the square to stop"
@@ -1043,7 +1462,7 @@ export function MGAIChat() {
               }
               rows={1}
               className="flex-1 bg-transparent text-white text-sm placeholder-gray-600 resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px]"
-              disabled={loading || isRecording}
+              disabled={loading || isRecording || !!streamingId}
             />
 
             {isSpeaking && (
@@ -1056,36 +1475,41 @@ export function MGAIChat() {
               </button>
             )}
 
-            <button
-              onClick={loading ? stopGenerating : () => sendMessage(input)}
-              disabled={!loading && !input.trim()}
-              className={`h-8 w-8 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95 ${
-                loading
-                  ? "bg-surface-3 border border-white/20 hover:bg-surface-2"
-                  : "bg-brand-blue hover:bg-brand-blue/80"
-              }`}
-              aria-label={loading ? "Stop generating" : "Send message"}
-              title={loading ? "Stop generating (Esc)" : "Send"}
-            >
-              {loading ? (
-                <Square className="h-3 w-3 text-white" fill="white" />
-              ) : imageMode || input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
-                <ImageIcon className="h-3.5 w-3.5 text-white" />
-              ) : (
-                <Send className="h-3.5 w-3.5 text-white" />
-              )}
-            </button>
+            {loading || streamingId ? (
+              <button
+                onClick={stopGenerating}
+                title="Stop generating"
+                className="h-8 w-8 rounded-lg bg-surface-2 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 flex items-center justify-center flex-shrink-0 transition-all group/stop"
+                aria-label="Stop generating"
+              >
+                <StopCircle className="h-3.5 w-3.5 text-gray-300 group-hover/stop:text-red-400" />
+              </button>
+            ) : (
+              <button
+                onClick={() => sendMessage(input)}
+                disabled={!input.trim()}
+                className="h-8 w-8 rounded-lg bg-brand-blue hover:bg-brand-blue/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95"
+                aria-label="Send message"
+              >
+                {imageMode || input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
+                  <ImageIcon className="h-3.5 w-3.5 text-white" />
+                ) : (
+                  <Send className="h-3.5 w-3.5 text-white" />
+                )}
+              </button>
+            )}
+          </div>
           </div>
           <div className="flex items-center justify-between mt-2 px-1">
             <p className="text-xs text-gray-700">
-              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send ·{" "}
-              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Esc</kbd> to stop · Tap 🎤 to talk · Tap 🖼️ or type <code className="text-gray-600">/image</code> to create art
+              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · Type <code className="text-gray-600">/</code> for commands
             </p>
             <Link href="/signup" className="text-xs text-brand-purple hover:text-white transition-colors flex items-center gap-1">
               Unlock full platform <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
