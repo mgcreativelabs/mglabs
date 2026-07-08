@@ -64,28 +64,24 @@ export function Navbar() {
     );
   }
 
-  return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
-        scrolled
-          ? "bg-surface/90 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/50"
-          : "bg-transparent"
-      )}
-    >
-      <nav className="w-full max-w-7xl mx-auto px-6 lg:px-8">
-        {/* 3-column grid: logo | nav | cta */}
-        <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-4">
+ return (
+  <nav className={cn(
+    "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+    scrolled ? "bg-surface-1/95 backdrop-blur-md shadow-lg" : "bg-transparent",
+  )}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between h-16">
+        {/* LOGO - Add this */}
+        <Link href="/" className="flex items-center gap-2">
+          <img 
+            src="/logo.png" 
+            alt="MG Creative Labs" 
+            className="h-8 w-auto"
+          />
+          <span className="text-white font-bold text-xl">MG Labs</span>
+        </Link>
 
-          {/* LEFT — Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-display font-bold text-white text-base tracking-tight hidden sm:inline">
-              MG <span className="text-gradient">Labs</span>
-            </span>
-          </Link>
+        {/* Rest of navigation... */}
 
           {/* CENTER — Desktop nav */}
           <div className="hidden lg:flex items-center justify-center gap-0.5">
