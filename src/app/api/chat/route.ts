@@ -59,12 +59,12 @@ export async function POST(req: NextRequest) {
   // to the default the same way it always has.
   let model: string;
   let routedReason: string | undefined;
-  if (body.model && isAutoModel(body.model)) {
+    if (requestedModel && isAutoModel(requestedModel)) {
     const decision = routeAuto(conversation);
     model = decision.modelId;
     routedReason = decision.reason;
   } else {
-    model = body.model && isValidTextModel(body.model) ? body.model : DEFAULT_TEXT_MODEL;
+    model = requestedModel && isValidTextModel(requestedModel) ? requestedModel : DEFAULT_TEXT_MODEL;
   }
 
   if (isCompoundModel(model)) {
