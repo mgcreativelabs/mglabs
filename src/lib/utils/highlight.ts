@@ -1,21 +1,37 @@
 // src/lib/utils/highlight.ts
-import hljs from 'highlight.js';
+// 1. Import the core instead of the full library
+import hljs from 'highlight.js/lib/core';
 
+// 2. Only import the languages you actually use
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import python from 'highlight.js/lib/languages/python';
+import bash from 'highlight.js/lib/languages/bash';
+import json from 'highlight.js/lib/languages/json';
+import css from 'highlight.js/lib/languages/css';
+
+// 3. Register them
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('css', css);
+
+// 4. The highlighting function
 export function highlightCode(code: string, lang?: string): string {
-  // If a language is specified and highlight.js supports it, use it
   if (lang && hljs.getLanguage(lang)) {
     try {
       return hljs.highlight(code, { language: lang, ignoreIllegals: true }).value;
     } catch (err) {
-      // Fallback to auto-detection if the specific language fails
+      console.warn(`Highlighting failed for language ${lang}:`, err);
     }
   }
   
-  // Auto-detect the language if none was provided
   try {
     return hljs.highlightAuto(code).value;
   } catch (err) {
-    // Final fallback: escape HTML to prevent errors if highlighting completely fails
+    // Fallback: Escape HTML to prevent XSS or broken UI
     return code
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
