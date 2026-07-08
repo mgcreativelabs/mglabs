@@ -26,8 +26,7 @@ export async function submitContactForm(
   });
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.errors[0].message };
-  }
+   return { error: validatedFields.error.issues[0]?.message || "Invalid input." };  }
 
   const { name, email, subject, message } = validatedFields.data;
 
