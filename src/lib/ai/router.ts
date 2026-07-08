@@ -20,10 +20,7 @@ const ADAPTERS: Record<string, ChatAdapter> = {
   mistral: mistralAdapter,
 };
 
-export async function routeChat(
-  modelId: string,
-  messages: ChatMessage[]
-): Promise<ChatResult> {
+function resolveAdapter(modelId: string): ChatAdapter {
   const model = TEXT_MODELS.find((m) => m.id === modelId);
   if (!model) {
     throw new AIProviderError(`Unknown model id: ${modelId}`, 400);
@@ -37,5 +34,33 @@ export async function routeChat(
     );
   }
 
-  return adapter.chat(modelId, messages);
+  return adapter;
+}
+
+export async function routeChat(
+  modelId: string,
+  messages: ChatMessage[]
+): Promise<ChatResult> {
+  return resolveAdapter(modelId).chat(modelId, messages);
+}
+
+/** Streaming counterpart of routeChat. Falls back to buffering the full
+ * `chat()` reply and yielding it as one chunk if the adapter has no
+ * `chatStream` — so callers never need to check adapter capabilities
+ * themselves, and every model id works here even if a provider hasn't
+ * been wired up for streaming yet. */
+export async function* routeChatStream(
+  modelId: string,
+  messages: ChatMessage[],
+  opts?: { signal?: AbortSignal }
+): AsyncGenerator<string> {
+  const adapter = resolveAdapter(modelId);
+
+  if (adapter.chatStream) {
+    yield* adapter.chatStream(modelId, messages, opts);
+    return;
+  }
+
+  const result = await adapter.chat(modelId, messages);
+  yield result.content;
 }

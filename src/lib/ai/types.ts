@@ -30,6 +30,16 @@ export interface ChatAdapter {
   /** Provider id, matches TextModelOption.provider in ai-models.ts */
   provider: string;
   chat(model: string, messages: ChatMessage[]): Promise<ChatResult>;
+  /** Optional — streams text deltas as they arrive instead of waiting for
+   * the full reply. Adapters that skip this fall back to `chat()`, buffered
+   * and yielded as one chunk (see router.ts). Not implemented for compound
+   * models: their tool-call metadata (citations) is only reliably available
+   * on the final, non-streamed response. */
+  chatStream?(
+    model: string,
+    messages: ChatMessage[],
+    opts?: { signal?: AbortSignal }
+  ): AsyncGenerator<string>;
 }
 
 /** Thrown by adapters on any upstream failure — carries an HTTP status

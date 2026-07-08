@@ -63,4 +63,79 @@ export const geminiAdapter: ChatAdapter = {
 
     return { content, raw: data };
   },
+
+  // Gemini's streaming endpoint is a *different* path (streamGenerateContent)
+  // rather than a `stream: true` flag on the same one — with `alt=sse` it
+  // emits standard `data: {...}` lines, each a full candidate-so-far JSON
+  // object (not an OpenAI-style delta), so parsing it needs its own loop.
+  async *chatStream(
+    model: string,
+    messages: ChatMessage[],
+    opts?: { signal?: AbortSignal }
+  ): AsyncGenerator<string> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new AIProviderError(
+        "Gemini API key not configured. Add GEMINI_API_KEY to your Vercel env vars.",
+        500
+      );
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: toGeminiContents(messages),
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7,
+        },
+      }),
+      signal: opts?.signal,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new AIProviderError(`Gemini API error: ${res.status} — ${errText}`, res.status);
+    }
+
+    if (!res.body) return;
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+
+          const payload = trimmed.slice(5).trim();
+          if (!payload) continue;
+
+          try {
+            const parsed = JSON.parse(payload);
+            const text: string | undefined =
+              parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) yield text;
+          } catch {
+            // Ignore malformed keep-alive lines — not fatal.
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  },
 };

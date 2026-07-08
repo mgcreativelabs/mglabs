@@ -4,12 +4,12 @@
 // Full chat UI — history, streaming feel, markdown render,
 // voice input/output, and free image generation.
 // ============================================================
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Bot, Send, Trash2, Copy, Check, Sparkles,
   ArrowRight, Zap, RotateCcw, Mic, Square, Volume2, VolumeX,
-  ImageIcon, Loader2, X,
+  ImageIcon, Loader2, X, Pencil, RefreshCw, ArrowDown,
 } from "lucide-react";
 import {
   TEXT_MODELS,
@@ -19,6 +19,8 @@ import {
   AUTO_MODEL_OPTION,
   isAutoModel,
 } from "@/lib/data/ai-models";
+import { highlightCode } from "@/lib/utils/highlight";
+import "./hljs-theme.css";
 
 // ── Types ────────────────────────────────────────────────────
 interface Citation {
@@ -38,6 +40,50 @@ interface Message {
   /** Web sources the model cited, when smart routing picked the
    * search-enabled model for this turn. */
   citations?: Citation[];
+  /** True while this assistant reply is still receiving stream deltas —
+   * drives the typing cursor and the empty-bubble loading dots. */
+  streaming?: boolean;
+}
+
+/** One event from /api/chat's SSE stream — see route.ts for the protocol. */
+interface ChatStreamEvent {
+  delta?: string;
+  error?: string;
+  done?: boolean;
+  modelUsed?: string;
+  routedReason?: string;
+}
+
+/** Reads the custom `data: {...}` SSE protocol /api/chat streams back.
+ * Not the OpenAI wire format — this project owns both ends, so the
+ * event shape is whatever's simplest for the UI to consume. */
+async function* readChatSSE(res: Response): AsyncGenerator<ChatStreamEvent> {
+  if (!res.body) return;
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data:")) continue;
+        const payload = trimmed.slice(5).trim();
+        if (!payload) continue;
+        try {
+          yield JSON.parse(payload) as ChatStreamEvent;
+        } catch {
+          // Ignore a malformed/partial line — not fatal.
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 // Text + image model catalogs live in src/lib/data/ai-models.ts —
@@ -68,19 +114,20 @@ function renderMarkdown(text: string) {
   const result: React.ReactNode[] = [];
   let inCode = false;
   let codeLines: string[] = [];
+  let codeLang = "";
   let key = 0;
 
   for (const line of lines) {
     if (line.startsWith("```")) {
       if (inCode) {
         result.push(
-          <pre key={key++} className="bg-black/40 rounded-lg p-3 my-2 overflow-x-auto text-xs font-mono text-green-300 border border-white/10">
-            <code>{codeLines.join("\n")}</code>
-          </pre>
+          <CodeBlock key={key++} code={codeLines.join("\n")} lang={codeLang} />
         );
         codeLines = [];
+        codeLang = "";
         inCode = false;
       } else {
+        codeLang = line.slice(3).trim();
         inCode = true;
       }
       continue;
@@ -105,7 +152,52 @@ function renderMarkdown(text: string) {
       result.push(<p key={key++} className="text-gray-300 text-sm leading-relaxed">{renderInline(line)}</p>);
     }
   }
+  // An unclosed fence (still streaming mid-code-block) would otherwise
+  // drop everything typed so far — render what's arrived so far instead.
+  if (inCode && codeLines.length > 0) {
+    result.push(<CodeBlock key={key++} code={codeLines.join("\n")} lang={codeLang} />);
+  }
   return result;
+}
+
+/** A fenced code block: language label, copy button, and real syntax
+ * highlighting (see src/lib/utils/highlight.ts) instead of flat green text. */
+function CodeBlock({ code, lang }: { code: string; lang?: string }) {
+  const [copied, setCopied] = useState(false);
+  const html = useMemo(() => highlightCode(code, lang), [code, lang]);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className="my-2 rounded-lg overflow-hidden border border-white/10 bg-black/40">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-white/[0.03] border-b border-white/10">
+        <span className="text-[11px] text-gray-500 font-mono">{lang || "text"}</span>
+        <button
+          onClick={copy}
+          className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3 w-3 text-green-400" /> Copied
+            </>
+          ) : (
+            <>
+              <Copy className="h-3 w-3" /> Copy
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="p-3 overflow-x-auto text-xs font-mono leading-relaxed">
+        {/* highlight.js output is our own escaped HTML, not user input
+            rendered verbatim — see highlightCode()'s escape fallback. */}
+        <code dangerouslySetInnerHTML={{ __html: html }} />
+      </pre>
+    </div>
+  );
 }
 
 function renderInline(text: string): React.ReactNode {
@@ -130,6 +222,17 @@ export function MGAIChat() {
   const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState(AUTO_MODEL_ID);
 
+  // Editing a previously-sent user message — see submitEdit().
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+
+  // Whether the user is scrolled near the bottom of the chat — drives
+  // both auto-scroll-on-new-content and the floating "jump to latest"
+  // button, so streaming replies don't yank the view out from under
+  // someone who scrolled up to reread something.
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const isNearBottomRef = useRef(true);
+
   // Image generation mode — toggled via the image icon next to the
   // mic, or auto-enabled when the user types the "/image" shortcut.
   const [imageMode, setImageMode] = useState(false);
@@ -142,14 +245,44 @@ export function MGAIChat() {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (isNearBottomRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, loading]);
+
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    isNearBottomRef.current = nearBottom;
+    setIsNearBottom(nearBottom);
+  };
+
+  const scrollToLatest = () => {
+    isNearBottomRef.current = true;
+    setIsNearBottom(true);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Esc stops an in-flight generation from anywhere on the page, not
+  // just while the (disabled, while loading) textarea has focus.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && loading) {
+        abortControllerRef.current?.abort();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [loading]);
 
   const uid = () => Math.random().toString(36).slice(2);
   const currentModel = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
@@ -185,37 +318,74 @@ export function MGAIChat() {
     }
   }, []);
 
-  // ── Send a chat message (text, image command, or image mode) ─
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+  // ── Dispatch a piece of user text: image command, image mode, or
+  // normal chat. Shared by sendMessage (typing) and submitEdit (editing
+  // a past message) so both go through identical routing logic against
+  // whatever "base" history they're building on top of. ──────────────
+  const dispatchUserText = async (text: string, base: Message[]) => {
+    const trimmed = text.trim();
+    if (!trimmed || loading) return;
     setError(null);
 
-    // Handle "/image <description>" as an image generation request,
-    // regardless of whether image mode is toggled on.
-    if (text.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
-      const prompt = stripImageCommand(text);
+    if (trimmed.toLowerCase().startsWith(IMAGE_COMMAND_PREFIX)) {
+      const prompt = stripImageCommand(trimmed);
       if (!prompt) {
         setError("Add a description after /image, e.g. /image a red fox in snow");
         return;
       }
-      await generateImage(prompt);
+      await generateImage(prompt, base);
       return;
     }
 
-    // Image mode is toggled on via the image icon — treat plain text
-    // as an image prompt too, so the user doesn't have to type /image.
     if (imageMode) {
-      await generateImage(text.trim());
+      await generateImage(trimmed, base);
       return;
     }
 
-    const userMsg: Message = { role: "user", content: text.trim(), id: uid() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    await runChat(trimmed, base);
+  };
+
+  const sendMessage = (text: string) => dispatchUserText(text, messages);
+
+  const submitEdit = (idx: number) => {
+    const val = editValue.trim();
+    if (!val) return;
+    setEditingId(null);
+    dispatchUserText(val, messages.slice(0, idx));
+  };
+
+  const retryMessage = (assistantIdx: number) => {
+    const userIdx = assistantIdx - 1;
+    if (userIdx < 0 || messages[userIdx]?.role !== "user") return;
+    dispatchUserText(messages[userIdx].content, messages.slice(0, userIdx));
+  };
+
+  const stopGenerating = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  // ── Send a chat message and stream the reply into a live bubble ──
+  const runChat = async (text: string, base: Message[]) => {
+    const userMsg: Message = { role: "user", content: text, id: uid() };
+    const assistantId = uid();
+    const newMessages = [...base, userMsg];
+
+    setMessages([...newMessages, { role: "assistant", content: "", id: assistantId, streaming: true }]);
     setInput("");
     setLoading(true);
+    isNearBottomRef.current = true;
+    setIsNearBottom(true);
 
     if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const updateAssistant = (patch: Partial<Message>) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, ...patch } : m))
+      );
+    };
 
     try {
       const res = await fetch("/api/chat", {
@@ -225,41 +395,63 @@ export function MGAIChat() {
           model: selectedModel,
           messages: newMessages.map(({ role, content }) => ({ role, content })),
         }),
+        signal: controller.signal,
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Something went wrong.");
       }
 
-      const assistantContent: string =
-        data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+      const isStream = (res.headers.get("content-type") || "").includes("text/event-stream");
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
+      if (isStream) {
+        let full = "";
+        let modelUsed: string | undefined;
+        for await (const evt of readChatSSE(res)) {
+          if (evt.error) throw new Error(evt.error);
+          if (evt.delta) {
+            full += evt.delta;
+            updateAssistant({ content: full });
+          }
+          if (evt.done) modelUsed = evt.modelUsed;
+        }
+        updateAssistant({
+          streaming: false,
+          modelUsed: isAutoModel(selectedModel) ? modelUsed : undefined,
+        });
+        if (voiceModeOn) speakText(full);
+      } else {
+        const data = await res.json();
+        const assistantContent: string =
+          data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+        updateAssistant({
           content: assistantContent,
-          id: uid(),
+          streaming: false,
           modelUsed: isAutoModel(selectedModel) ? data.modelUsed : undefined,
           citations: data.citations,
-        },
-      ]);
-
-      // In voice mode, speak the reply aloud automatically
-      if (voiceModeOn) {
-        speakText(assistantContent);
+        });
+        if (voiceModeOn) speakText(assistantContent);
       }
     } catch (err) {
-      setError((err as Error).message);
+      const e = err as Error;
+      if (e.name === "AbortError") {
+        // User hit Stop — keep whatever streamed in so far, just drop
+        // the "still typing" state instead of treating it as a failure.
+        updateAssistant({ streaming: false });
+      } else {
+        setError(e.message);
+        // No partial content to keep — drop the empty placeholder bubble.
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId || m.content));
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
   // ── Generate an image via Pollinations ───────────────────────
-  const generateImage = async (prompt: string) => {
+  const generateImage = async (prompt: string, base: Message[] = messages) => {
     if (!prompt.trim()) {
       setError("Add a description of the image you want.");
       return;
@@ -269,16 +461,20 @@ export function MGAIChat() {
       IMAGE_MODELS.find((m) => m.id === selectedImageModel) ?? IMAGE_MODELS[0];
 
     const userMsg: Message = { role: "user", content: `/image ${prompt}`, id: uid() };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages([...base, userMsg]);
     setInput("");
     setLoading(true);
     setError(null);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const res = await fetch("/api/image-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, model: imageModel.id }),
+        signal: controller.signal,
       });
       const data = await res.json();
 
@@ -297,9 +493,13 @@ export function MGAIChat() {
         },
       ]);
     } catch (err) {
-      setError((err as Error).message);
+      const e = err as Error;
+      if (e.name !== "AbortError") {
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -408,9 +608,11 @@ export function MGAIChat() {
   };
 
   const clearChat = () => {
+    abortControllerRef.current?.abort();
     setMessages([]);
     setError(null);
     setImageMode(false);
+    setEditingId(null);
     stopSpeaking();
   };
 
@@ -478,7 +680,11 @@ export function MGAIChat() {
       </div>
 
       {/* ── Main chat area ── */}
-      <div className="flex-1 overflow-y-auto">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto"
+      >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
           {/* Empty state */}
@@ -527,108 +733,191 @@ export function MGAIChat() {
           )}
 
           {/* Messages */}
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`mb-6 ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
-            >
-              {msg.role === "assistant" && (
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1 shadow-lg">
-                  <Bot className="h-3.5 w-3.5 text-white" />
-                </div>
-              )}
+          {messages.map((msg, idx) => {
+            const isLastAssistant =
+              msg.role === "assistant" && idx === messages.length - 1;
+            const isEditingThis = editingId === msg.id;
 
+            return (
               <div
-                className={`max-w-[85%] relative group ${
-                  msg.role === "user"
-                    ? "bg-brand-blue text-white px-4 py-3 rounded-2xl rounded-tr-sm"
-                    : "bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm"
-                }`}
+                key={msg.id}
+                className={`mb-6 ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
               >
-                {msg.role === "user" ? (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                ) : (
-                  <div className="text-sm leading-relaxed space-y-0.5">
-                    {msg.modelUsed && (
-                      <div className="mb-2 inline-flex items-center gap-1 text-[11px] text-brand-purple/80 bg-brand-purple/10 border border-brand-purple/20 rounded-full px-2 py-0.5">
-                        <Sparkles className="h-2.5 w-2.5" />
-                        {MODELS.find((m) => m.id === msg.modelUsed)?.emoji}{" "}
-                        {MODELS.find((m) => m.id === msg.modelUsed)?.label ?? msg.modelUsed}
-                      </div>
-                    )}
-                    {renderMarkdown(msg.content)}
-                    {msg.citations && msg.citations.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                        <div className="text-[11px] text-gray-600 mb-1.5">Sources</div>
-                        <div className="flex flex-col gap-1">
-                          {msg.citations.map((c, i) => (
-                            <a
-                              key={c.url + i}
-                              href={c.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] text-brand-blue/80 hover:text-brand-blue truncate"
-                              title={c.url}
-                            >
-                              {i + 1}. {c.title}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {msg.imageUrl && (
-                      <div className="mt-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={msg.imageUrl}
-                          alt="AI generated"
-                          className="rounded-xl border border-white/10 max-w-full"
-                          loading="lazy"
-                        />
-                        {msg.imageModelLabel && (
-                          <div className="mt-1.5 text-[11px] text-gray-600">
-                            Generated with {msg.imageModelLabel}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                {msg.role === "assistant" && (
+                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1 shadow-lg">
+                    <Bot className="h-3.5 w-3.5 text-white" />
                   </div>
                 )}
 
-                {/* Copy / speak controls */}
-                {msg.role === "assistant" && !msg.imageUrl && (
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <button
-                      onClick={() => speakText(msg.content)}
-                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
-                      title="Read aloud"
-                    >
-                      <Volume2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => copyMessage(msg.content, msg.id)}
-                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
-                    >
-                      {copiedId === msg.id ? (
-                        <Check className="h-3.5 w-3.5 text-green-400" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5" />
+                <div
+                  className={`max-w-[85%] relative group ${
+                    msg.role === "user"
+                      ? "bg-brand-blue text-white px-4 py-3 rounded-2xl rounded-tr-sm"
+                      : "bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm"
+                  }`}
+                >
+                  {msg.role === "user" ? (
+                    isEditingThis ? (
+                      <div className="flex flex-col gap-2 min-w-[220px]">
+                        <textarea
+                          autoFocus
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              submitEdit(idx);
+                            } else if (e.key === "Escape") {
+                              setEditingId(null);
+                            }
+                          }}
+                          rows={Math.min(8, editValue.split("\n").length + 1)}
+                          className="bg-black/20 text-white text-sm rounded-lg p-2 outline-none resize-none border border-white/20 leading-relaxed"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="text-xs text-white/70 hover:text-white px-2 py-1"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => submitEdit(idx)}
+                            className="text-xs bg-white/20 hover:bg-white/30 rounded px-2 py-1 transition-colors"
+                          >
+                            Save & resend
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    )
+                  ) : (
+                    <div className="text-sm leading-relaxed space-y-0.5">
+                      {msg.modelUsed && (
+                        <div className="mb-2 inline-flex items-center gap-1 text-[11px] text-brand-purple/80 bg-brand-purple/10 border border-brand-purple/20 rounded-full px-2 py-0.5">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          {MODELS.find((m) => m.id === msg.modelUsed)?.emoji}{" "}
+                          {MODELS.find((m) => m.id === msg.modelUsed)?.label ?? msg.modelUsed}
+                        </div>
                       )}
-                    </button>
+                      {msg.streaming && msg.content === "" ? (
+                        <div className="flex items-center gap-1.5 py-1">
+                          <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <span className="h-2 w-2 rounded-full bg-brand-purple animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      ) : (
+                        <>
+                          {renderMarkdown(msg.content)}
+                          {msg.streaming && (
+                            <span className="inline-block w-1.5 h-4 bg-brand-purple/70 ml-0.5 align-text-bottom animate-pulse" />
+                          )}
+                        </>
+                      )}
+                      {msg.citations && msg.citations.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                          <div className="text-[11px] text-gray-600 mb-1.5">Sources</div>
+                          <div className="flex flex-col gap-1">
+                            {msg.citations.map((c, i) => (
+                              <a
+                                key={c.url + i}
+                                href={c.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-brand-blue/80 hover:text-brand-blue truncate"
+                                title={c.url}
+                              >
+                                {i + 1}. {c.title}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {msg.imageUrl && (
+                        <div className="mt-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={msg.imageUrl}
+                            alt="AI generated"
+                            className="rounded-xl border border-white/10 max-w-full"
+                            loading="lazy"
+                          />
+                          {msg.imageModelLabel && (
+                            <div className="mt-1.5 text-[11px] text-gray-600">
+                              Generated with {msg.imageModelLabel}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Copy / speak / retry controls */}
+                  {msg.role === "assistant" && !msg.imageUrl && !msg.streaming && (
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      {isLastAssistant && (
+                        <button
+                          onClick={() => retryMessage(idx)}
+                          disabled={loading}
+                          className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300 disabled:opacity-40"
+                          title="Retry — regenerate this reply"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => speakText(msg.content)}
+                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                        title="Read aloud"
+                      >
+                        <Volume2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => copyMessage(msg.content, msg.id)}
+                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                        title="Copy"
+                      >
+                        {copiedId === msg.id ? (
+                          <Check className="h-3.5 w-3.5 text-green-400" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Edit control */}
+                  {msg.role === "user" && !isEditingThis && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => {
+                          setEditingId(msg.id);
+                          setEditValue(msg.content);
+                        }}
+                        disabled={loading}
+                        className="p-1.5 rounded-md hover:bg-white/10 text-white/60 hover:text-white disabled:opacity-40"
+                        title="Edit & resend"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {msg.role === "user" && (
+                  <div className="h-7 w-7 rounded-lg bg-surface-2 border border-white/10 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-gray-400">
+                    U
                   </div>
                 )}
               </div>
+            );
+          })}
 
-              {msg.role === "user" && (
-                <div className="h-7 w-7 rounded-lg bg-surface-2 border border-white/10 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-gray-400">
-                  U
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Loading indicator */}
-          {loading && (
+          {/* Loading indicator — only for requests with no placeholder
+              bubble of their own yet (image generation in flight). Text
+              chat shows its "typing" state inline in the message above. */}
+          {loading && messages[messages.length - 1]?.role === "user" && (
             <div className="flex justify-start mb-6">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1">
                 <Bot className="h-3.5 w-3.5 text-white" />
@@ -658,6 +947,18 @@ export function MGAIChat() {
           <div ref={bottomRef} />
         </div>
       </div>
+
+      {/* Floating "jump to latest" — appears once the user scrolls away
+          from the bottom, e.g. to reread something while a reply streams. */}
+      {!isNearBottom && messages.length > 0 && (
+        <button
+          onClick={scrollToLatest}
+          className="fixed bottom-28 right-4 sm:right-10 z-40 h-9 w-9 rounded-full bg-surface-2 border border-white/10 shadow-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-surface-3 transition-all"
+          title="Scroll to latest"
+        >
+          <ArrowDown className="h-4 w-4" />
+        </button>
+      )}
 
       {/* ── Input area ── */}
       <div className="sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t border-white/[0.06] px-4 sm:px-6 py-4">
@@ -756,12 +1057,19 @@ export function MGAIChat() {
             )}
 
             <button
-              onClick={() => sendMessage(input)}
-              disabled={!input.trim() || loading}
-              className="h-8 w-8 rounded-lg bg-brand-blue hover:bg-brand-blue/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95"
-              aria-label="Send message"
+              onClick={loading ? stopGenerating : () => sendMessage(input)}
+              disabled={!loading && !input.trim()}
+              className={`h-8 w-8 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all hover:scale-105 active:scale-95 ${
+                loading
+                  ? "bg-surface-3 border border-white/20 hover:bg-surface-2"
+                  : "bg-brand-blue hover:bg-brand-blue/80"
+              }`}
+              aria-label={loading ? "Stop generating" : "Send message"}
+              title={loading ? "Stop generating (Esc)" : "Send"}
             >
-              {imageMode || input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
+              {loading ? (
+                <Square className="h-3 w-3 text-white" fill="white" />
+              ) : imageMode || input.trim().toLowerCase().startsWith(IMAGE_COMMAND_PREFIX) ? (
                 <ImageIcon className="h-3.5 w-3.5 text-white" />
               ) : (
                 <Send className="h-3.5 w-3.5 text-white" />
@@ -770,7 +1078,8 @@ export function MGAIChat() {
           </div>
           <div className="flex items-center justify-between mt-2 px-1">
             <p className="text-xs text-gray-700">
-              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · Tap 🖼️ or type <code className="text-gray-600">/image</code> to create art
+              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send ·{" "}
+              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Esc</kbd> to stop · Tap 🎤 to talk · Tap 🖼️ or type <code className="text-gray-600">/image</code> to create art
             </p>
             <Link href="/signup" className="text-xs text-brand-purple hover:text-white transition-colors flex items-center gap-1">
               Unlock full platform <ArrowRight className="h-3 w-3" />
