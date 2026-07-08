@@ -193,10 +193,12 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
-    
-                      </div>
-      </div>
-    </nav>
-  </header>
- );
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+    </header>
+  );
 }
