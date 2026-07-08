@@ -17,9 +17,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const lesson = getLessonBySlug(slug);
   if (!lesson) return { title: "Lesson not found" };
+  
+  const title = `Lesson ${lesson.number}: ${lesson.title} | MG Labs`;
+  const description = lesson.tagline;
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mglabs.vexr.dev";
+
   return {
-    title: `Lesson ${lesson.number}: ${lesson.title} | MG Labs`,
-    description: lesson.tagline,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/learn/${slug}`,
+      siteName: "MG Labs",
+      type: "article",
+      images: [
+        {
+          url: `${BASE_URL}/og/lesson-${lesson.number}.png`, // Make sure you add these images to your /public/og/ folder!
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${BASE_URL}/og/lesson-${lesson.number}.png`],
+    },
   };
 }
 

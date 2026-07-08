@@ -1,8 +1,6 @@
-// src/lib/utils/highlight.ts
-// 1. Import the core instead of the full library
 import hljs from 'highlight.js/lib/core';
 
-// 2. Only import the languages you actually use
+// Only import languages you actually use
 import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
 import python from 'highlight.js/lib/languages/python';
@@ -10,7 +8,6 @@ import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
 import css from 'highlight.js/lib/languages/css';
 
-// 3. Register them
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('python', python);
@@ -18,7 +15,6 @@ hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('json', json);
 hljs.registerLanguage('css', css);
 
-// 4. The highlighting function
 export function highlightCode(code: string, lang?: string): string {
   if (lang && hljs.getLanguage(lang)) {
     try {

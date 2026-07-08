@@ -5,6 +5,7 @@
 // (Groq, Gemini, Mistral, ...). Keys stay server-side in each
 // provider adapter — this route never touches them directly.
 // ============================================================
+import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_TEXT_MODEL, isValidTextModel, isAutoModel } from "@/lib/data/ai-models";
 import { routeChat, routeChatStream } from "@/lib/ai/router";
@@ -23,24 +24,36 @@ function isCompoundModel(modelId: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  let body: {
-    messages?: unknown[];
-    model?: string;
-  };
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  if (!body.messages || !Array.isArray(body.messages)) {
-    return NextResponse.json({ error: "messages array is required." }, { status: 400 });
+  // 🛡️ Zod Validation: Prevents AI API abuse and massive token costs
+  const ChatRequestSchema = z.object({
+    messages: z.array(
+      z.object({
+        role: z.enum(["system", "user", "assistant"]),
+        content: z.string().max(4000, "Message content is too long."), // Max 4k chars per message
+      })
+    ).max(50, "Conversation history is too long."), // Max 50 messages in history
+    model: z.string().optional(),
+  });
+
+  const validationResult = ChatRequestSchema.safeParse(body);
+
+  if (!validationResult.success) {
+    return NextResponse.json(
+      { error: "Invalid request payload", details: validationResult.error.errors },
+      { status: 400 }
+    );
   }
 
-  const conversation = body.messages as {
-    role: "system" | "user" | "assistant";
-    content: string;
-  }[];
+  // Now we know the data is safe and correctly typed
+  const { messages, model: requestedModel } = validationResult.data;
+  const conversation = messages;
 
   // "auto" isn't a real model — resolve it to one via the heuristic
   // router before validating/dispatching. Anything else falls back
