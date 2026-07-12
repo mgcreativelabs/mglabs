@@ -20,6 +20,10 @@ export interface TextModelOption {
   bestFor: string;
   /** Which adapter in src/lib/ai/providers handles this model. */
   provider: "groq" | "gemini" | "mistral";
+  /** Can this model accept image_url content parts? Used by
+   *  /api/chat to auto-reroute image messages to a capable model
+   *  instead of silently failing on a text-only one. */
+  supportsVision?: boolean;
 }
 
 export interface ImageModelOption {
@@ -56,6 +60,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     description: "Well-rounded, multilingual & vision",
     bestFor: "General chat, writing, everyday tasks",
     provider: "groq",
+    supportsVision: true,
   },
   {
     id: "groq/compound",
@@ -72,6 +77,7 @@ export const TEXT_MODELS: TextModelOption[] = [
     description: "Google's fast multimodal model",
     bestFor: "Quick answers, general chat, free tier",
     provider: "gemini",
+    supportsVision: true,
   },
   {
     id: "mistral-small-latest",
