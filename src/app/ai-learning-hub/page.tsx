@@ -76,13 +76,13 @@ export default function AILearningHubPage() {
         <Badge variant="blue" className="mb-5">
           <BookOpen className="h-3 w-3" /> Free courses
         </Badge>
-        <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-bold text-ink mb-5 leading-tight">
           AI Learning{" "}
-          <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <span className="text-brand-blue">
             Hub
           </span>
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
           Structured courses that take you from AI curious to AI capable.
           Free to start — no account required.
         </p>
@@ -103,7 +103,7 @@ export default function AILearningHubPage() {
       {/* ── Courses grid ─────────────────────────────────────────────────── */}
       <section className="py-8 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-white">All Courses</h2>
+          <h2 className="text-2xl font-bold text-ink">All Courses</h2>
           <Badge variant="default">{courses.length} available</Badge>
         </div>
 
@@ -118,11 +118,11 @@ export default function AILearningHubPage() {
               href={`/courses/${course.slug}`}
               className="group block"
             >
-              <Card className="border border-white/10 bg-white/5 p-6 rounded-2xl flex flex-col h-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200">
+              <Card className="border border-border bg-surface-2 p-6 rounded-2xl flex flex-col h-full hover:bg-surface-2 hover:border-border-strong transition-all duration-200">
                 {/* Card header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-2.5 rounded-xl bg-white/10 group-hover:bg-blue-500/20 transition-colors">
-                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-blue-400" />
+                  <div className="p-2.5 rounded-xl bg-surface-2 group-hover:bg-blue-500/20 transition-colors">
+                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-brand-blue" />
                   </div>
                   <div className="flex items-center gap-2">
                     {course.isFree ? (
@@ -135,10 +135,10 @@ export default function AILearningHubPage() {
                 </div>
 
                 {/* Title + description */}
-                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-blue-300 transition-colors">
+                <h3 className="font-semibold text-ink text-lg mb-2 group-hover:text-blue-300 transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-gray-400 text-sm mb-4 flex-1 leading-relaxed">
+                <p className="text-ink-2 text-sm mb-4 flex-1 leading-relaxed">
                   {course.description}
                 </p>
 
@@ -147,7 +147,7 @@ export default function AILearningHubPage() {
                   {course.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs text-gray-400 bg-white/5 px-2 py-0.5 rounded-md"
+                      className="text-xs text-ink-2 bg-surface-2 px-2 py-0.5 rounded-md"
                     >
                       {tag}
                     </span>
@@ -155,7 +155,7 @@ export default function AILearningHubPage() {
                 </div>
 
                 {/* Stats row */}
-                <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-white/10 pt-4 mb-4">
+                <div className="flex items-center gap-4 text-xs text-ink-2 border-t border-border pt-4 mb-4">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {course.duration}
@@ -176,7 +176,7 @@ export default function AILearningHubPage() {
 
                 {/* Inline CTA (not a nested link — card itself is the link) */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-blue-400 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                  <span className="text-sm text-brand-blue font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                     {course.isFree ? "Start free course" : "View course"}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
@@ -189,12 +189,12 @@ export default function AILearningHubPage() {
 
       {/* ── Pricing nudge ────────────────────────────────────────────────── */}
       <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-900/30 to-purple-900/20 border border-blue-500/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="rounded-2xl bg-brand-blue/5 border border-brand-blue/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-xl font-bold text-white mb-1">
+            <h3 className="text-xl font-bold text-ink mb-1">
               Need personalised AI guidance?
             </h3>
-            <p className="text-gray-400 text-sm max-w-md">
+            <p className="text-ink-2 text-sm max-w-md">
               Unlock one-on-one strategic support with our Premium AI Guidance plan —
               advanced implementation help across tools, workflows, and AI projects.
             </p>
@@ -214,8 +214,8 @@ export default function AILearningHubPage() {
       >
         <div className="mb-8">
           <Badge variant="purple" className="mb-3">Curated directory</Badge>
-          <h2 className="text-3xl font-bold text-white">AI Tools Directory</h2>
-          <p className="text-gray-400 mt-2">
+          <h2 className="text-3xl font-bold text-ink">AI Tools Directory</h2>
+          <p className="text-ink-2 mt-2">
             The best AI tools, ranked and explained so you know what to reach for.
           </p>
         </div>
@@ -224,10 +224,10 @@ export default function AILearningHubPage() {
           {AI_TOOLS.map((tool) => (
             <div
               key={tool.name}
-              className="rounded-2xl p-5 border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+              className="rounded-2xl p-5 border border-border bg-surface-2 hover:bg-surface-2 transition-colors"
             >
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-white">{tool.name}</h3>
+                <h3 className="font-semibold text-ink">{tool.name}</h3>
                 <Badge
                   variant={
                     tool.pricing === "free"
@@ -244,7 +244,7 @@ export default function AILearningHubPage() {
               <Badge variant="default" size="sm" className="mb-3">
                 {tool.category}
               </Badge>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-ink-2 text-sm leading-relaxed">
                 {tool.description}
               </p>
             </div>

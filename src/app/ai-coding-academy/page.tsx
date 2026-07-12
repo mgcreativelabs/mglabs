@@ -78,13 +78,13 @@ export default function AICodingAcademyPage() {
         <Badge variant="blue" className="mb-5">
           <Code className="h-3 w-3" /> Build with AI
         </Badge>
-        <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-bold text-ink mb-5 leading-tight">
           AI Coding{" "}
-          <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          <span className="text-brand-blue">
             Academy
           </span>
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
           Ship real products. From your first HTML tag to a production-deployed
           SaaS — with AI accelerating every step.
         </p>
@@ -104,15 +104,15 @@ export default function AICodingAcademyPage() {
 
       {/* ── Quick stats ──────────────────────────────────────────────────── */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-16">
-        <div className="grid grid-cols-3 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/[0.06]">
+        <div className="grid grid-cols-3 gap-px bg-surface-2 rounded-2xl overflow-hidden border border-border">
           {[
             { n: courses.length.toString(), label: "Courses" },
             { n: `${totalLessons}+`,        label: "Lessons" },
             { n: "Free",                    label: "To start" },
           ].map((s) => (
-            <div key={s.label} className="bg-black/20 px-6 py-5 text-center">
-              <div className="text-2xl font-bold text-white">{s.n}</div>
-              <div className="text-xs text-gray-600 mt-0.5 uppercase tracking-wider">
+            <div key={s.label} className="bg-surface-1 px-6 py-5 text-center">
+              <div className="text-2xl font-bold text-ink">{s.n}</div>
+              <div className="text-xs text-ink-muted mt-0.5 uppercase tracking-wider">
                 {s.label}
               </div>
             </div>
@@ -124,8 +124,8 @@ export default function AICodingAcademyPage() {
       <section className="py-8 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white">All Courses</h2>
-            <p className="text-gray-500 text-sm mt-1">
+            <h2 className="text-2xl font-bold text-ink">All Courses</h2>
+            <p className="text-ink-muted text-sm mt-1">
               Start from zero or jump to the level you need.
             </p>
           </div>
@@ -139,10 +139,10 @@ export default function AICodingAcademyPage() {
               href={`/courses/${course.slug}`}
               className="group block"
             >
-              <Card className="border border-white/10 bg-white/5 p-6 rounded-2xl flex flex-col h-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200">
+              <Card className="border border-border bg-surface-2 p-6 rounded-2xl flex flex-col h-full hover:bg-surface-2 hover:border-border-strong transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-2.5 rounded-xl bg-white/10 group-hover:bg-cyan-500/20 transition-colors">
-                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-cyan-400" />
+                  <div className="p-2.5 rounded-xl bg-surface-2 group-hover:bg-brand-blue/10 transition-colors">
+                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-brand-blue" />
                   </div>
                   <div className="flex items-center gap-2">
                     {course.isFree ? (
@@ -154,10 +154,10 @@ export default function AICodingAcademyPage() {
                   </div>
                 </div>
 
-                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-cyan-300 transition-colors">
+                <h3 className="font-semibold text-ink text-lg mb-2 group-hover:text-brand-blue transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-gray-400 text-sm mb-4 flex-1 leading-relaxed">
+                <p className="text-ink-2 text-sm mb-4 flex-1 leading-relaxed">
                   {course.description}
                 </p>
 
@@ -165,14 +165,14 @@ export default function AICodingAcademyPage() {
                   {course.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs text-cyan-400/80 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20"
+                      className="text-xs text-brand-blue/80 bg-brand-blue/10 px-2 py-0.5 rounded-md border border-brand-blue/20"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-white/10 pt-4 mb-4">
+                <div className="flex items-center gap-4 text-xs text-ink-2 border-t border-border pt-4 mb-4">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />{course.duration}
                   </span>
@@ -189,7 +189,7 @@ export default function AICodingAcademyPage() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-cyan-400 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                  <span className="text-sm text-brand-blue font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                     {course.isFree ? "Start free" : "View course"}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
@@ -205,13 +205,13 @@ export default function AICodingAcademyPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <Badge variant="purple" className="mb-4">Project-based learning</Badge>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-ink mb-4">
               Build{" "}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              <span className="text-brand-blue">
                 {PROJECTS.length} real projects
               </span>
             </h2>
-            <p className="text-gray-400 leading-relaxed mb-8">
+            <p className="text-ink-2 leading-relaxed mb-8">
               Every course ends with a deployable capstone project.
               No toy examples — real apps with real architecture that you can
               put in a portfolio and grow into a business.
@@ -238,10 +238,10 @@ export default function AICodingAcademyPage() {
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-cyan-500/30 transition-colors"
+                className="flex items-center gap-3 p-4 rounded-xl bg-surface-2 border border-border hover:border-brand-blue/30 transition-colors"
               >
                 <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                <span className="text-gray-300 text-sm">{project}</span>
+                <span className="text-ink-2 text-sm">{project}</span>
               </div>
             ))}
           </div>
@@ -250,23 +250,23 @@ export default function AICodingAcademyPage() {
 
       {/* ── Learning path note ───────────────────────────────────────────── */}
       <section className="py-8 px-4 sm:px-6 max-w-6xl mx-auto pb-24">
-        <div className="rounded-2xl bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-500/20 p-8">
+        <div className="rounded-2xl bg-surface-1 border border-brand-blue/20 p-8">
           <div className="flex items-start gap-4">
-            <div className="p-2.5 rounded-xl bg-cyan-500/20 flex-shrink-0">
-              <BookOpen className="h-5 w-5 text-cyan-400" />
+            <div className="p-2.5 rounded-xl bg-brand-blue/10 flex-shrink-0">
+              <BookOpen className="h-5 w-5 text-brand-blue" />
             </div>
             <div>
-              <h3 className="font-bold text-white mb-1.5">Recommended learning path</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              <h3 className="font-bold text-ink mb-1.5">Recommended learning path</h3>
+              <p className="text-ink-2 text-sm leading-relaxed mb-4">
                 New to coding? Follow the path in order:&nbsp;
-                <strong className="text-white">HTML &amp; CSS</strong> →{" "}
-                <strong className="text-white">JavaScript</strong> →{" "}
-                <strong className="text-white">APIs</strong> →{" "}
-                <strong className="text-white">Python for AI</strong> →{" "}
-                <strong className="text-white">React</strong> →{" "}
-                <strong className="text-white">Git</strong> →{" "}
-                <strong className="text-white">Databases</strong> →{" "}
-                <strong className="text-white">Full-Stack with AI</strong>.
+                <strong className="text-ink">HTML &amp; CSS</strong> →{" "}
+                <strong className="text-ink">JavaScript</strong> →{" "}
+                <strong className="text-ink">APIs</strong> →{" "}
+                <strong className="text-ink">Python for AI</strong> →{" "}
+                <strong className="text-ink">React</strong> →{" "}
+                <strong className="text-ink">Git</strong> →{" "}
+                <strong className="text-ink">Databases</strong> →{" "}
+                <strong className="text-ink">Full-Stack with AI</strong>.
                 Already have experience? Jump to any course directly.
               </p>
               <Link href="/ai-learning-hub">

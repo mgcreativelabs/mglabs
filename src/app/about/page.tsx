@@ -65,11 +65,11 @@ export default async function AboutPage() {
       {/* Hero */}
       <section className="py-24 px-4 sm:px-6 max-w-4xl mx-auto text-center mesh-bg">
         <Badge variant="blue" className="mb-5">Our story</Badge>
-        <h1 className="text-5xl sm:text-6xl font-display font-bold text-white mb-6 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-display font-bold text-ink mb-6 leading-tight">
           We believe AI education{" "}
           <span className="text-gradient">should be accessible</span>.
         </h1>
-        <p className="text-gray-400 text-xl leading-relaxed max-w-2xl mx-auto">
+        <p className="text-ink-2 text-xl leading-relaxed max-w-2xl mx-auto">
           MG Creative Labs was built by creators who were frustrated with bad AI courses, overwhelming jargon, and paywalled tutorials. We&apos;re fixing that — one lesson at a time.
         </p>
       </section>
@@ -79,21 +79,21 @@ export default async function AboutPage() {
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
             <Badge variant="purple" className="mb-4">Mission</Badge>
-            <h2 className="text-3xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl font-display font-bold text-ink mb-4">
               Helping the next generation master AI
             </h2>
-            <p className="text-gray-400 leading-relaxed mb-4">
+            <p className="text-ink-2 leading-relaxed mb-4">
               The world is being reshaped by AI. The people who understand it will build the future. The people who don&apos;t will be left behind.
             </p>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-ink-2 leading-relaxed">
               Our mission is to make sure every student, freelancer, entrepreneur, and developer has access to world-class AI education — regardless of background or budget.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {missionStats.map((s) => (
-              <div key={s.label} className="glass rounded-2xl p-6 text-center border border-white/[0.06]">
-                <div className="text-3xl font-display font-bold text-white mb-1">{s.n}</div>
-                <div className="text-xs text-gray-600">{s.label}</div>
+              <div key={s.label} className="glass rounded-2xl p-6 text-center border border-border">
+                <div className="text-3xl font-display font-bold text-ink mb-1">{s.n}</div>
+                <div className="text-xs text-ink-muted">{s.label}</div>
               </div>
             ))}
           </div>
@@ -104,18 +104,18 @@ export default async function AboutPage() {
       <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <Badge variant="blue" className="mb-4">Values</Badge>
-          <h2 className="text-3xl font-display font-bold text-white">How we think</h2>
+          <h2 className="text-3xl font-display font-bold text-ink">How we think</h2>
         </div>
         <div className="grid md:grid-cols-2 gap-5">
           {values.map((v) => (
-            <div key={v.title} className="glass rounded-2xl p-6 border border-white/[0.06]">
+            <div key={v.title} className="glass rounded-2xl p-6 border border-border">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-xl bg-surface-3">
                   <v.icon className="h-5 w-5 text-brand-blue" />
                 </div>
-                <h3 className="font-semibold text-white">{v.title}</h3>
+                <h3 className="font-semibold text-ink">{v.title}</h3>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">{v.description}</p>
+              <p className="text-ink-muted text-sm leading-relaxed">{v.description}</p>
             </div>
           ))}
         </div>
@@ -125,10 +125,10 @@ export default async function AboutPage() {
       <section className="py-16 px-4 sm:px-6 max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <Badge variant="purple" className="mb-4">Journey</Badge>
-          <h2 className="text-3xl font-display font-bold text-white">How we got here</h2>
+          <h2 className="text-3xl font-display font-bold text-ink">How we got here</h2>
         </div>
         <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-brand-blue/50 to-brand-purple/20" />
+          <div className="absolute left-4 top-0 bottom-0 w-px bg-brand-blue/30" />
           <div className="space-y-8">
             {timeline.map((item) => (
               <div key={item.year} className="flex gap-6 pl-10 relative">
@@ -137,7 +137,7 @@ export default async function AboutPage() {
                 </div>
                 <div>
                   <div className="text-xs font-mono text-brand-blue mb-1">{item.year}</div>
-                  <p className="text-gray-400 text-sm leading-relaxed">{item.event}</p>
+                  <p className="text-ink-2 text-sm leading-relaxed">{item.event}</p>
                 </div>
               </div>
             ))}
@@ -147,8 +147,8 @@ export default async function AboutPage() {
 
       {/* CTA */}
       <section className="py-16 px-4 sm:px-6 text-center max-w-2xl mx-auto">
-        <h2 className="text-3xl font-display font-bold text-white mb-4">Join us on the mission</h2>
-        <p className="text-gray-500 mb-8">Start learning today — it&apos;s completely free.</p>
+        <h2 className="text-3xl font-display font-bold text-ink mb-4">Join us on the mission</h2>
+        <p className="text-ink-muted mb-8">Start learning today — it&apos;s completely free.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/signup">
             <Button size="lg" variant="primary" rightIcon={<ArrowRight className="h-4 w-4" />}>

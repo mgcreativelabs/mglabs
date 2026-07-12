@@ -83,13 +83,13 @@ export default function AIDesignAcademyPage() {
         <Badge variant="purple" className="mb-5">
           <Palette className="h-3 w-3" /> Creative &amp; Automation
         </Badge>
-        <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-bold text-ink mb-5 leading-tight">
           Design &amp; Automation{" "}
-          <span className="bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
+          <span className="text-pink-500">
             Academy
           </span>
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto leading-relaxed mb-8">
           No design degree needed. Create stunning visuals, brand identities,
           and powerful automations — then get paid for them.
         </p>
@@ -109,15 +109,15 @@ export default function AIDesignAcademyPage() {
 
       {/* ── Quick stats ──────────────────────────────────────────────────── */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-16">
-        <div className="grid grid-cols-3 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/[0.06]">
+        <div className="grid grid-cols-3 gap-px bg-surface-2 rounded-2xl overflow-hidden border border-border">
           {[
             { n: courses.length.toString(), label: "Courses" },
             { n: `${totalLessons}+`,        label: "Lessons" },
             { n: "Free",                    label: "To start" },
           ].map((s) => (
-            <div key={s.label} className="bg-black/20 px-6 py-5 text-center">
-              <div className="text-2xl font-bold text-white">{s.n}</div>
-              <div className="text-xs text-gray-600 mt-0.5 uppercase tracking-wider">
+            <div key={s.label} className="bg-surface-1 px-6 py-5 text-center">
+              <div className="text-2xl font-bold text-ink">{s.n}</div>
+              <div className="text-xs text-ink-muted mt-0.5 uppercase tracking-wider">
                 {s.label}
               </div>
             </div>
@@ -129,8 +129,8 @@ export default function AIDesignAcademyPage() {
       <section className="py-8 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="mb-8">
           <Badge variant="blue" className="mb-3">Curriculum</Badge>
-          <h2 className="text-2xl font-bold text-white">All Courses</h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <h2 className="text-2xl font-bold text-ink">All Courses</h2>
+          <p className="text-ink-muted text-sm mt-1">
             Design. Brand. Automate. Each course is standalone — start anywhere.
           </p>
         </div>
@@ -142,10 +142,10 @@ export default function AIDesignAcademyPage() {
               href={`/courses/${course.slug}`}
               className="group block"
             >
-              <Card className="border border-white/10 bg-white/5 p-6 rounded-2xl flex flex-col h-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-200">
+              <Card className="border border-border bg-surface-2 p-6 rounded-2xl flex flex-col h-full hover:bg-surface-2 hover:border-border-strong transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-2.5 rounded-xl bg-white/10 group-hover:bg-pink-500/20 transition-colors">
-                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-pink-400" />
+                  <div className="p-2.5 rounded-xl bg-surface-2 group-hover:bg-pink-100 transition-colors">
+                    <CourseIcon iconKey={course.iconKey} className="h-5 w-5 text-pink-600" />
                   </div>
                   <div className="flex items-center gap-2">
                     {course.isFree ? (
@@ -157,10 +157,10 @@ export default function AIDesignAcademyPage() {
                   </div>
                 </div>
 
-                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-pink-300 transition-colors">
+                <h3 className="font-semibold text-ink text-lg mb-2 group-hover:text-pink-600 transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-gray-400 text-sm mb-4 flex-1 leading-relaxed">
+                <p className="text-ink-2 text-sm mb-4 flex-1 leading-relaxed">
                   {course.description}
                 </p>
 
@@ -168,14 +168,14 @@ export default function AIDesignAcademyPage() {
                   {course.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs text-pink-400/80 bg-pink-500/10 px-2 py-0.5 rounded-md border border-pink-500/20"
+                      className="text-xs text-pink-600/80 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-white/10 pt-4 mb-4">
+                <div className="flex items-center gap-4 text-xs text-ink-2 border-t border-border pt-4 mb-4">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />{course.duration}
                   </span>
@@ -191,7 +191,7 @@ export default function AIDesignAcademyPage() {
                   </span>
                 </div>
 
-                <span className="text-sm text-pink-400 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                <span className="text-sm text-pink-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                   {course.isFree ? "Start free course" : "View course"}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
@@ -206,14 +206,14 @@ export default function AIDesignAcademyPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <Badge variant="purple" className="mb-4">Skills you will master</Badge>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-ink mb-4">
               From zero to{" "}
-              <span className="bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
+              <span className="text-pink-500">
                 professional designer
               </span>
               {" "}— with AI
             </h2>
-            <p className="text-gray-400 leading-relaxed mb-8">
+            <p className="text-ink-2 leading-relaxed mb-8">
               Every skill is taught with hands-on projects and real-world
               examples. You will not just watch — you will create and ship.
             </p>
@@ -235,10 +235,10 @@ export default function AIDesignAcademyPage() {
             {SKILLS.map((skill, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-pink-500/30 transition-colors"
+                className="flex items-center gap-3 p-4 rounded-xl bg-surface-2 border border-border hover:border-pink-300 transition-colors"
               >
                 <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                <span className="text-gray-300 text-sm">{skill}</span>
+                <span className="text-ink-2 text-sm">{skill}</span>
               </div>
             ))}
           </div>
@@ -247,12 +247,12 @@ export default function AIDesignAcademyPage() {
 
       {/* ── Premium nudge ────────────────────────────────────────────────── */}
       <section className="py-8 px-4 sm:px-6 max-w-6xl mx-auto pb-24">
-        <div className="rounded-2xl bg-gradient-to-br from-purple-900/30 to-pink-900/20 border border-purple-500/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="rounded-2xl bg-pink-50 border border-pink-200 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-xl font-bold text-white mb-1">
+            <h3 className="text-xl font-bold text-ink mb-1">
               Want hands-on guidance with your AI projects?
             </h3>
-            <p className="text-gray-400 text-sm max-w-md">
+            <p className="text-ink-2 text-sm max-w-md">
               Our Premium AI Guidance plan provides one-on-one strategic support
               for your design, automation, and AI implementation projects.
             </p>

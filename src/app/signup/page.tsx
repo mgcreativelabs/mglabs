@@ -44,8 +44,8 @@ export default function SignupPage() {
           <div className="h-16 w-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="h-8 w-8 text-green-400" />
           </div>
-          <h1 className="text-2xl font-display font-bold text-white mb-3">Check your inbox!</h1>
-          <p className="text-gray-400 mb-6">We sent a confirmation link to <strong className="text-white">{form.email}</strong>. Click it to activate your account.</p>
+          <h1 className="text-2xl font-display font-bold text-ink mb-3">Check your inbox!</h1>
+          <p className="text-ink-2 mb-6">We sent a confirmation link to <strong className="text-ink">{form.email}</strong>. Click it to activate your account.</p>
           <Link href="/login"><Button variant="primary" size="lg">Go to sign in</Button></Link>
         </div>
       </div>
@@ -58,20 +58,20 @@ export default function SignupPage() {
         {/* Left: Perks */}
         <div className="hidden md:block pt-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-8">
-            <div className="h-9 w-9 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30">
+            <div className="h-9 w-9 rounded-xl bg-brand-blue flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-lg">MG <span className="text-gradient">Creative Labs</span></span>
+            <span className="font-display font-bold text-ink text-lg">MG <span className="text-gradient">Creative Labs</span></span>
           </Link>
-          <h2 className="text-3xl font-display font-bold text-white mb-3 leading-tight">
+          <h2 className="text-3xl font-display font-bold text-ink mb-3 leading-tight">
             Start your AI journey today
           </h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
+          <p className="text-ink-muted mb-8 leading-relaxed">
             Join the creators mastering AI tools, prompt engineering, and automation. Free forever.
           </p>
           <ul className="space-y-3">
             {PERKS.map((perk) => (
-              <li key={perk} className="flex items-center gap-3 text-gray-300 text-sm">
+              <li key={perk} className="flex items-center gap-3 text-ink-2 text-sm">
                 <div className="h-5 w-5 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="h-3 w-3 text-green-400" />
                 </div>
@@ -85,15 +85,15 @@ export default function SignupPage() {
         <div>
           <div className="text-center mb-6 md:hidden">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-xl bg-gradient-brand flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-brand-blue flex items-center justify-center">
                 <Zap className="h-4 w-4 text-white" />
               </div>
-              <span className="font-display font-bold text-white">MG Creative Labs</span>
+              <span className="font-display font-bold text-ink">MG Creative Labs</span>
             </Link>
           </div>
-          <div className="glass rounded-3xl p-8 border border-white/[0.06]">
-            <h1 className="text-xl font-display font-bold text-white mb-1">Create your free account</h1>
-            <p className="text-gray-500 text-sm mb-6">No credit card required</p>
+          <div className="glass rounded-3xl p-8 border border-border">
+            <h1 className="text-xl font-display font-bold text-ink mb-1">Create your free account</h1>
+            <p className="text-ink-muted text-sm mb-6">No credit card required</p>
 
             <Button variant="secondary" className="w-full mb-5" size="lg"
               onClick={() => signInWithGoogle()}
@@ -109,9 +109,9 @@ export default function SignupPage() {
             </Button>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-white/[0.06]" />
-              <span className="text-xs text-gray-600">or with email</span>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+              <div className="flex-1 h-px bg-surface-2" />
+              <span className="text-xs text-ink-muted">or with email</span>
+              <div className="flex-1 h-px bg-surface-2" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,14 +135,14 @@ export default function SignupPage() {
               <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading}>
                 Create free account
               </Button>
-              <p className="text-xs text-gray-600 text-center">
+              <p className="text-xs text-ink-muted text-center">
                 By signing up you agree to our{" "}
-                <Link href="/terms" className="text-gray-500 hover:text-white">Terms</Link> and{" "}
-                <Link href="/privacy" className="text-gray-500 hover:text-white">Privacy Policy</Link>.
+                <Link href="/terms" className="text-ink-muted hover:text-ink">Terms</Link> and{" "}
+                <Link href="/privacy" className="text-ink-muted hover:text-ink">Privacy Policy</Link>.
               </p>
             </form>
           </div>
-          <p className="text-center text-sm text-gray-600 mt-4">
+          <p className="text-center text-sm text-ink-muted mt-4">
             Already have an account?{" "}
             <Link href="/login" className="text-brand-blue hover:underline font-medium">Sign in</Link>
           </p>

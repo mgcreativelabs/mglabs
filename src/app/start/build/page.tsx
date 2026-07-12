@@ -197,7 +197,7 @@ export default function BuildPage() {
     <div className="min-h-screen bg-surface">
 
       {/* ── Progress bar ── */}
-      <div className="sticky top-16 z-40 bg-surface/90 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className="sticky top-16 z-40 bg-surface/90 backdrop-blur-xl border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {steps.map((s, i) => (
@@ -207,20 +207,20 @@ export default function BuildPage() {
                     step > s.n
                       ? "bg-green-500 text-white"
                       : step === s.n
-                      ? "bg-gradient-brand text-white"
-                      : "bg-surface-3 text-gray-600"
+                      ? "bg-brand-blue text-white hover:bg-brand-blue-hover"
+                      : "bg-surface-3 text-ink-muted"
                   }`}>
                     {step > s.n ? <CheckCircle2 className="w-4 h-4" /> : s.n}
                   </div>
                   <span className={`text-xs font-medium hidden sm:block ${
-                    step === s.n ? "text-white" : step > s.n ? "text-green-400" : "text-gray-600"
+                    step === s.n ? "text-ink" : step > s.n ? "text-green-400" : "text-ink-muted"
                   }`}>
                     {s.label}
                   </span>
                 </div>
                 {i < steps.length - 1 && (
                   <div className={`flex-1 h-px mx-2 transition-colors duration-500 ${
-                    step > s.n ? "bg-green-500/50" : "bg-white/[0.07]"
+                    step > s.n ? "bg-green-500/50" : "bg-surface-2"
                   }`} />
                 )}
               </React.Fragment>
@@ -236,10 +236,10 @@ export default function BuildPage() {
           <div className="animate-fade-up">
             <div className="text-center mb-10">
               <div className="text-brand-blue text-xs font-bold uppercase tracking-widest mb-3">Step 1 of 4</div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              <h1 className="text-3xl sm:text-4xl font-bold text-ink mb-3">
                 What kind of AI tool do you want to build?
               </h1>
-              <p className="text-gray-400">Pick one. You can always build a different one later.</p>
+              <p className="text-ink-2">Pick one. You can always build a different one later.</p>
             </div>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -247,14 +247,14 @@ export default function BuildPage() {
                 <button
                   key={type.id}
                   onClick={() => handleTypeSelect(type.id)}
-                  className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all duration-200 text-left flex flex-col gap-3"
+                  className="group p-6 rounded-2xl bg-surface-2 border border-border hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all duration-200 text-left flex flex-col gap-3"
                 >
                   <div className="w-12 h-12 rounded-xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue group-hover:bg-brand-blue/20 transition-colors">
                     {type.icon}
                   </div>
                   <div>
-                    <div className="font-semibold text-white mb-1">{type.label}</div>
-                    <div className="text-gray-400 text-sm leading-relaxed">{type.desc}</div>
+                    <div className="font-semibold text-ink mb-1">{type.label}</div>
+                    <div className="text-ink-2 text-sm leading-relaxed">{type.desc}</div>
                   </div>
                   <div className="mt-auto flex items-center gap-1.5 text-brand-blue text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                     Select <ArrowRight className="w-3.5 h-3.5" />
@@ -270,10 +270,10 @@ export default function BuildPage() {
           <div className="animate-fade-up">
             <div className="text-center mb-10">
               <div className="text-brand-blue text-xs font-bold uppercase tracking-widest mb-3">Step 2 of 4</div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              <h1 className="text-3xl sm:text-4xl font-bold text-ink mb-3">
                 How should your AI behave?
               </h1>
-              <p className="text-gray-400">This defines your AI&apos;s personality and purpose.</p>
+              <p className="text-ink-2">This defines your AI&apos;s personality and purpose.</p>
             </div>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -281,11 +281,11 @@ export default function BuildPage() {
                 <button
                   key={b.id}
                   onClick={() => handleBehaviorSelect(b.id)}
-                  className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:border-brand-purple/50 hover:bg-brand-purple/5 transition-all duration-200 text-left flex flex-col gap-2"
+                  className="group p-6 rounded-2xl bg-surface-2 border border-border hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all duration-200 text-left flex flex-col gap-2"
                 >
-                  <div className="font-semibold text-white">{b.label}</div>
-                  <div className="text-gray-400 text-sm leading-relaxed">{b.desc}</div>
-                  <div className="mt-3 flex items-center gap-1.5 text-brand-purple text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="font-semibold text-ink">{b.label}</div>
+                  <div className="text-ink-2 text-sm leading-relaxed">{b.desc}</div>
+                  <div className="mt-3 flex items-center gap-1.5 text-brand-blue text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                     Choose this <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </button>
@@ -294,7 +294,7 @@ export default function BuildPage() {
 
             <button
               onClick={() => setStep(1)}
-              className="mt-6 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+              className="mt-6 text-sm text-ink-muted hover:text-ink-2 transition-colors"
             >
               ← Back to AI type
             </button>
@@ -306,24 +306,24 @@ export default function BuildPage() {
           <div className="animate-fade-up">
             <div className="text-center mb-6">
               <div className="text-brand-blue text-xs font-bold uppercase tracking-widest mb-2">Step 3 of 4</div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-ink mb-2">
                 Talk to your AI — it&apos;s live.
               </h1>
-              <p className="text-gray-400 text-sm">
+              <p className="text-ink-2 text-sm">
                 This is powered by a real AI model. What you&apos;re seeing is actual AI responding to you.
               </p>
             </div>
 
             {/* AI info bar */}
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.07] mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-2 border border-border mb-4">
+              <div className="w-8 h-8 rounded-lg bg-brand-blue flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-white text-sm font-semibold">
+                <div className="text-ink text-sm font-semibold">
                   {behaviorOptions[selectedType].find(b => b.id === selectedBehavior)?.label ?? "Your AI"}
                 </div>
-                <div className="text-gray-500 text-xs">Powered by Groq · Llama 3.3 70B</div>
+                <div className="text-ink-muted text-xs">Powered by Groq · Llama 3.3 70B</div>
               </div>
               <div className="ml-auto flex items-center gap-1.5 text-xs text-green-400">
                 <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse" />
@@ -332,24 +332,24 @@ export default function BuildPage() {
             </div>
 
             {/* Chat window */}
-            <div className="rounded-2xl bg-white/[0.02] border border-white/[0.07] overflow-hidden">
+            <div className="rounded-2xl bg-surface-2 border border-border overflow-hidden">
               <div className="h-[400px] overflow-y-auto p-4 space-y-4">
                 {messages.map((msg, i) => (
                   <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                       msg.role === "assistant"
-                        ? "bg-gradient-brand"
-                        : "bg-surface-3 border border-white/10"
+                        ? "bg-brand-blue"
+                        : "bg-surface-3 border border-border"
                     }`}>
                       {msg.role === "assistant"
                         ? <Bot className="w-4 h-4 text-white" />
-                        : <User className="w-4 h-4 text-gray-400" />
+                        : <User className="w-4 h-4 text-ink-2" />
                       }
                     </div>
                     <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                       msg.role === "assistant"
-                        ? "bg-surface-2 text-gray-200 rounded-tl-sm"
-                        : "bg-brand-blue/20 text-white rounded-tr-sm"
+                        ? "bg-surface-2 text-ink rounded-tl-sm"
+                        : "bg-brand-blue text-white rounded-tr-sm"
                     }`}>
                       {msg.content}
                     </div>
@@ -358,12 +358,12 @@ export default function BuildPage() {
 
                 {loading && (
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center">
                       <Bot className="w-4 h-4 text-white" />
                     </div>
                     <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-surface-2 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                      <span className="text-gray-500 text-sm">Thinking...</span>
+                      <Loader2 className="w-4 h-4 text-ink-2 animate-spin" />
+                      <span className="text-ink-muted text-sm">Thinking...</span>
                     </div>
                   </div>
                 )}
@@ -371,7 +371,7 @@ export default function BuildPage() {
               </div>
 
               {/* Input area */}
-              <div className="border-t border-white/[0.06] p-3">
+              <div className="border-t border-border p-3">
                 {/* Suggested prompts */}
                 {messages.length < 3 && (
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -379,7 +379,7 @@ export default function BuildPage() {
                       <button
                         key={s}
                         onClick={() => sendMessage(s)}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-surface-3 border border-white/[0.07] text-gray-400 hover:text-white hover:border-brand-blue/30 transition-all"
+                        className="text-xs px-3 py-1.5 rounded-lg bg-surface-3 border border-border text-ink-2 hover:text-ink hover:border-brand-blue/30 transition-all"
                       >
                         {s.length > 50 ? s.slice(0, 48) + "…" : s}
                       </button>
@@ -395,12 +395,12 @@ export default function BuildPage() {
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
                     disabled={loading}
-                    className="flex-1 bg-surface-3 border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-blue/50 transition-colors disabled:opacity-50"
+                    className="flex-1 bg-surface-3 border border-border rounded-xl px-4 py-2.5 text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand-blue/50 transition-colors disabled:opacity-50"
                   />
                   <button
                     onClick={() => sendMessage(input)}
                     disabled={loading || !input.trim()}
-                    className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center disabled:opacity-40 hover:scale-[1.05] transition-transform"
+                    className="w-10 h-10 rounded-xl bg-brand-blue flex items-center justify-center disabled:opacity-40 hover:scale-[1.05] transition-transform"
                     aria-label="Send message"
                   >
                     <Send className="w-4 h-4 text-white" />
@@ -413,7 +413,7 @@ export default function BuildPage() {
             <div className="text-center mt-6">
               <button
                 onClick={() => setStep(4)}
-                className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-sm text-ink-muted hover:text-ink-2 transition-colors"
               >
                 Done testing → See what I built
               </button>
@@ -431,10 +431,10 @@ export default function BuildPage() {
               <span className="text-green-400 text-sm font-medium">You built your first AI tool</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-ink mb-4">
               You just built a working AI.
             </h1>
-            <p className="text-gray-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+            <p className="text-ink-2 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
               That AI you were just talking to? That&apos;s real. It&apos;s powered by Groq&apos;s Llama model.
               You defined its behavior. You tested it. You built it.
             </p>
@@ -446,19 +446,19 @@ export default function BuildPage() {
                 { label: "AI type built", value: aiTypes.find(t => t.id === selectedType)?.label ?? "AI Tool" },
                 { label: "Time to build", value: "< 5 min" },
               ].map((s) => (
-                <div key={s.label} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.07]">
-                  <div className="text-white font-bold text-sm">{s.value}</div>
-                  <div className="text-gray-600 text-xs mt-0.5">{s.label}</div>
+                <div key={s.label} className="p-3 rounded-xl bg-surface-2 border border-border">
+                  <div className="text-ink font-bold text-sm">{s.value}</div>
+                  <div className="text-ink-muted text-xs mt-0.5">{s.label}</div>
                 </div>
               ))}
             </div>
 
             <div className="max-w-xl mx-auto">
-              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.07] text-left mb-6">
-                <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider mb-3">
+              <div className="p-5 rounded-2xl bg-surface-2 border border-border text-left mb-6">
+                <p className="text-sm text-ink-muted font-semibold uppercase tracking-wider mb-3">
                   One thing to know
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-ink-2 text-sm leading-relaxed">
                   Your AI currently only runs inside MG Labs. It doesn&apos;t have its own URL.
                   You can&apos;t share it, deploy it, or turn it into a real product — yet.
                   That&apos;s the next step.
@@ -468,13 +468,13 @@ export default function BuildPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => router.push("/start/complete")}
-                  className="flex-1 py-3.5 px-5 bg-gradient-brand text-white rounded-xl font-semibold hover:scale-[1.02] transition-all shadow-lg shadow-brand-blue/30 flex items-center gap-2 justify-center"
+                  className="flex-1 py-3.5 px-5 bg-brand-blue text-white hover:bg-brand-blue-hover rounded-xl font-semibold hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
                 >
                   What happens next? <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => { setStep(1); setMessages([]); setMsgCount(0); }}
-                  className="flex-1 py-3.5 px-5 rounded-xl font-medium text-gray-300 border border-white/10 hover:border-white/20 hover:text-white transition-all"
+                  className="flex-1 py-3.5 px-5 rounded-xl font-medium text-ink-2 border border-border hover:border-border-strong hover:text-ink transition-all"
                 >
                   Build a different one
                 </button>

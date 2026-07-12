@@ -49,7 +49,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="glass rounded-3xl p-8 border border-white/[0.06]">
+    <div className="glass rounded-3xl p-8 border border-border">
       {/* Google OAuth */}
       <Button
         variant="secondary"
@@ -69,9 +69,9 @@ function LoginForm() {
       </Button>
 
       <div className="flex items-center gap-3 mb-5">
-        <div className="flex-1 h-px bg-white/[0.06]" />
-        <span className="text-xs text-gray-600">or</span>
-        <div className="flex-1 h-px bg-white/[0.06]" />
+        <div className="flex-1 h-px bg-surface-2" />
+        <span className="text-xs text-ink-muted">or</span>
+        <div className="flex-1 h-px bg-surface-2" />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,7 +106,7 @@ function LoginForm() {
         <div className="flex justify-end">
           <Link
             href="/reset-password"
-            className="text-xs text-gray-600 hover:text-brand-blue transition-colors"
+            className="text-xs text-ink-muted hover:text-brand-blue transition-colors"
           >
             Forgot password?
           </Link>
@@ -127,26 +127,26 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="h-9 w-9 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30">
+            <div className="h-9 w-9 rounded-xl bg-brand-blue flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-lg">
+            <span className="font-display font-bold text-ink text-lg">
               MG <span className="text-gradient">Creative Labs</span>
             </span>
           </Link>
-          <h1 className="text-2xl font-display font-bold text-white">Welcome back</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
+          <h1 className="text-2xl font-display font-bold text-ink">Welcome back</h1>
+          <p className="text-ink-muted text-sm mt-1">Sign in to your account</p>
         </div>
 
         <Suspense
           fallback={
-            <div className="glass rounded-3xl p-8 border border-white/[0.06] h-64 animate-pulse" />
+            <div className="glass rounded-3xl p-8 border border-border h-64 animate-pulse" />
           }
         >
           <LoginForm />
         </Suspense>
 
-        <p className="text-center text-sm text-gray-600 mt-5">
+        <p className="text-center text-sm text-ink-muted mt-5">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-brand-blue hover:underline font-medium">
             Create one free

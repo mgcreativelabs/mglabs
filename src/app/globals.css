@@ -7,22 +7,33 @@
    and fonts are now defined here so they're picked up correctly.
 ═══════════════════════════════════════════════════════════════ */
 @theme {
-  --color-brand-blue:   #3B82F6;
-  --color-brand-purple: #8B5CF6;
+  /* Brand */
+  --color-brand-blue:       #0071E3;
+  --color-brand-blue-hover: #005BB5;
 
-  --color-surface:   #0A0A0A;
-  --color-surface-1: #111111;
-  --color-surface-2: #1A1A1A;
-  --color-surface-3: #222222;
-  --color-surface-4: #2A2A2A;
+  /* Surfaces (light) */
+  --color-surface:    #FFFFFF;
+  --color-surface-1:  #FAFAFA;
+  --color-surface-2:  #F5F5F7;
+  --color-surface-3:  #EFEFF1;
+  --color-surface-4:  #E5E5E7;
+
+  /* Borders */
+  --color-border:        #E5E5E7;
+  --color-border-strong: #D2D2D7;
+
+  /* Text */
+  --color-ink:        #111111;
+  --color-ink-2:       #6E6E73;
+  --color-ink-muted:   #8E8E93;
+
+  /* Status */
+  --color-success: #34C759;
+  --color-warning: #FF9F0A;
+  --color-danger:  #FF3B30;
 
   --font-sans:    "Inter", system-ui, sans-serif;
   --font-display: "Inter", system-ui, sans-serif;
-
-  --background-image-gradient-brand:
-    linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-  --background-image-gradient-brand-subtle:
-    linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.15) 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -54,10 +65,10 @@
 
   :root {
     --font-inter: "Inter", system-ui, sans-serif;
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --radius: 0.75rem;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
+    --border: 240 6% 90%;
+    --radius: 0.875rem;
   }
 
   html {
@@ -67,20 +78,20 @@
   }
 
   body {
-    background-color: #0A0A0A;
-    color: #F9FAFB;
+    background-color: #FFFFFF;
+    color: #111111;
     font-family: var(--font-inter);
     overflow-x: hidden;
   }
 
   ::-webkit-scrollbar              { width: 6px; }
-  ::-webkit-scrollbar-track        { background: #111111; }
-  ::-webkit-scrollbar-thumb        { background: #333; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover  { background: #3B82F6; }
-  ::selection                      { background: rgba(59, 130, 246, 0.3); color: #fff; }
+  ::-webkit-scrollbar-track        { background: #FAFAFA; }
+  ::-webkit-scrollbar-thumb        { background: #D2D2D7; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover  { background: #0071E3; }
+  ::selection                      { background: rgba(0, 113, 227, 0.15); color: #111111; }
 
   :focus-visible {
-    outline: 2px solid #3B82F6;
+    outline: 2px solid #0071E3;
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -95,45 +106,45 @@
    backdrop-filter, box-shadow, etc.).
 ═══════════════════════════════════════════════════════════════ */
 
+/* Kept as a class for any component still referencing .text-gradient;
+   resolves to a solid brand color instead of a gradient, per the
+   "no gradient text unless necessary" rule. */
 .text-gradient {
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0071E3;
 }
 
+/* Kept as a class for compatibility with components still referencing
+   .glass; resolves to a plain elevated card, no blur/transparency. */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #FFFFFF;
+  border: 1px solid #E5E5E7;
 }
 
 .glass-hover:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(59, 130, 246, 0.2);
+  background: #FAFAFA;
+  border-color: #D2D2D7;
   transition: all 0.3s ease;
 }
 
-.glow-blue   { box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
-.glow-purple { box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
+/* Glow utilities kept as no-op-safe soft shadows (no colored glow) */
+.glow-blue,
+.glow-purple {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
 
+/* Mesh background kept as class for compatibility; resolves to the
+   plain secondary surface, no radial color blobs. */
 .mesh-bg {
-  background-color: #0A0A0A;
-  background-image:
-    radial-gradient(at 27% 37%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 97% 21%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 52% 99%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
-    radial-gradient(at 10% 29%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
+  background-color: #FAFAFA;
 }
 
 .card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  border-color: #D2D2D7;
 }
 
 /* ═══════════════════════════════════════════════════════════════

@@ -83,10 +83,10 @@ export default async function CommunityPage() {
         <Badge variant="blue" className="mb-5">
           <Users className="h-3 w-3" /> {membersLabel ? `${membersLabel} members` : "Now open"}
         </Badge>
-        <h1 className="text-5xl font-display font-bold text-white mb-5 leading-tight">
+        <h1 className="text-5xl font-display font-bold text-ink mb-5 leading-tight">
           The <span className="text-gradient">Community</span>
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto mb-8">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto mb-8">
           Share what you&apos;re building, ask questions, find collaborators, and grow with other AI creators.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -103,9 +103,9 @@ export default async function CommunityPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-10">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {communityStats.map((s) => (
-            <div key={s.label} className="glass rounded-2xl p-5 text-center border border-white/[0.06]">
-              <div className="text-2xl font-display font-bold text-white">{s.n}</div>
-              <div className="text-xs text-gray-600 mt-0.5">{s.label}</div>
+            <div key={s.label} className="glass rounded-2xl p-5 text-center border border-border">
+              <div className="text-2xl font-display font-bold text-ink">{s.n}</div>
+              <div className="text-xs text-ink-muted mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
@@ -114,13 +114,13 @@ export default async function CommunityPage() {
       <div id="discussions" className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 grid lg:grid-cols-4 gap-8 scroll-mt-20">
         {/* Sidebar */}
         <aside className="lg:col-span-1 space-y-4">
-          <Card className="border border-white/[0.06]">
-            <h3 className="text-sm font-semibold text-white mb-3">Categories</h3>
+          <Card className="border border-border">
+            <h3 className="text-sm font-semibold text-ink mb-3">Categories</h3>
             <div className="space-y-1">
               {CATEGORIES.map((cat) => (
                 <div
                   key={cat.value}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-ink-2"
                 >
                   <cat.icon className="h-4 w-4" />
                   {cat.label}
@@ -129,9 +129,9 @@ export default async function CommunityPage() {
             </div>
           </Card>
 
-          <Card className="border border-white/[0.06]">
-            <h3 className="text-sm font-semibold text-white mb-3">Community rules</h3>
-            <ul className="space-y-2 text-xs text-gray-600">
+          <Card className="border border-border">
+            <h3 className="text-sm font-semibold text-ink mb-3">Community rules</h3>
+            <ul className="space-y-2 text-xs text-ink-muted">
               <li>✅ Be respectful and helpful</li>
               <li>✅ Share knowledge freely</li>
               <li>✅ Celebrate others&apos; wins</li>
@@ -144,19 +144,19 @@ export default async function CommunityPage() {
         {/* Posts */}
         <main className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Latest Discussions</h2>
+            <h2 className="text-lg font-semibold text-ink">Latest Discussions</h2>
             <NewPostForm />
           </div>
 
           {posts.length === 0 ? (
-            <Card className="border border-white/[0.06] p-10 text-center">
-              <MessageSquare className="h-8 w-8 text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm mb-1">No discussions yet</p>
-              <p className="text-gray-600 text-xs">Be the first to share what you&apos;re building or ask a question.</p>
+            <Card className="border border-border p-10 text-center">
+              <MessageSquare className="h-8 w-8 text-ink-muted mx-auto mb-3" />
+              <p className="text-ink-2 text-sm mb-1">No discussions yet</p>
+              <p className="text-ink-muted text-xs">Be the first to share what you&apos;re building or ask a question.</p>
             </Card>
           ) : (
             posts.map((post) => (
-              <Card key={post.id} className="card-hover border border-white/[0.06] p-6">
+              <Card key={post.id} className="card-hover border border-border p-6">
                 <div className="flex items-start gap-3">
                   <Avatar fallback={post.profiles?.full_name ?? "?"} src={post.profiles?.avatar_url ?? undefined} size="sm" />
                   <div className="flex-1 min-w-0">
@@ -171,12 +171,12 @@ export default async function CommunityPage() {
                       </Badge>
                     </div>
 
-                    <h3 className="font-medium text-white text-sm leading-tight mb-2">
+                    <h3 className="font-medium text-ink text-sm leading-tight mb-2">
                       {post.title}
                     </h3>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span className="font-medium text-gray-500">{post.profiles?.full_name ?? "Member"}</span>
+                    <div className="flex items-center gap-4 text-xs text-ink-muted">
+                      <span className="font-medium text-ink-muted">{post.profiles?.full_name ?? "Member"}</span>
                       <span>{formatRelativeDate(post.created_at)}</span>
                       <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" />{post.likes_count}</span>
                       <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{post.replies_count}</span>

@@ -35,25 +35,25 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="h-9 w-9 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30">
+            <div className="h-9 w-9 rounded-xl bg-brand-blue flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-lg">MG <span className="text-gradient">Creative Labs</span></span>
+            <span className="font-display font-bold text-ink text-lg">MG <span className="text-gradient">Creative Labs</span></span>
           </Link>
-          <h1 className="text-2xl font-display font-bold text-white">Reset your password</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-2xl font-display font-bold text-ink">Reset your password</h1>
+          <p className="text-ink-muted text-sm mt-1">
             {sent ? "Check your inbox for a reset link" : "We'll email you a link to set a new password"}
           </p>
         </div>
 
-        <div className="glass rounded-3xl p-8 border border-white/[0.06]">
+        <div className="glass rounded-3xl p-8 border border-border">
           {sent ? (
             <div className="text-center">
               <div className="h-14 w-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-7 w-7 text-green-400" />
               </div>
-              <p className="text-gray-400 text-sm mb-6">
-                If an account exists for <strong className="text-white">{email}</strong>, a reset link is on its way. It'll expire in 1 hour.
+              <p className="text-ink-2 text-sm mb-6">
+                If an account exists for <strong className="text-ink">{email}</strong>, a reset link is on its way. It'll expire in 1 hour.
               </p>
               <Link href="/login">
                 <Button variant="secondary" size="lg" className="w-full">Back to sign in</Button>
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
           )}
         </div>
 
-        <Link href="/login" className="flex items-center justify-center gap-1.5 text-sm text-gray-600 hover:text-white transition-colors mt-5">
+        <Link href="/login" className="flex items-center justify-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors mt-5">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
         </Link>
       </div>

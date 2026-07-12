@@ -28,7 +28,7 @@ export function Avatar({ src, alt, fallback, size = "md", className }: AvatarPro
   return (
     <div
       className={cn(
-        "relative rounded-full overflow-hidden flex items-center justify-center bg-gradient-brand font-semibold text-white flex-shrink-0",
+        "relative rounded-full overflow-hidden flex items-center justify-center bg-brand-blue font-semibold text-white flex-shrink-0",
         sizeClasses[size],
         className
       )}

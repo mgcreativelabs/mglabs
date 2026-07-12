@@ -100,14 +100,14 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
   };
 
   return (
-    <div className="my-2 rounded-lg overflow-hidden border border-white/10 bg-[#282c34]">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-black/30 border-b border-white/10">
+    <div className="my-2 rounded-lg overflow-hidden border border-border bg-[#282c34]">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#21252b] border-b border-white/[0.06]">
         <span className="text-[11px] font-mono text-gray-400 lowercase">
           {lang || "text"}
         </span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-white transition-colors"
+          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200 transition-colors"
         >
           {copied ? (
             <>

@@ -99,11 +99,11 @@ export default function PricingPage() {
       {/* ── Header ── */}
       <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto text-center">
         <Badge variant="blue" className="mb-5">Transparent pricing</Badge>
-        <h1 className="text-5xl sm:text-6xl font-bold text-white mb-5 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-bold text-ink mb-5 leading-tight">
           Build something real,<br />
           <span className="text-gradient">starting today</span>.
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto">
           MG Labs is not a course platform. Every plan is built around one goal —
           helping you go from idea to a real, launched AI product.
         </p>
@@ -117,19 +117,19 @@ export default function PricingPage() {
               key={plan.id}
               className={`relative rounded-2xl p-7 flex flex-col transition-all duration-300 ${
                 plan.featured
-                  ? "bg-gradient-to-b from-brand-blue/20 via-surface-1 to-brand-purple/10 border-2 border-brand-blue/50 shadow-2xl shadow-brand-blue/20"
-                  : "bg-white/[0.03] border border-white/[0.07] hover:border-white/15"
+                  ? "bg-brand-blue/5 border-2 border-brand-blue/30"
+                  : "bg-surface-2 border border-border hover:border-border-strong"
               }`}
             >
               {/* Top glow for featured card */}
               {plan.featured && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-brand-blue/30" />
               )}
 
               {/* Badge */}
               {plan.badge && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-brand text-white shadow-lg">
+                  <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-brand-blue text-white hover:bg-brand-blue-hover ">
                     {plan.badge}
                   </span>
                 </div>
@@ -137,32 +137,32 @@ export default function PricingPage() {
 
               {/* Icon + Name */}
               <div className="flex items-center gap-2.5 mb-4">
-                <div className={`p-2 rounded-lg ${plan.featured ? "bg-brand-blue/20" : "bg-white/5"}`}>
-                  <plan.Icon className={`h-4 w-4 ${plan.featured ? "text-brand-blue" : "text-gray-400"}`} />
+                <div className={`p-2 rounded-lg ${plan.featured ? "bg-brand-blue/20" : "bg-surface-2"}`}>
+                  <plan.Icon className={`h-4 w-4 ${plan.featured ? "text-brand-blue" : "text-ink-2"}`} />
                 </div>
-                <span className="font-bold text-white text-lg">{plan.name}</span>
+                <span className="font-bold text-ink text-lg">{plan.name}</span>
               </div>
 
               {/* Price */}
               <div className="mb-0.5">
-                <span className="text-4xl font-black text-white">{plan.price}</span>
+                <span className="text-4xl font-black text-ink">{plan.price}</span>
                 {plan.period && (
-                  <span className="text-gray-500 text-sm ml-1">{plan.period}</span>
+                  <span className="text-ink-muted text-sm ml-1">{plan.period}</span>
                 )}
               </div>
-              <p className="text-xs text-gray-600 mb-3">{plan.note}</p>
+              <p className="text-xs text-ink-muted mb-3">{plan.note}</p>
 
               {/* Tagline */}
-              <p className={`text-sm font-semibold mb-5 ${plan.featured ? "text-brand-blue" : "text-gray-400"}`}>
+              <p className={`text-sm font-semibold mb-5 ${plan.featured ? "text-brand-blue" : "text-ink-2"}`}>
                 {plan.tagline}
               </p>
 
               {/* Who it's for */}
-              <div className="mb-5 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1.5">
+              <div className="mb-5 p-3.5 rounded-xl bg-surface-2 border border-border">
+                <p className="text-[10px] text-ink-muted font-bold uppercase tracking-wider mb-1.5">
                   Who this is for
                 </p>
-                <p className="text-xs text-gray-400 leading-relaxed">{plan.forWho}</p>
+                <p className="text-xs text-ink-2 leading-relaxed">{plan.forWho}</p>
               </div>
 
               {/* CTA — styled Link, no nested button */}
@@ -170,8 +170,8 @@ export default function PricingPage() {
                 href={plan.cta.href}
                 className={`mb-6 w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                   plan.featured
-                    ? "bg-gradient-brand text-white shadow-lg shadow-brand-blue/30 hover:scale-[1.02]"
-                    : "bg-white/5 text-gray-200 border border-white/10 hover:bg-white/10 hover:border-white/20"
+                    ? "bg-brand-blue text-white hover:bg-brand-blue-hover hover:scale-[1.02]"
+                    : "bg-surface-2 text-ink border border-border hover:bg-surface-2 hover:border-border-strong"
                 }`}
               >
                 {plan.cta.label}
@@ -187,7 +187,7 @@ export default function PricingPage() {
                         plan.featured ? "text-brand-blue" : "text-green-400"
                       }`}
                     />
-                    <span className="text-sm text-gray-300 leading-snug">{feature}</span>
+                    <span className="text-sm text-ink-2 leading-snug">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -195,7 +195,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <p className="text-center text-gray-700 text-xs mt-6">
+        <p className="text-center text-ink-muted text-xs mt-6">
           All plans include SSL, 99.9% uptime, and GDPR compliance. No hidden fees.
         </p>
       </section>
@@ -204,10 +204,10 @@ export default function PricingPage() {
       <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto" id="services">
         <div className="text-center mb-12">
           <Badge variant="purple" className="mb-4">Also available</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-ink mb-3">
             Need something done for you instead?
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
+          <p className="text-ink-2 max-w-xl mx-auto">
             Content production, freelance work, and ready-made digital products —
             separate from the AI Builder Platform.
           </p>
@@ -217,16 +217,16 @@ export default function PricingPage() {
 
       {/* ── Value comparison ── */}
       <section className="py-16 px-4 sm:px-6 max-w-3xl mx-auto" id="launch">
-        <div className="rounded-2xl bg-white/[0.02] border border-white/[0.07] p-10 text-center">
-          <p className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-3">The math</p>
-          <h2 className="text-3xl font-bold text-white mb-8">
+        <div className="rounded-2xl bg-surface-2 border border-border p-10 text-center">
+          <p className="text-ink-muted text-sm font-bold uppercase tracking-widest mb-3">The math</p>
+          <h2 className="text-3xl font-bold text-ink mb-8">
             The $500 Launch Program vs the alternatives
           </h2>
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div className="text-center p-4">
-              <div className="text-gray-600 text-xs uppercase tracking-wider mb-3">Hiring a developer</div>
-              <div className="text-2xl font-bold text-gray-400 mb-2">$3,000+</div>
-              <div className="text-xs text-gray-600 leading-relaxed">
+              <div className="text-ink-muted text-xs uppercase tracking-wider mb-3">Hiring a developer</div>
+              <div className="text-2xl font-bold text-ink-2 mb-2">$3,000+</div>
+              <div className="text-xs text-ink-muted leading-relaxed">
                 They build it. You understand nothing. No learning.
               </div>
             </div>
@@ -234,16 +234,16 @@ export default function PricingPage() {
               <div className="absolute inset-0 rounded-xl bg-brand-blue/10 border border-brand-blue/20" />
               <div className="relative">
                 <div className="text-brand-blue text-xs uppercase tracking-wider font-bold mb-3">MG Labs</div>
-                <div className="text-2xl font-bold text-white mb-2">$500</div>
-                <div className="text-xs text-gray-300 leading-relaxed">
+                <div className="text-2xl font-bold text-ink mb-2">$500</div>
+                <div className="text-xs text-ink-2 leading-relaxed">
                   We build together. You own it and understand every decision.
                 </div>
               </div>
             </div>
             <div className="text-center p-4">
-              <div className="text-gray-600 text-xs uppercase tracking-wider mb-3">Generic course</div>
-              <div className="text-2xl font-bold text-gray-400 mb-2">$0–$200</div>
-              <div className="text-xs text-gray-600 leading-relaxed">
+              <div className="text-ink-muted text-xs uppercase tracking-wider mb-3">Generic course</div>
+              <div className="text-2xl font-bold text-ink-2 mb-2">$0–$200</div>
+              <div className="text-xs text-ink-muted leading-relaxed">
                 You learn the concepts. But you never finish building.
               </div>
             </div>
@@ -253,27 +253,27 @@ export default function PricingPage() {
 
       {/* ── FAQ ── */}
       <section className="py-16 px-4 sm:px-6 max-w-3xl mx-auto pb-24">
-        <h2 className="text-3xl font-bold text-white text-center mb-10">
+        <h2 className="text-3xl font-bold text-ink text-center mb-10">
           Questions about the Launch Program
         </h2>
         <div className="space-y-4">
           {faqs.map((faq) => (
             <div
               key={faq.q}
-              className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.07]"
+              className="p-5 rounded-xl bg-surface-2 border border-border"
             >
-              <h3 className="font-semibold text-white mb-2 text-sm">{faq.q}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{faq.a}</p>
+              <h3 className="font-semibold text-ink mb-2 text-sm">{faq.q}</h3>
+              <p className="text-ink-2 text-sm leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-gray-500 text-sm mb-1">Still have questions?</p>
-          <p className="text-gray-600 text-xs mb-6">We respond within 24 hours.</p>
+          <p className="text-ink-muted text-sm mb-1">Still have questions?</p>
+          <p className="text-ink-muted text-xs mb-6">We respond within 24 hours.</p>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-200 hover:bg-white/10 hover:border-white/20 transition-all text-sm font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-2 border border-border text-ink hover:bg-surface-2 hover:border-border-strong transition-all text-sm font-medium"
           >
             Get in touch
           </Link>

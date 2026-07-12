@@ -37,13 +37,13 @@ export default async function LessonPage({ params }: Props) {
       <div className="max-w-3xl mx-auto px-4 py-16 sm:py-20">
 
         {/* ── Breadcrumb ── */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-10">
-          <Link href="/learn" className="hover:text-gray-400 transition-colors flex items-center gap-1">
+        <div className="flex items-center gap-2 text-sm text-ink-muted mb-10">
+          <Link href="/learn" className="hover:text-ink-2 transition-colors flex items-center gap-1">
             <BookOpen className="w-3.5 h-3.5" />
             Foundation Path
           </Link>
           <span>/</span>
-          <span className="text-gray-500">Lesson {lesson.number}</span>
+          <span className="text-ink-muted">Lesson {lesson.number}</span>
         </div>
 
         {/* ── Header ── */}
@@ -55,19 +55,19 @@ export default async function LessonPage({ params }: Props) {
             </Badge>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold text-ink mb-4 leading-tight">
             {lesson.title}
           </h1>
-          <p className="text-gray-400 text-xl leading-relaxed mb-5">{lesson.tagline}</p>
+          <p className="text-ink-2 text-xl leading-relaxed mb-5">{lesson.tagline}</p>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-ink-muted">
             <Clock className="w-4 h-4" />
             {lesson.duration}
           </div>
         </div>
 
         {/* Divider */}
-        <div className="w-full h-px bg-white/[0.06] mb-12" />
+        <div className="w-full h-px bg-surface-2 mb-12" />
 
         {/* ── Content ── */}
         <div className="space-y-10">
@@ -77,10 +77,10 @@ export default async function LessonPage({ params }: Props) {
               return (
                 <div key={i}>
                   {section.heading && (
-                    <h2 className="text-2xl font-bold text-white mb-4">{section.heading}</h2>
+                    <h2 className="text-2xl font-bold text-ink mb-4">{section.heading}</h2>
                   )}
                   {section.body && (
-                    <p className="text-gray-300 leading-relaxed text-lg">{section.body}</p>
+                    <p className="text-ink-2 leading-relaxed text-lg">{section.body}</p>
                   )}
                 </div>
               );
@@ -90,7 +90,7 @@ export default async function LessonPage({ params }: Props) {
             if (section.type === "highlight") {
               return (
                 <div key={i} className="pl-5 border-l-4 border-brand-blue py-1">
-                  <p className="text-white font-medium text-lg leading-relaxed">{section.body}</p>
+                  <p className="text-ink font-medium text-lg leading-relaxed">{section.body}</p>
                 </div>
               );
             }
@@ -100,11 +100,11 @@ export default async function LessonPage({ params }: Props) {
               return (
                 <div key={i}>
                   {section.heading && (
-                    <h3 className="text-lg font-semibold text-white mb-4">{section.heading}</h3>
+                    <h3 className="text-lg font-semibold text-ink mb-4">{section.heading}</h3>
                   )}
                   <ul className="space-y-3">
                     {section.items?.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-gray-300">
+                      <li key={item} className="flex items-start gap-3 text-ink-2">
                         <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0 mt-1" />
                         <span className="leading-relaxed">{item}</span>
                       </li>
@@ -119,18 +119,18 @@ export default async function LessonPage({ params }: Props) {
               return (
                 <div key={i}>
                   {section.heading && (
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
                       <Code className="w-4 h-4 text-brand-blue" />
                       {section.heading}
                     </h3>
                   )}
-                  <div className="rounded-xl bg-surface-1 border border-white/[0.07] overflow-hidden">
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
+                  <div className="rounded-xl bg-surface-1 border border-border overflow-hidden">
+                    <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
                       <div className="w-3 h-3 rounded-full bg-red-500/60" />
                       <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                       <div className="w-3 h-3 rounded-full bg-green-500/60" />
                     </div>
-                    <pre className="p-5 overflow-x-auto text-sm text-gray-300 leading-relaxed">
+                    <pre className="p-5 overflow-x-auto text-sm text-ink-2 leading-relaxed">
                       <code>{section.code}</code>
                     </pre>
                   </div>
@@ -141,12 +141,12 @@ export default async function LessonPage({ params }: Props) {
             // Exercise
             if (section.type === "exercise") {
               return (
-                <div key={i} className="p-6 rounded-2xl bg-brand-purple/5 border border-brand-purple/20">
-                  <div className="flex items-center gap-2 text-brand-purple font-bold text-sm uppercase tracking-wider mb-3">
+                <div key={i} className="p-6 rounded-2xl bg-brand-blue/5 border border-brand-blue/20">
+                  <div className="flex items-center gap-2 text-brand-blue font-bold text-sm uppercase tracking-wider mb-3">
                     <span>✏️</span>
                     {section.heading ?? "Exercise"}
                   </div>
-                  <p className="text-gray-300 leading-relaxed">{section.body}</p>
+                  <p className="text-ink-2 leading-relaxed">{section.body}</p>
                 </div>
               );
             }
@@ -157,27 +157,27 @@ export default async function LessonPage({ params }: Props) {
 
         {/* ── Wall CTA (lesson 5 only) ── */}
         {lesson.wall && (
-          <div className="mt-16 rounded-2xl bg-gradient-to-br from-brand-blue/15 via-surface-1 to-brand-purple/10 border-2 border-brand-blue/40 p-10 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
+          <div className="mt-16 rounded-2xl bg-brand-blue/5 border-2 border-brand-blue/30 p-10 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-brand-blue/30" />
             <div className="text-4xl mb-4">🚀</div>
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="text-2xl font-bold text-ink mb-3">
               Ready to turn this into a real product?
             </h2>
-            <p className="text-gray-400 max-w-md mx-auto mb-6 text-sm leading-relaxed">
+            <p className="text-ink-2 max-w-md mx-auto mb-6 text-sm leading-relaxed">
               The Launch Program takes you from what you&apos;ve learned here to a deployed AI
               product — with your idea, your design, your URL. In 4 weeks with expert guidance.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/pricing#launch"
-                className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-brand text-white shadow-lg shadow-brand-blue/30 hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
+                className="px-6 py-3 rounded-xl font-semibold text-sm bg-brand-blue text-white hover:bg-brand-blue-hover hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
               >
                 Apply for Launch Program — $500
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/contact"
-                className="px-6 py-3 rounded-xl font-medium text-sm text-gray-300 border border-white/10 hover:border-white/20 hover:text-white transition-all text-center"
+                className="px-6 py-3 rounded-xl font-medium text-sm text-ink-2 border border-border hover:border-border-strong hover:text-ink transition-all text-center"
               >
                 Ask a question first
               </Link>
@@ -186,20 +186,20 @@ export default async function LessonPage({ params }: Props) {
         )}
 
         {/* ── Navigation ── */}
-        <div className="flex items-center justify-between mt-16 pt-8 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between mt-16 pt-8 border-t border-border">
           {prevLesson ? (
             <Link
               href={`/learn/${prevLesson.slug}`}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+              className="flex items-center gap-2 text-ink-2 hover:text-ink transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               <div className="text-left">
-                <div className="text-xs text-gray-600">Previous</div>
+                <div className="text-xs text-ink-muted">Previous</div>
                 <div className="text-sm font-medium">{prevLesson.title}</div>
               </div>
             </Link>
           ) : (
-            <Link href="/learn" className="flex items-center gap-2 text-gray-500 hover:text-gray-300 text-sm transition-colors">
+            <Link href="/learn" className="flex items-center gap-2 text-ink-muted hover:text-ink-2 text-sm transition-colors">
               <ArrowLeft className="w-4 h-4" />
               All lessons
             </Link>
@@ -208,10 +208,10 @@ export default async function LessonPage({ params }: Props) {
           {nextLesson && !lesson.wall ? (
             <Link
               href={`/learn/${nextLesson.slug}`}
-              className="flex items-center gap-2 text-brand-blue hover:text-white transition-colors group"
+              className="flex items-center gap-2 text-brand-blue hover:text-ink transition-colors group"
             >
               <div className="text-right">
-                <div className="text-xs text-gray-600">Next lesson</div>
+                <div className="text-xs text-ink-muted">Next lesson</div>
                 <div className="text-sm font-medium">{nextLesson.title}</div>
               </div>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -219,7 +219,7 @@ export default async function LessonPage({ params }: Props) {
           ) : !lesson.wall && (
             <Link
               href="/learn"
-              className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+              className="text-sm text-ink-muted hover:text-ink-2 transition-colors"
             >
               Back to all lessons
             </Link>

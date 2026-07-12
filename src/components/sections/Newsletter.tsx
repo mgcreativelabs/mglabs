@@ -49,19 +49,19 @@ export function Newsletter() {
   return (
     <section id="newsletter" className="py-24 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
-        <div className="rounded-3xl bg-gradient-brand-subtle border border-brand-blue/20 p-10 text-center relative overflow-hidden">
+        <div className="rounded-3xl bg-brand-blue/5 border border-brand-blue/20 p-10 text-center relative overflow-hidden">
           {/* Background decoration */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-64 bg-brand-blue/10 blur-3xl pointer-events-none" />
+          {/* Ambient glow blob removed for a calm, flat premium look */}
 
           <div className="relative z-10">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-brand flex items-center justify-center mx-auto mb-5 shadow-lg shadow-brand-blue/30">
+            <div className="h-12 w-12 rounded-2xl bg-brand-blue flex items-center justify-center mx-auto mb-5">
               <Mail className="h-6 w-6 text-white" />
             </div>
 
-            <h2 className="text-3xl font-display font-bold text-white mb-3">
+            <h2 className="text-3xl font-display font-bold text-ink mb-3">
               Weekly AI insights
             </h2>
-            <p className="text-gray-400 mb-8 leading-relaxed">
+            <p className="text-ink-2 mb-8 leading-relaxed">
               Get the best AI tools, prompts, tutorials, and news delivered every Tuesday.
               Zero fluff, only value.
             </p>
@@ -101,7 +101,7 @@ export function Newsletter() {
                 >
                   Subscribe for free
                 </Button>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-ink-muted">
                   No spam. Unsubscribe anytime.
                 </p>
               </form>

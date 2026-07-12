@@ -72,8 +72,8 @@ export function NewPostForm() {
 
   if (!isAuthenticated) {
     return (
-      <Card className="border border-white/[0.06] p-5 mb-4">
-        <p className="text-sm text-gray-400 mb-3">
+      <Card className="border border-border p-5 mb-4">
+        <p className="text-sm text-ink-2 mb-3">
           Sign in to start a discussion with the community.
         </p>
         <div className="flex gap-2">
@@ -87,13 +87,13 @@ export function NewPostForm() {
   }
 
   return (
-    <Card className="border border-white/[0.06] p-5 mb-4">
+    <Card className="border border-border p-5 mb-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">Start a discussion</h3>
+        <h3 className="text-sm font-semibold text-ink">Start a discussion</h3>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-gray-500 hover:text-white transition-colors"
+          className="text-ink-muted hover:text-ink transition-colors"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -111,11 +111,11 @@ export function NewPostForm() {
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
+          <label className="block text-sm font-medium text-ink-2 mb-1.5">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-xl bg-surface-2 border border-white/10 text-gray-100 px-4 py-3 text-sm focus:outline-none focus:border-brand-blue/60 focus:ring-2 focus:ring-brand-blue/20"
+            className="w-full rounded-xl bg-surface-2 border border-border text-ink px-4 py-3 text-sm focus:outline-none focus:border-brand-blue/60 focus:ring-2 focus:ring-brand-blue/20"
           >
             {CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>

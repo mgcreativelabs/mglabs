@@ -138,21 +138,21 @@ function renderMarkdown(text: string) {
     if (inCode) { codeLines.push(line); continue; }
 
     if (line.startsWith("### ")) {
-      result.push(<h3 key={key++} className="text-sm font-semibold text-white mt-3 mb-1">{line.slice(4)}</h3>);
+      result.push(<h3 key={key++} className="text-sm font-semibold text-ink mt-3 mb-1">{line.slice(4)}</h3>);
     } else if (line.startsWith("## ")) {
-      result.push(<h2 key={key++} className="text-base font-bold text-white mt-4 mb-2">{line.slice(3)}</h2>);
+      result.push(<h2 key={key++} className="text-base font-bold text-ink mt-4 mb-2">{line.slice(3)}</h2>);
     } else if (line.startsWith("# ")) {
-      result.push(<h1 key={key++} className="text-lg font-bold text-white mt-4 mb-2">{line.slice(2)}</h1>);
+      result.push(<h1 key={key++} className="text-lg font-bold text-ink mt-4 mb-2">{line.slice(2)}</h1>);
     } else if (line.startsWith("- ") || line.startsWith("* ")) {
-      result.push(<li key={key++} className="ml-4 text-gray-300 list-disc text-sm mb-0.5">{renderInline(line.slice(2))}</li>);
+      result.push(<li key={key++} className="ml-4 text-ink-2 list-disc text-sm mb-0.5">{renderInline(line.slice(2))}</li>);
     } else if (line.match(/^\d+\.\s/)) {
-      result.push(<li key={key++} className="ml-4 text-gray-300 list-decimal text-sm mb-0.5">{renderInline(line.replace(/^\d+\.\s/, ""))}</li>);
+      result.push(<li key={key++} className="ml-4 text-ink-2 list-decimal text-sm mb-0.5">{renderInline(line.replace(/^\d+\.\s/, ""))}</li>);
     } else if (line.startsWith("---") || line.startsWith("***")) {
-      result.push(<hr key={key++} className="border-white/10 my-3" />);
+      result.push(<hr key={key++} className="border-border my-3" />);
     } else if (line.trim() === "") {
       result.push(<div key={key++} className="h-1.5" />);
     } else {
-      result.push(<p key={key++} className="text-gray-300 text-sm leading-relaxed">{renderInline(line)}</p>);
+      result.push(<p key={key++} className="text-ink-2 text-sm leading-relaxed">{renderInline(line)}</p>);
     }
   }
 
@@ -170,10 +170,10 @@ function renderInline(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="text-ink font-semibold">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="bg-black/40 text-green-300 px-1 py-0.5 rounded text-xs font-mono">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-surface-1 text-green-300 px-1 py-0.5 rounded text-xs font-mono">{part.slice(1, -1)}</code>;
     }
     return part;
   });
@@ -915,27 +915,27 @@ export function MGAIChat() {
               }}
             />
           </div>
-          <div className="flex-1 bg-black/60" onClick={() => setMobileSidebarOpen(false)} />
+          <div className="flex-1 bg-surface-1" onClick={() => setMobileSidebarOpen(false)} />
         </div>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
       {/* ── Top bar ── */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/[0.06] bg-surface/50 backdrop-blur-xl sticky top-16 z-30">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-surface/50 backdrop-blur-xl sticky top-16 z-30">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileSidebarOpen(true)}
-            className="sm:hidden h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-surface-2 flex-shrink-0"
+            className="sm:hidden h-8 w-8 rounded-lg flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 flex-shrink-0"
             aria-label="Open chat history"
           >
             <Menu className="h-4 w-4" />
           </button>
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center shadow-lg">
+          <div className="h-8 w-8 rounded-lg bg-brand-blue flex items-center justify-center">
             <Bot className="h-4 w-4 text-white" />
           </div>
           <div>
-            <div className="text-white font-semibold text-sm leading-none">MG Labs AI</div>
-            <div className="text-gray-500 text-xs mt-0.5 flex items-center gap-1.5">
+            <div className="text-ink font-semibold text-sm leading-none">MG Labs AI</div>
+            <div className="text-ink-muted text-xs mt-0.5 flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
               {currentModel.emoji} {currentModel.label} · Free
             </div>
@@ -952,8 +952,8 @@ export function MGAIChat() {
             title={voiceModeOn ? "Voice mode on — replies will be spoken" : "Turn on voice mode"}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors border ${
               voiceModeOn
-                ? "bg-brand-purple/20 text-brand-purple border-brand-purple/40"
-                : "text-gray-400 hover:text-white hover:bg-surface-2 border-white/[0.06]"
+                ? "bg-brand-blue/20 text-brand-blue border-brand-blue/40"
+                : "text-ink-2 hover:text-ink hover:bg-surface-2 border-border"
             }`}
           >
             {voiceModeOn ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
@@ -964,7 +964,7 @@ export function MGAIChat() {
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
             title={currentModel.description}
-            className="bg-surface-2 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white max-w-[120px] sm:max-w-none"
+            className="bg-surface-2 border border-border rounded-lg px-3 py-1.5 text-xs text-ink max-w-[120px] sm:max-w-none"
           >
             {MODELS.map((m) => (
               <option key={m.id} value={m.id}>
@@ -975,12 +975,12 @@ export function MGAIChat() {
           {messages.length > 0 && (
             <button
               onClick={clearChat}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-surface-2 transition-colors border border-white/[0.06]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-ink-2 hover:text-ink hover:bg-surface-2 transition-colors border border-border"
             >
               <Trash2 className="h-3 w-3" /> Clear
             </button>
           )}
-          <Link href="/signup" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-brand-blue hover:text-white hover:bg-surface-2 transition-colors border border-brand-blue/20">
+          <Link href="/signup" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-brand-blue hover:text-ink hover:bg-surface-2 transition-colors border border-brand-blue/20">
             <Zap className="h-3 w-3" /> Get full access
           </Link>
         </div>
@@ -995,7 +995,7 @@ export function MGAIChat() {
             <div className="space-y-6">
               {[0, 1, 0].map((align, i) => (
                 <div key={i} className={align ? "flex justify-end" : "flex justify-start"}>
-                  <div className="h-16 w-2/3 max-w-sm rounded-2xl bg-surface-1 border border-white/[0.06] animate-pulse" />
+                  <div className="h-16 w-2/3 max-w-sm rounded-2xl bg-surface-1 border border-border animate-pulse" />
                 </div>
               ))}
             </div>
@@ -1004,19 +1004,19 @@ export function MGAIChat() {
           {/* Empty state */}
           {!conversationLoading && isEmpty && (
             <div className="text-center py-16">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-blue/20 to-brand-purple/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                <Bot className="h-8 w-8 text-brand-purple" />
+              <div className="h-16 w-16 rounded-2xl bg-brand-blue/10 border border-border flex items-center justify-center mx-auto mb-6">
+                <Bot className="h-8 w-8 text-brand-blue" />
               </div>
-              <h1 className="text-3xl font-display font-bold text-white mb-2">
+              <h1 className="text-3xl font-display font-bold text-ink mb-2">
                 MG Labs AI
               </h1>
-              <p className="text-gray-400 mb-2">
+              <p className="text-ink-2 mb-2">
                 Your free AI assistant — chat, voice, and image generation.
               </p>
-              <p className="text-gray-600 text-sm mb-2">
-                Currently using {currentModel.emoji} <span className="text-gray-400">{currentModel.label}</span> — {currentModel.description}
+              <p className="text-ink-muted text-sm mb-2">
+                Currently using {currentModel.emoji} <span className="text-ink-2">{currentModel.label}</span> — {currentModel.description}
               </p>
-              <p className="text-gray-700 text-xs mb-12">
+              <p className="text-ink-muted text-xs mb-12">
                 Tap the mic to talk · Tap the image icon (or type <code className="bg-surface-2 px-1 rounded">/image</code>) to generate art · No account needed
               </p>
 
@@ -1032,11 +1032,11 @@ export function MGAIChat() {
                       }
                       sendMessage(s.prompt);
                     }}
-                    className="group p-4 rounded-xl bg-surface-1 border border-white/[0.06] hover:border-brand-blue/40 hover:bg-surface-2 transition-all text-left"
+                    className="group p-4 rounded-xl bg-surface-1 border border-border hover:border-brand-blue/40 hover:bg-surface-2 transition-all text-left"
                   >
                     <div className="flex items-start gap-2">
-                      <Sparkles className="h-4 w-4 text-brand-purple flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-400 text-sm group-hover:text-white transition-colors leading-relaxed">
+                      <Sparkles className="h-4 w-4 text-brand-blue flex-shrink-0 mt-0.5" />
+                      <span className="text-ink-2 text-sm group-hover:text-ink transition-colors leading-relaxed">
                         {s.label}
                       </span>
                     </div>
@@ -1059,7 +1059,7 @@ export function MGAIChat() {
               className={`mb-6 ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1 shadow-lg">
+                <div className="h-7 w-7 rounded-lg bg-brand-blue flex items-center justify-center flex-shrink-0 mr-3 mt-1">
                   <Bot className="h-3.5 w-3.5 text-white" />
                 </div>
               )}
@@ -1070,8 +1070,8 @@ export function MGAIChat() {
                   isEditingThis
                     ? "bg-surface-1 border border-brand-blue/40 px-4 py-3 rounded-2xl"
                     : msg.role === "user"
-                      ? "bg-brand-blue text-white px-4 py-3 rounded-2xl rounded-tr-sm"
-                      : "bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm"
+                      ? "bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-3 rounded-2xl rounded-tr-sm"
+                      : "bg-surface-1 border border-border px-5 py-4 rounded-2xl rounded-tl-sm"
                 }
               >
                 {msg.role === "user" ? (
@@ -1091,12 +1091,12 @@ export function MGAIChat() {
                           if (e.key === "Escape") setEditingMessageId(null);
                         }}
                         rows={2}
-                        className="w-full bg-transparent text-white text-sm resize-none outline-none leading-relaxed"
+                        className="w-full bg-transparent text-ink text-sm resize-none outline-none leading-relaxed"
                       />
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => setEditingMessageId(null)}
-                          className="px-2.5 py-1 rounded-md text-xs text-gray-400 hover:text-white hover:bg-surface-3"
+                          className="px-2.5 py-1 rounded-md text-xs text-ink-2 hover:text-ink hover:bg-surface-3"
                         >
                           Cancel
                         </button>
@@ -1107,7 +1107,7 @@ export function MGAIChat() {
                             sendMessage(value, msg.id);
                           }}
                           disabled={!editingValue.trim()}
-                          className="px-2.5 py-1 rounded-md text-xs bg-brand-blue text-white hover:bg-brand-blue/80 disabled:opacity-40"
+                          className="px-2.5 py-1 rounded-md text-xs bg-brand-blue text-white hover:bg-brand-blue-hover hover:bg-brand-blue/80 disabled:opacity-40"
                         >
                           Send
                         </button>
@@ -1123,7 +1123,7 @@ export function MGAIChat() {
                               key={i}
                               src={att.dataUrl}
                               alt={att.name}
-                              className="h-16 w-16 object-cover rounded-lg border border-white/20"
+                              className="h-16 w-16 object-cover rounded-lg border border-border-strong"
                             />
                           ))}
                         </div>
@@ -1145,19 +1145,19 @@ export function MGAIChat() {
                         <img
                           src={msg.imageUrl}
                           alt="AI generated"
-                          className="rounded-xl border border-white/10 max-w-full"
+                          className="rounded-xl border border-border max-w-full"
                           loading="lazy"
                         />
                         {msg.imageModelLabel && (
-                          <div className="mt-1.5 text-[11px] text-gray-600">
+                          <div className="mt-1.5 text-[11px] text-ink-muted">
                             Generated with {msg.imageModelLabel}
                           </div>
                         )}
                       </div>
                     )}
                     {msg.citations && msg.citations.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                        <div className="flex items-center gap-1.5 mb-1.5 text-[11px] text-gray-500">
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <div className="flex items-center gap-1.5 mb-1.5 text-[11px] text-ink-muted">
                           <Globe className="h-3 w-3" />
                           Sources
                         </div>
@@ -1169,7 +1169,7 @@ export function MGAIChat() {
                               target="_blank"
                               rel="noopener noreferrer"
                               title={c.url}
-                              className="text-[11px] px-2 py-1 rounded-md bg-surface-2 border border-white/10 text-gray-400 hover:text-brand-blue hover:border-brand-blue/40 transition-colors max-w-[180px] truncate"
+                              className="text-[11px] px-2 py-1 rounded-md bg-surface-2 border border-border text-ink-2 hover:text-brand-blue hover:border-brand-blue/40 transition-colors max-w-[180px] truncate"
                             >
                               {c.title || new URL(c.url).hostname.replace(/^www\./, "")}
                             </a>
@@ -1186,7 +1186,7 @@ export function MGAIChat() {
                     {isLastAssistant && (
                       <button
                         onClick={retryLastResponse}
-                        className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                        className="p-1.5 rounded-md hover:bg-surface-3 text-ink-muted hover:text-ink-2"
                         title="Retry"
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
@@ -1194,14 +1194,14 @@ export function MGAIChat() {
                     )}
                     <button
                       onClick={() => speakText(msg.content)}
-                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-ink-muted hover:text-ink-2"
                       title="Read aloud"
                     >
                       <Volume2 className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => copyMessage(msg.content, msg.id)}
-                      className="p-1.5 rounded-md hover:bg-surface-3 text-gray-600 hover:text-gray-300"
+                      className="p-1.5 rounded-md hover:bg-surface-3 text-ink-muted hover:text-ink-2"
                     >
                       {copiedId === msg.id ? (
                         <Check className="h-3.5 w-3.5 text-green-400" />
@@ -1223,7 +1223,7 @@ export function MGAIChat() {
                       setEditingMessageId(msg.id);
                       setEditingValue(msg.content);
                     }}
-                    className="p-1 rounded-md text-gray-600 hover:text-gray-300 hover:bg-surface-3 flex items-center gap-1 text-[11px]"
+                    className="p-1 rounded-md text-ink-muted hover:text-ink-2 hover:bg-surface-3 flex items-center gap-1 text-[11px]"
                     title="Edit and resend"
                   >
                     <Pencil className="h-3 w-3" /> Edit
@@ -1233,7 +1233,7 @@ export function MGAIChat() {
               </div>
 
               {msg.role === "user" && (
-                <div className="h-7 w-7 rounded-lg bg-surface-2 border border-white/10 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-gray-400">
+                <div className="h-7 w-7 rounded-lg bg-surface-2 border border-border flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-semibold text-ink-2">
                   U
                 </div>
               )}
@@ -1247,13 +1247,13 @@ export function MGAIChat() {
               cursor never show at the same time). */}
           {loading && (
             <div className="flex justify-start mb-6">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center flex-shrink-0 mr-3 mt-1">
+              <div className="h-7 w-7 rounded-lg bg-brand-blue flex items-center justify-center flex-shrink-0 mr-3 mt-1">
                 <Bot className="h-3.5 w-3.5 text-white" />
               </div>
-              <div className="bg-surface-1 border border-white/[0.06] px-5 py-4 rounded-2xl rounded-tl-sm">
+              <div className="bg-surface-1 border border-border px-5 py-4 rounded-2xl rounded-tl-sm">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-brand-purple animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "150ms" }} />
                   <span className="h-2 w-2 rounded-full bg-brand-blue animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
@@ -1279,7 +1279,7 @@ export function MGAIChat() {
       {/* ── Input area ── */}
       <div
         className={`sticky bottom-0 bg-surface/80 backdrop-blur-xl border-t px-4 sm:px-6 py-4 transition-colors ${
-          isDraggingFile ? "border-brand-blue/60 bg-brand-blue/[0.03]" : "border-white/[0.06]"
+          isDraggingFile ? "border-brand-blue/60 bg-brand-blue/[0.03]" : "border-border"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -1314,11 +1314,11 @@ export function MGAIChat() {
                   <img
                     src={att.dataUrl}
                     alt={att.name}
-                    className="h-14 w-14 object-cover rounded-lg border border-white/10"
+                    className="h-14 w-14 object-cover rounded-lg border border-border"
                   />
                   <button
                     onClick={() => removePendingAttachment(i)}
-                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 border border-white/20 flex items-center justify-center text-gray-300 hover:text-white hover:bg-red-500/80 transition-colors"
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 border border-border-strong flex items-center justify-center text-ink-2 hover:text-white hover:bg-red-500/80 transition-colors"
                     title="Remove"
                   >
                     <X className="h-3 w-3" />
@@ -1333,7 +1333,7 @@ export function MGAIChat() {
               the composer wrapper below via the outer relative div. */}
           <div className="relative">
             {slashMenuOpen && filteredSlashCommands.length > 0 && (
-              <div className="absolute bottom-full mb-2 left-0 right-0 bg-surface-1 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-20">
+              <div className="absolute bottom-full mb-2 left-0 right-0 bg-surface-1 border border-border rounded-xl shadow-2xl overflow-hidden z-20">
                 {filteredSlashCommands.map((cmd, i) => {
                   const Icon =
                     cmd.icon === "image" ? ImageIcon
@@ -1351,8 +1351,8 @@ export function MGAIChat() {
                     >
                       <Icon className="h-3.5 w-3.5 text-brand-blue flex-shrink-0" />
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-white">{cmd.command}</div>
-                        <div className="text-[11px] text-gray-500 truncate">{cmd.description}</div>
+                        <div className="text-xs font-medium text-ink">{cmd.command}</div>
+                        <div className="text-[11px] text-ink-muted truncate">{cmd.description}</div>
                       </div>
                     </button>
                   );
@@ -1364,15 +1364,15 @@ export function MGAIChat() {
               lets the user pick which free image model to use. */}
           {imageMode && (
             <div className="flex items-center gap-2 mb-2 px-1 animate-fade-up">
-              <ImageIcon className="h-3.5 w-3.5 text-brand-purple flex-shrink-0" />
-              <span className="text-xs text-gray-400 flex-shrink-0">Image mode</span>
+              <ImageIcon className="h-3.5 w-3.5 text-brand-blue flex-shrink-0" />
+              <span className="text-xs text-ink-2 flex-shrink-0">Image mode</span>
               <select
                 value={selectedImageModel}
                 onChange={(e) => setSelectedImageModel(e.target.value)}
                 title={
                   IMAGE_MODELS.find((m) => m.id === selectedImageModel)?.description
                 }
-                className="bg-surface-2 border border-white/10 rounded-lg px-2 py-1 text-xs text-white flex-1 min-w-0"
+                className="bg-surface-2 border border-border rounded-lg px-2 py-1 text-xs text-ink flex-1 min-w-0"
               >
                 {IMAGE_MODELS.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -1383,14 +1383,14 @@ export function MGAIChat() {
               <button
                 onClick={toggleImageMode}
                 title="Exit image mode"
-                className="h-6 w-6 rounded-md flex items-center justify-center flex-shrink-0 text-gray-500 hover:text-white hover:bg-surface-2 transition-colors"
+                className="h-6 w-6 rounded-md flex items-center justify-center flex-shrink-0 text-ink-muted hover:text-ink hover:bg-surface-2 transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
 
-          <div className="flex items-end gap-3 bg-surface-1 border border-white/[0.06] rounded-2xl px-4 py-3 focus-within:border-brand-blue/50 transition-colors">
+          <div className="flex items-end gap-3 bg-surface-1 border border-border rounded-2xl px-4 py-3 focus-within:border-brand-blue/50 transition-colors">
             <input
               ref={fileInputRef}
               type="file"
@@ -1403,7 +1403,7 @@ export function MGAIChat() {
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || !!streamingId}
               title="Attach a file"
-              className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-surface-2 hover:bg-surface-3 border border-white/10 text-gray-300 disabled:opacity-40 transition-all"
+              className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-surface-2 hover:bg-surface-3 border border-border text-ink-2 disabled:opacity-40 transition-all"
             >
               <Paperclip className="h-3.5 w-3.5" />
             </button>
@@ -1415,15 +1415,15 @@ export function MGAIChat() {
               className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
                 isRecording
                   ? "bg-red-500 animate-pulse"
-                  : "bg-surface-2 hover:bg-surface-3 border border-white/10"
+                  : "bg-surface-2 hover:bg-surface-3 border border-border"
               } disabled:opacity-40`}
             >
               {isTranscribing ? (
-                <Loader2 className="h-3.5 w-3.5 text-gray-300 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 text-ink-2 animate-spin" />
               ) : isRecording ? (
                 <Square className="h-3 w-3 text-white" fill="white" />
               ) : (
-                <Mic className="h-3.5 w-3.5 text-gray-300" />
+                <Mic className="h-3.5 w-3.5 text-ink-2" />
               )}
             </button>
 
@@ -1435,8 +1435,8 @@ export function MGAIChat() {
               title={imageMode ? "Exit image mode" : "Generate an image"}
               className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
                 imageMode
-                  ? "bg-brand-purple/20 border border-brand-purple/40 text-brand-purple"
-                  : "bg-surface-2 hover:bg-surface-3 border border-white/10 text-gray-300"
+                  ? "bg-brand-blue/20 border border-brand-blue/40 text-brand-blue"
+                  : "bg-surface-2 hover:bg-surface-3 border border-border text-ink-2"
               } disabled:opacity-40`}
             >
               <ImageIcon className="h-3.5 w-3.5" />
@@ -1461,7 +1461,7 @@ export function MGAIChat() {
                     : "Ask anything, or tap the image icon to generate art…"
               }
               rows={1}
-              className="flex-1 bg-transparent text-white text-sm placeholder-gray-600 resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px]"
+              className="flex-1 bg-transparent text-ink text-sm placeholder-ink-muted resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px]"
               disabled={loading || isRecording || !!streamingId}
             />
 
@@ -1469,9 +1469,9 @@ export function MGAIChat() {
               <button
                 onClick={stopSpeaking}
                 title="Stop speaking"
-                className="h-8 w-8 rounded-lg bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center flex-shrink-0"
+                className="h-8 w-8 rounded-lg bg-brand-blue/20 border border-brand-blue/40 flex items-center justify-center flex-shrink-0"
               >
-                <VolumeX className="h-3.5 w-3.5 text-brand-purple" />
+                <VolumeX className="h-3.5 w-3.5 text-brand-blue" />
               </button>
             )}
 
@@ -1479,10 +1479,10 @@ export function MGAIChat() {
               <button
                 onClick={stopGenerating}
                 title="Stop generating"
-                className="h-8 w-8 rounded-lg bg-surface-2 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 flex items-center justify-center flex-shrink-0 transition-all group/stop"
+                className="h-8 w-8 rounded-lg bg-surface-2 hover:bg-red-500/20 border border-border hover:border-red-500/40 flex items-center justify-center flex-shrink-0 transition-all group/stop"
                 aria-label="Stop generating"
               >
-                <StopCircle className="h-3.5 w-3.5 text-gray-300 group-hover/stop:text-red-400" />
+                <StopCircle className="h-3.5 w-3.5 text-ink-2 group-hover/stop:text-red-400" />
               </button>
             ) : (
               <button
@@ -1501,10 +1501,10 @@ export function MGAIChat() {
           </div>
           </div>
           <div className="flex items-center justify-between mt-2 px-1">
-            <p className="text-xs text-gray-700">
-              <kbd className="text-gray-600 bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-white/10">Enter</kbd> to send · Tap 🎤 to talk · Type <code className="text-gray-600">/</code> for commands
+            <p className="text-xs text-ink-muted">
+              <kbd className="text-ink-muted bg-surface-2 px-1 py-0.5 rounded text-[10px] border border-border">Enter</kbd> to send · Tap 🎤 to talk · Type <code className="text-ink-muted">/</code> for commands
             </p>
-            <Link href="/signup" className="text-xs text-brand-purple hover:text-white transition-colors flex items-center gap-1">
+            <Link href="/signup" className="text-xs text-brand-blue hover:text-ink transition-colors flex items-center gap-1">
               Unlock full platform <ArrowRight className="h-3 w-3" />
             </Link>
           </div>

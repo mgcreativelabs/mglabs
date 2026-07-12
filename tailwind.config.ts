@@ -11,20 +11,26 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          blue: "#3B82F6",
-          purple: "#8B5CF6",
+          blue: "#0071E3",
+          "blue-hover": "#005BB5",
         },
         surface: {
-          DEFAULT: "#0A0A0A",
-          1: "#111111",
-          2: "#1A1A1A",
-          3: "#222222",
-          4: "#2A2A2A",
+          DEFAULT: "#FFFFFF",
+          1: "#FAFAFA",
+          2: "#F5F5F7",
+          3: "#EFEFF1",
+          4: "#E5E5E7",
         },
-      },
-      backgroundImage: {
-        "gradient-brand": "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-        "gradient-brand-subtle": "linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.15) 100%)",
+        ink: {
+          DEFAULT: "#111111",
+          2: "#6E6E73",
+          muted: "#8E8E93",
+        },
+        status: {
+          success: "#34C759",
+          warning: "#FF9F0A",
+          danger: "#FF3B30",
+        },
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

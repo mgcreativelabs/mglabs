@@ -10,14 +10,14 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-surface-3 text-gray-300 border-white/10",
+        default: "bg-surface-2 text-ink-2 border-border",
         blue: "bg-brand-blue/10 text-brand-blue border-brand-blue/20",
-        purple: "bg-brand-purple/10 text-brand-purple border-brand-purple/20",
-        gradient: "bg-gradient-brand text-white border-transparent",
-        success: "bg-green-500/10 text-green-400 border-green-500/20",
-        warning: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-        danger: "bg-red-500/10 text-red-400 border-red-500/20",
-        outline: "border-white/20 text-gray-400",
+        purple: "bg-brand-blue/10 text-brand-blue border-brand-blue/20",
+        gradient: "bg-brand-blue text-white hover:bg-brand-blue-hover border-transparent",
+        success: "bg-status-success/10 text-status-success border-status-success/20",
+        warning: "bg-status-warning/10 text-status-warning border-status-warning/20",
+        danger: "bg-status-danger/10 text-status-danger border-status-danger/20",
+        outline: "border-border-strong text-ink-2",
       },
       size: {
         sm: "px-2 py-0.5 text-[10px]",

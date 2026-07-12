@@ -14,7 +14,7 @@ const navLinks = [
   { label: "Build",    href: "/start",         icon: Rocket,    highlight: "blue"   },
   { label: "Learn",    href: "/learn",          icon: BookOpen,  highlight: null     },
   { label: "Prompts",  href: "/prompt-library", icon: Sparkles,  highlight: null     },
-  { label: "MG AI",    href: "/mg-ai",          icon: Bot,       highlight: "purple" },
+  { label: "MG AI",    href: "/mg-ai",          icon: Bot,       highlight: "blue"   },
   { label: "Services", href: "/services",       icon: Briefcase, highlight: null     },
   { label: "Pricing",  href: "/pricing",        icon: Tag,       highlight: null     },
 ] as const;
@@ -38,29 +38,21 @@ export function Navbar() {
   function getLinkClass(link: NavLink) {
     const active = pathname === link.href;
     const base =
-      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap";
+      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-250 whitespace-nowrap";
 
-    if (link.highlight === "purple") {
-      return cn(
-        base,
-        active
-          ? "text-white bg-brand-purple/20 border border-brand-purple/30"
-          : "text-brand-purple hover:text-white hover:bg-brand-purple/20 border border-brand-purple/20"
-      );
-    }
     if (link.highlight === "blue") {
       return cn(
         base,
         active
-          ? "text-white bg-brand-blue/20 border border-brand-blue/30"
-          : "text-brand-blue hover:text-white hover:bg-brand-blue/20 border border-brand-blue/20"
+          ? "text-brand-blue bg-brand-blue/10 border border-brand-blue/20"
+          : "text-brand-blue hover:bg-brand-blue/10 border border-brand-blue/10"
       );
     }
     return cn(
       base,
       active
-        ? "text-white bg-surface-3"
-        : "text-gray-400 hover:text-white hover:bg-surface-2"
+        ? "text-ink bg-surface-2"
+        : "text-ink-2 hover:text-ink hover:bg-surface-1"
     );
   }
 
@@ -69,8 +61,8 @@ export function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
         scrolled
-          ? "bg-surface/90 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/50"
-          : "bg-transparent"
+          ? "bg-white/90 backdrop-blur-xl border-b border-border"
+          : "bg-white border-b border-transparent"
       )}
     >
       <nav className="w-full max-w-7xl mx-auto px-6 lg:px-8">
@@ -79,10 +71,10 @@ export function Navbar() {
 
           {/* LEFT — Logo */}
           <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className="h-8 w-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30 group-hover:shadow-brand-blue/50 transition-shadow">
+            <div className="h-8 w-8 rounded-lg bg-brand-blue flex items-center justify-center transition-transform group-hover:scale-[1.02]">
               <Zap className="h-4 w-4 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-base tracking-tight hidden sm:inline">
+            <span className="font-display font-bold text-ink text-base tracking-tight hidden sm:inline">
               MG <span className="text-gradient">Labs</span>
             </span>
           </Link>
@@ -136,7 +128,7 @@ export function Navbar() {
 
             {/* Hamburger */}
             <button
-              className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-ink-2 hover:text-ink hover:bg-surface-1 transition-colors"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
@@ -147,7 +139,7 @@ export function Navbar() {
 
         {/* Mobile dropdown */}
         {isOpen && (
-          <div className="lg:hidden pb-4 border-t border-white/[0.06] mt-2 bg-surface/95 backdrop-blur-xl -mx-6 px-6">
+          <div className="lg:hidden pb-4 border-t border-border mt-2 bg-white -mx-6 px-6">
             <div className="pt-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
@@ -156,26 +148,26 @@ export function Navbar() {
                   className={cn(
                     "flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
                     pathname === link.href
-                      ? "text-white bg-surface-3"
-                      : "text-gray-400 hover:text-white hover:bg-surface-2"
+                      ? "text-ink bg-surface-2"
+                      : "text-ink-2 hover:text-ink hover:bg-surface-1"
                   )}
                 >
                   <link.icon className="h-4 w-4" />
                   {link.label}
                   {link.href === "/mg-ai" && (
-                    <span className="ml-auto text-xs bg-brand-purple/20 text-brand-purple px-1.5 py-0.5 rounded-md border border-brand-purple/20">
+                    <span className="ml-auto text-xs bg-brand-blue/10 text-brand-blue px-1.5 py-0.5 rounded-md border border-brand-blue/20">
                       Free
                     </span>
                   )}
                   {link.href === "/start" && (
-                    <span className="ml-auto text-xs bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-md border border-brand-blue/20">
+                    <span className="ml-auto text-xs bg-brand-blue/10 text-brand-blue px-1.5 py-0.5 rounded-md border border-brand-blue/20">
                       Free
                     </span>
                   )}
                 </Link>
               ))}
 
-              <div className="pt-3 border-t border-white/[0.06] flex flex-col gap-2">
+              <div className="pt-3 border-t border-border flex flex-col gap-2">
                 {user ? (
                   <>
                     <Link href="/dashboard">

@@ -68,11 +68,11 @@ export function ChatSidebar({
 
   if (collapsed) {
     return (
-      <div className="hidden sm:flex flex-col items-center w-14 border-r border-white/[0.06] bg-surface/50 py-4 gap-3">
+      <div className="hidden sm:flex flex-col items-center w-14 border-r border-border bg-surface/50 py-4 gap-3">
         <button
           onClick={onToggleCollapsed}
           title="Expand sidebar"
-          className="h-9 w-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
+          className="h-9 w-9 rounded-lg flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 transition-colors"
         >
           <PanelLeft className="h-4 w-4" />
         </button>
@@ -88,11 +88,11 @@ export function ChatSidebar({
   }
 
   return (
-    <div className="hidden sm:flex flex-col w-64 flex-shrink-0 border-r border-white/[0.06] bg-surface/50">
+    <div className="hidden sm:flex flex-col w-64 flex-shrink-0 border-r border-border bg-surface/50">
       <div className="flex items-center gap-2 px-3 pt-4 pb-2">
         <button
           onClick={onNewChat}
-          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-1 border border-white/[0.08] hover:border-brand-blue/40 text-sm text-white transition-colors"
+          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-1 border border-border hover:border-brand-blue/40 text-sm text-ink transition-colors"
         >
           <Plus className="h-3.5 w-3.5 text-brand-blue" />
           New chat
@@ -100,7 +100,7 @@ export function ChatSidebar({
         <button
           onClick={onToggleCollapsed}
           title="Collapse sidebar"
-          className="h-9 w-9 flex-shrink-0 rounded-lg flex items-center justify-center text-gray-500 hover:text-white hover:bg-surface-2 transition-colors"
+          className="h-9 w-9 flex-shrink-0 rounded-lg flex items-center justify-center text-ink-muted hover:text-ink hover:bg-surface-2 transition-colors"
         >
           <PanelLeftClose className="h-4 w-4" />
         </button>
@@ -108,12 +108,12 @@ export function ChatSidebar({
 
       <div className="px-3 pb-2">
         <div className="relative">
-          <Search className="h-3.5 w-3.5 text-gray-600 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <Search className="h-3.5 w-3.5 text-ink-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search chats"
-            className="w-full bg-surface-1 border border-white/[0.06] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-600 outline-none focus:border-brand-blue/40"
+            className="w-full bg-surface-1 border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-ink placeholder-ink-muted outline-none focus:border-brand-blue/40"
           />
         </div>
       </div>
@@ -172,7 +172,7 @@ export function ChatSidebar({
               />
             )}
             {filtered.length === 0 && (
-              <p className="text-xs text-gray-600 px-2 pt-2">
+              <p className="text-xs text-ink-muted px-2 pt-2">
                 {query ? "No chats match your search." : "No chats yet — start one above."}
               </p>
             )}
@@ -220,7 +220,7 @@ function ChatGroup({
 }: ChatGroupProps) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-600 px-2 mb-1">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-muted px-2 mb-1">
         {label}
       </p>
       <div className="space-y-0.5">
@@ -248,12 +248,12 @@ function ChatGroup({
                       if (e.key === "Enter") onCommitEdit();
                       if (e.key === "Escape") onCancelEdit();
                     }}
-                    className="flex-1 min-w-0 bg-surface-3 border border-brand-blue/40 rounded-md px-2 py-1 text-xs text-white outline-none"
+                    className="flex-1 min-w-0 bg-surface-3 border border-brand-blue/40 rounded-md px-2 py-1 text-xs text-ink outline-none"
                   />
                   <button onClick={onCommitEdit} className="p-1 text-green-400 hover:text-green-300 flex-shrink-0">
                     <Check className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={onCancelEdit} className="p-1 text-gray-500 hover:text-gray-300 flex-shrink-0">
+                  <button onClick={onCancelEdit} className="p-1 text-ink-muted hover:text-ink-2 flex-shrink-0">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -269,7 +269,7 @@ function ChatGroup({
                     </button>
                     <button
                       onClick={onCancelDelete}
-                      className="px-1.5 py-0.5 rounded bg-surface-3 text-gray-400 text-[10px] hover:text-gray-200"
+                      className="px-1.5 py-0.5 rounded bg-surface-3 text-ink-2 text-[10px] hover:text-ink"
                     >
                       Cancel
                     </button>
@@ -278,10 +278,10 @@ function ChatGroup({
               ) : (
                 <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className={cn("text-xs truncate", isActive ? "text-white" : "text-gray-300")}>
+                    <p className={cn("text-xs truncate", isActive ? "text-ink" : "text-ink-2")}>
                       {c.title}
                     </p>
-                    <p className="text-[10px] text-gray-600 mt-0.5">{formatRelativeDate(c.updatedAt)}</p>
+                    <p className="text-[10px] text-ink-muted mt-0.5">{formatRelativeDate(c.updatedAt)}</p>
                   </div>
                   <div
                     className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity"
@@ -290,21 +290,21 @@ function ChatGroup({
                     <button
                       onClick={() => onTogglePinned(c.id, !c.pinned)}
                       title={c.pinned ? "Unpin" : "Pin"}
-                      className="p-1 rounded text-gray-500 hover:text-brand-purple hover:bg-surface-3"
+                      className="p-1 rounded text-ink-muted hover:text-brand-blue hover:bg-surface-3"
                     >
                       {c.pinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />}
                     </button>
                     <button
                       onClick={() => onStartEdit(c)}
                       title="Rename"
-                      className="p-1 rounded text-gray-500 hover:text-white hover:bg-surface-3"
+                      className="p-1 rounded text-ink-muted hover:text-ink hover:bg-surface-3"
                     >
                       <Pencil className="h-3 w-3" />
                     </button>
                     <button
                       onClick={() => onRequestDelete(c.id)}
                       title="Delete"
-                      className="p-1 rounded text-gray-500 hover:text-red-400 hover:bg-surface-3"
+                      className="p-1 rounded text-ink-muted hover:text-red-400 hover:bg-surface-3"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>

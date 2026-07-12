@@ -6,25 +6,25 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-40 select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[14px] font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-40 select-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-gradient-brand text-white shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 hover:scale-[1.02] active:scale-[0.98]",
+          "bg-brand-blue text-white hover:bg-brand-blue-hover hover:scale-[1.02] active:scale-[0.98]",
         secondary:
-          "bg-surface-2 text-gray-100 border border-white/10 hover:border-brand-blue/40 hover:bg-surface-3",
+          "bg-white text-ink border border-border-strong hover:bg-surface-1 hover:scale-[1.02] active:scale-[0.98]",
         ghost:
-          "text-gray-400 hover:text-white hover:bg-surface-2",
+          "text-ink-2 hover:text-ink hover:bg-surface-2",
         outline:
-          "border border-white/10 text-gray-200 hover:border-brand-blue/50 hover:text-white hover:bg-surface-2/50",
+          "border border-border-strong text-ink hover:border-ink-muted hover:bg-surface-1",
         danger:
-          "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40",
+          "bg-status-danger/10 text-status-danger border border-status-danger/20 hover:bg-status-danger/20 hover:border-status-danger/40",
         link:
           "text-brand-blue underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
-        sm: "h-8 px-3 text-xs rounded-lg",
+        sm: "h-8 px-3 text-xs rounded-[10px]",
         md: "h-10 px-4 text-sm",
         lg: "h-12 px-6 text-base",
         xl: "h-14 px-8 text-lg",

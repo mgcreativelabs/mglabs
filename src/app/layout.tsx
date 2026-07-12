@@ -56,8 +56,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased min-h-screen bg-black text-white">
+    <html lang="en">
+      <body className="antialiased min-h-screen bg-surface-1 text-ink">
         <Navbar />
         {/*
           pt-16 = 64px = exact height of the fixed navbar.

@@ -32,11 +32,11 @@ export function SettingsClient({ user, profile }: SettingsClientProps) {
     <div className="min-h-screen">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
         {/* Back */}
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-8">
+        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors mb-8">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to dashboard
         </Link>
 
-        <h1 className="text-3xl font-display font-bold text-white mb-8">Settings</h1>
+        <h1 className="text-3xl font-display font-bold text-ink mb-8">Settings</h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar nav */}
@@ -50,7 +50,7 @@ export function SettingsClient({ user, profile }: SettingsClientProps) {
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? "bg-brand-blue/20 text-brand-blue border border-brand-blue/30"
-                      : "text-gray-400 hover:text-white hover:bg-surface-2"
+                      : "text-ink-2 hover:text-ink hover:bg-surface-2"
                   }`}
                 >
                   <tab.icon className="h-4 w-4" />
@@ -116,15 +116,15 @@ function ProfileTab({ user, profile }: { user: User; profile: Record<string, unk
   }
 
   return (
-    <Card className="border border-white/[0.06] p-6">
-      <h2 className="text-lg font-semibold text-white mb-6">Profile information</h2>
+    <Card className="border border-border p-6">
+      <h2 className="text-lg font-semibold text-ink mb-6">Profile information</h2>
 
       <div className="flex items-center gap-4 mb-8">
         <Avatar fallback={displayName} src={(profile?.avatar_url as string) || undefined} size="xl" />
         <div>
-          <p className="text-sm font-medium text-white">{displayName}</p>
-          <p className="text-xs text-gray-500">{user.email}</p>
-          <p className="text-xs text-gray-600 mt-1">Avatar is pulled from your Gravatar or Google account</p>
+          <p className="text-sm font-medium text-ink">{displayName}</p>
+          <p className="text-xs text-ink-muted">{user.email}</p>
+          <p className="text-xs text-ink-muted mt-1">Avatar is pulled from your Gravatar or Google account</p>
         </div>
       </div>
 
@@ -148,7 +148,7 @@ function ProfileTab({ user, profile }: { user: User; profile: Record<string, unk
             value={user.email || ""}
             disabled
           />
-          <p className="text-xs text-gray-600 mt-1.5">To change your email, contact mgcreativelabs@technologist.com</p>
+          <p className="text-xs text-ink-muted mt-1.5">To change your email, contact mgcreativelabs@technologist.com</p>
         </div>
         <Textarea
           label="Bio"
@@ -228,8 +228,8 @@ function PasswordTab() {
   }
 
   return (
-    <Card className="border border-white/[0.06] p-6">
-      <h2 className="text-lg font-semibold text-white mb-6">Change password</h2>
+    <Card className="border border-border p-6">
+      <h2 className="text-lg font-semibold text-ink mb-6">Change password</h2>
       <form onSubmit={handleSave} className="space-y-4 max-w-md">
         <Input
           label="Current password"
@@ -279,15 +279,15 @@ function BillingTab({ profile }: { profile: Record<string, unknown> | null }) {
   const tier = (profile?.subscription_tier as string) ?? "free";
 
   return (
-    <Card className="border border-white/[0.06] p-6">
-      <h2 className="text-lg font-semibold text-white mb-6">Billing & subscription</h2>
+    <Card className="border border-border p-6">
+      <h2 className="text-lg font-semibold text-ink mb-6">Billing & subscription</h2>
 
-      <div className="p-4 rounded-xl bg-surface-2 border border-white/[0.06] flex items-center justify-between mb-6">
+      <div className="p-4 rounded-xl bg-surface-2 border border-border flex items-center justify-between mb-6">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-ink">
             {tier === "pro" ? "Pro plan" : "Free plan"}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             {tier === "pro" ? "$500/month — renews automatically" : "No active subscription"}
           </p>
         </div>
@@ -298,7 +298,7 @@ function BillingTab({ profile }: { profile: Record<string, unknown> | null }) {
 
       {tier === "free" ? (
         <div className="space-y-4">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-ink-2">
             Upgrade to Pro to unlock all premium courses, exclusive AI tools, and the full prompt library.
           </p>
           <Link href="/pricing">
@@ -306,7 +306,7 @@ function BillingTab({ profile }: { profile: Record<string, unknown> | null }) {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3 text-sm text-gray-400">
+        <div className="space-y-3 text-sm text-ink-2">
           <p>To manage or cancel your subscription, email us at{" "}
             <a href="mailto:mgcreativelabs@technologist.com" className="text-brand-blue hover:underline">
               mgcreativelabs@technologist.com
@@ -323,21 +323,21 @@ function BillingTab({ profile }: { profile: Record<string, unknown> | null }) {
 // ─────────────────────────────────────────────
 function NotificationsTab() {
   return (
-    <Card className="border border-white/[0.06] p-6">
-      <h2 className="text-lg font-semibold text-white mb-6">Notification preferences</h2>
-      <div className="space-y-4 text-sm text-gray-400">
+    <Card className="border border-border p-6">
+      <h2 className="text-lg font-semibold text-ink mb-6">Notification preferences</h2>
+      <div className="space-y-4 text-sm text-ink-2">
         {[
           { label: "New course announcements", sub: "When new courses are published" },
           { label: "Community replies", sub: "When someone replies to your posts" },
           { label: "Newsletter", sub: "Weekly AI creator insights" },
           { label: "Streak reminders", sub: "Daily reminder to keep your streak" },
         ].map((item) => (
-          <div key={item.label} className="flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0">
+          <div key={item.label} className="flex items-center justify-between py-3 border-b border-border last:border-0">
             <div>
-              <p className="text-sm text-white">{item.label}</p>
-              <p className="text-xs text-gray-600">{item.sub}</p>
+              <p className="text-sm text-ink">{item.label}</p>
+              <p className="text-xs text-ink-muted">{item.sub}</p>
             </div>
-            <p className="text-xs text-gray-600 italic">Coming soon</p>
+            <p className="text-xs text-ink-muted italic">Coming soon</p>
           </div>
         ))}
       </div>

@@ -130,7 +130,7 @@ function PromptCard({ prompt }: { prompt: typeof MOCK_PROMPTS[0] }) {
   }[prompt.difficulty];
 
   return (
-    <Card className="card-hover border border-white/[0.06] p-6">
+    <Card className="card-hover border border-border p-6">
       <div className="p-5 flex-1">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -143,30 +143,30 @@ function PromptCard({ prompt }: { prompt: typeof MOCK_PROMPTS[0] }) {
             )}
           </div>
           {prompt.model && (
-            <span className="text-xs text-gray-600 font-mono">{prompt.model}</span>
+            <span className="text-xs text-ink-muted font-mono">{prompt.model}</span>
           )}
         </div>
 
-        <h3 className="font-semibold text-white mb-2 leading-tight">{prompt.title}</h3>
-        <p className="text-gray-500 text-sm leading-relaxed mb-4">{prompt.description}</p>
+        <h3 className="font-semibold text-ink mb-2 leading-tight">{prompt.title}</h3>
+        <p className="text-ink-muted text-sm leading-relaxed mb-4">{prompt.description}</p>
 
-        <div className="bg-surface-2 rounded-xl p-3 border border-white/[0.04]">
-          <p className="text-xs text-gray-500 leading-relaxed font-mono line-clamp-3">
+        <div className="bg-surface-2 rounded-xl p-3 border border-border">
+          <p className="text-xs text-ink-muted leading-relaxed font-mono line-clamp-3">
             {prompt.content}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           {prompt.tags.map((tag) => (
-            <span key={tag} className="text-xs text-gray-600 bg-surface-3 px-2 py-0.5 rounded-md">
+            <span key={tag} className="text-xs text-ink-muted bg-surface-3 px-2 py-0.5 rounded-md">
               {tag}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-white/[0.04] p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 text-xs text-gray-600">
+      <div className="border-t border-border p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 text-xs text-ink-muted">
           <span className="flex items-center gap-1">
             <Heart className="h-3 w-3" /> {formatNumber(prompt.likes_count)}
           </span>
@@ -179,7 +179,7 @@ function PromptCard({ prompt }: { prompt: typeof MOCK_PROMPTS[0] }) {
             variant="ghost"
             size="icon-sm"
             onClick={() => setSaved(!saved)}
-            className={saved ? "text-brand-purple" : ""}
+            className={saved ? "text-brand-blue" : ""}
             title="Save prompt"
           >
             <Bookmark className="h-4 w-4" />
@@ -226,16 +226,16 @@ export function PromptLibraryClient() {
       {/* Header */}
       <div className="py-16 px-4 sm:px-6 text-center max-w-4xl mx-auto mesh-bg">
         <Badge variant="purple" className="mb-4">Free to use</Badge>
-        <h1 className="text-5xl font-display font-bold text-white mb-4">
+        <h1 className="text-5xl font-display font-bold text-ink mb-4">
           Prompt <span className="text-gradient">Library</span>
         </h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+        <p className="text-ink-2 text-lg max-w-2xl mx-auto">
           Hand-crafted prompts for every use case. Copy, customize, and get results in seconds.
         </p>
       </div>
 
       {/* Filters */}
-      <div className="sticky top-16 z-40 bg-surface/90 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className="sticky top-16 z-40 bg-surface/90 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           {/* Search + difficulty row */}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -249,7 +249,7 @@ export function PromptLibraryClient() {
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
-              className="h-11 px-4 rounded-xl bg-surface-2 border border-white/10 text-gray-300 text-sm focus:outline-none focus:border-brand-blue/60 min-w-[140px]"
+              className="h-11 px-4 rounded-xl bg-surface-2 border border-border text-ink-2 text-sm focus:outline-none focus:border-brand-blue/60 min-w-[140px]"
             >
               {DIFFICULTIES.map((d) => (
                 <option key={d.value} value={d.value}>{d.label}</option>
@@ -264,8 +264,8 @@ export function PromptLibraryClient() {
                 onClick={() => setCategory(c.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                   category === c.value
-                    ? "bg-brand-blue text-white"
-                    : "text-gray-500 hover:text-gray-300 hover:bg-surface-3"
+                    ? "bg-brand-blue text-white hover:bg-brand-blue-hover"
+                    : "text-ink-muted hover:text-ink-2 hover:bg-surface-3"
                 }`}
               >
                 {c.label}
@@ -278,9 +278,9 @@ export function PromptLibraryClient() {
       {/* Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-600">
-            Showing <span className="text-gray-300 font-medium">{filtered.length}</span> of{" "}
-            <span className="text-gray-300 font-medium">{MOCK_PROMPTS.length}</span> prompts
+          <p className="text-sm text-ink-muted">
+            Showing <span className="text-ink-2 font-medium">{filtered.length}</span> of{" "}
+            <span className="text-ink-2 font-medium">{MOCK_PROMPTS.length}</span> prompts
           </p>
         </div>
 
@@ -292,7 +292,7 @@ export function PromptLibraryClient() {
 
         {filtered.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No prompts found for your search.</p>
+            <p className="text-ink-muted text-lg">No prompts found for your search.</p>
             <Button
               variant="ghost"
               className="mt-4"

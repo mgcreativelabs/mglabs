@@ -19,7 +19,7 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
 
   const statCards = [
     { label: "Total Users", value: stats.userCount ?? 0, icon: Users, color: "text-brand-blue", change: "+12% this week" },
-    { label: "Prompts", value: stats.promptCount ?? 0, icon: Sparkles, color: "text-brand-purple", change: "+5 this week" },
+    { label: "Prompts", value: stats.promptCount ?? 0, icon: Sparkles, color: "text-brand-blue", change: "+5 this week" },
     { label: "Blog Posts", value: stats.postCount ?? 0, icon: FileText, color: "text-cyan-400", change: "+2 this week" },
     { label: "Subscribers", value: stats.subscriberCount ?? 0, icon: Mail, color: "text-green-400", change: "+84 this week" },
   ];
@@ -32,10 +32,10 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Shield className="h-5 w-5 text-brand-blue" />
-              <h1 className="text-2xl font-display font-bold text-white">Admin Panel</h1>
+              <h1 className="text-2xl font-display font-bold text-ink">Admin Panel</h1>
               <Badge variant="danger" size="sm">Restricted</Badge>
             </div>
-            <p className="text-gray-500 text-sm">Manage content, users, and platform settings.</p>
+            <p className="text-ink-muted text-sm">Manage content, users, and platform settings.</p>
           </div>
           <Button variant="primary" size="sm" leftIcon={<Plus className="h-4 w-4" />}>
             New content
@@ -43,15 +43,15 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 bg-surface-1 rounded-xl p-1 w-fit border border-white/[0.06]">
+        <div className="flex gap-1 mb-8 bg-surface-1 rounded-xl p-1 w-fit border border-border">
           {TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab
-                  ? "bg-surface-3 text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                  ? "bg-surface-3 text-ink"
+                  : "text-ink-muted hover:text-ink-2"
               }`}
             >
               {tab}
@@ -64,34 +64,34 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {statCards.map((s) => (
-                <Card key={s.label} className="glass border border-white/[0.06]" p-4>
+                <Card key={s.label} className="glass border border-border" p-4>
                   <div className="flex items-center justify-between mb-3">
                     <s.icon className={`h-5 w-5 ${s.color}`} />
                     <TrendingUp className="h-4 w-4 text-green-400" />
                   </div>
-                  <div className="text-3xl font-display font-bold text-white">{s.value.toLocaleString()}</div>
-                  <div className="text-xs text-gray-600 mt-0.5">{s.label}</div>
+                  <div className="text-3xl font-display font-bold text-ink">{s.value.toLocaleString()}</div>
+                  <div className="text-xs text-ink-muted mt-0.5">{s.label}</div>
                   <div className="text-xs text-green-400 mt-1">{s.change}</div>
                 </Card>
               ))}
             </div>
 
             {/* Recent users */}
-            <Card className="glass border border-white/[0.06] p-4">
+            <Card className="glass border border-border p-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-semibold">RECENT SIGNUP</h3>
                 <Button variant="ghost" size="sm">View all users</Button>
               </div>
               <div className="space-y-3">
                 {recentUsers.length === 0 ? (
-                  <p className="text-gray-600 text-sm text-center py-4">No users yet.</p>
+                  <p className="text-ink-muted text-sm text-center py-4">No users yet.</p>
                 ) : (
                   recentUsers.map((u: Record<string, unknown>, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 transition-colors">
                       <Avatar fallback={(u.full_name as string) || "U"} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium truncate">{(u.full_name as string) || "Anonymous"}</p>
-                        <p className="text-xs text-gray-600">{formatRelativeDate(u.created_at as string)}</p>
+                        <p className="text-sm text-ink font-medium truncate">{(u.full_name as string) || "Anonymous"}</p>
+                        <p className="text-xs text-ink-muted">{formatRelativeDate(u.created_at as string)}</p>
                       </div>
                       <Badge
                         variant={(u.role as string) === "admin" ? "danger" : "default"}
@@ -115,13 +115,13 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
             <div className="grid md:grid-cols-3 gap-4">
               {[
                 { icon: FileText, label: "New blog post", desc: "Write and publish a new article", color: "text-cyan-400" },
-                { icon: Sparkles, label: "Add prompt", desc: "Add a new prompt to the library", color: "text-brand-purple" },
+                { icon: Sparkles, label: "Add prompt", desc: "Add a new prompt to the library", color: "text-brand-blue" },
                 { icon: Mail, label: "Send newsletter", desc: "Compose and send to subscribers", color: "text-green-400" },
               ].map((action) => (
-                <div key={action.label} className="glass rounded-2xl p-5 border border-white/[0.06] hover:border-brand-blue/30 cursor-pointer transition-all hover:bg-surface-2">
+                <div key={action.label} className="glass rounded-2xl p-5 border border-border hover:border-brand-blue/30 cursor-pointer transition-all hover:bg-surface-2">
                   <action.icon className={`h-6 w-6 ${action.color} mb-3`} />
-                  <h3 className="font-semibold text-white text-sm">{action.label}</h3>
-                  <p className="text-xs text-gray-600 mt-1">{action.desc}</p>
+                  <h3 className="font-semibold text-ink text-sm">{action.label}</h3>
+                  <p className="text-xs text-ink-muted mt-1">{action.desc}</p>
                 </div>
               ))}
             </div>
@@ -130,9 +130,9 @@ export function AdminClient({ stats, recentUsers }: AdminClientProps) {
 
         {activeTab !== "Overview" && (
           <div className="text-center py-20">
-            <Settings className="h-10 w-10 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-gray-500 text-lg font-medium">{activeTab} management</h3>
-            <p className="text-gray-700 text-sm mt-1">Full CRUD interface — connect to your Supabase tables.</p>
+            <Settings className="h-10 w-10 text-ink-muted mx-auto mb-4" />
+            <h3 className="text-ink-muted text-lg font-medium">{activeTab} management</h3>
+            <p className="text-ink-muted text-sm mt-1">Full CRUD interface — connect to your Supabase tables.</p>
           </div>
         )}
       </div>

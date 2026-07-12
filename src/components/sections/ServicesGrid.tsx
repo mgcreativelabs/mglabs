@@ -15,30 +15,30 @@ export function ServicesGrid() {
           key={service.id}
           className={`relative rounded-2xl p-7 flex flex-col transition-all duration-300 ${
             service.featured
-              ? "bg-gradient-to-b from-brand-blue/20 via-surface-1 to-brand-purple/10 border-2 border-brand-blue/50 shadow-2xl shadow-brand-blue/20"
-              : "glass border border-white/[0.07] hover:border-white/15"
+              ? "bg-white border-2 border-brand-blue/40 shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
+              : "glass border border-border hover:border-border-strong"
           }`}
         >
           {service.featured && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-brand-blue/40" />
           )}
 
           <div className="flex items-center gap-2.5 mb-4">
-            <div className={`p-2 rounded-lg ${service.featured ? "bg-brand-blue/20" : "bg-white/5"}`}>
-              <service.Icon className={`h-4 w-4 ${service.featured ? "text-brand-blue" : "text-gray-400"}`} />
+            <div className={`p-2 rounded-lg ${service.featured ? "bg-brand-blue/20" : "bg-surface-2"}`}>
+              <service.Icon className={`h-4 w-4 ${service.featured ? "text-brand-blue" : "text-ink-2"}`} />
             </div>
-            <span className="font-bold text-white text-lg leading-tight">{service.name}</span>
+            <span className="font-bold text-ink text-lg leading-tight">{service.name}</span>
           </div>
 
           {service.price && (
             <div className="mb-4">
-              <span className={`text-2xl font-black ${service.featured ? "text-white" : "text-gray-200"}`}>
+              <span className={`text-2xl font-black ${service.featured ? "text-ink" : "text-ink"}`}>
                 {service.price}
               </span>
             </div>
           )}
 
-          <p className={`text-sm leading-relaxed mb-5 ${service.featured ? "text-gray-300" : "text-gray-400"}`}>
+          <p className={`text-sm leading-relaxed mb-5 ${service.featured ? "text-ink-2" : "text-ink-2"}`}>
             {service.description}
           </p>
 
@@ -50,7 +50,7 @@ export function ServicesGrid() {
                     service.featured ? "text-brand-blue" : "text-green-400"
                   }`}
                 />
-                <span className="text-sm text-gray-300 leading-snug">{item}</span>
+                <span className="text-sm text-ink-2 leading-snug">{item}</span>
               </li>
             ))}
           </ul>

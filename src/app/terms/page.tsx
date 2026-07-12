@@ -51,32 +51,32 @@ const TOC = [
 ];
 
 // ─── Shared heading styles ────────────────────────────────────────────────────
-const H2 = "text-xl font-bold text-white mb-4 scroll-mt-28";
-const H3 = "text-base font-semibold text-gray-200 mt-6 mb-2";
-const P  = "text-gray-400 text-sm leading-relaxed";
-const UL = "list-disc pl-5 space-y-1.5 text-gray-400 text-sm leading-relaxed";
+const H2 = "text-xl font-bold text-ink mb-4 scroll-mt-28";
+const H3 = "text-base font-semibold text-ink mt-6 mb-2";
+const P  = "text-ink-2 text-sm leading-relaxed";
+const UL = "list-disc pl-5 space-y-1.5 text-ink-2 text-sm leading-relaxed";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen">
 
       {/* ── Page header ── */}
-      <div className="py-20 px-4 sm:px-6 border-b border-white/[0.06]">
+      <div className="py-20 px-4 sm:px-6 border-b border-border">
         <div className="max-w-4xl mx-auto">
           <Badge variant="purple" className="mb-5">
             <FileText className="w-3 h-3" /> Legal
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3">
+          <h1 className="text-4xl sm:text-5xl font-bold text-ink mb-3">
             Terms of{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <span className="text-brand-blue">
               Service
             </span>
           </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-ink-muted">
             <span>Last updated: {LAST_UPDATED}</span>
-            <span className="text-gray-700">·</span>
+            <span className="text-ink-muted">·</span>
             <span>Version {VERSION}</span>
-            <span className="text-gray-700">·</span>
+            <span className="text-ink-muted">·</span>
             <Link href="/privacy" className="text-blue-500 hover:text-blue-400 transition-colors flex items-center gap-1">
               Privacy Policy <ArrowRight className="h-3 w-3" />
             </Link>
@@ -90,8 +90,8 @@ export default function TermsPage() {
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-white font-semibold text-sm mb-1">Plain-language summary</p>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-ink font-semibold text-sm mb-1">Plain-language summary</p>
+              <p className="text-ink-2 text-sm leading-relaxed">
                 MG Creative Labs is an educational platform. All content — courses, prompts, and
                 guidance — is for learning purposes and does not constitute professional advice.
                 Results are not guaranteed. The $500/month Premium AI Guidance plan is
@@ -108,8 +108,8 @@ export default function TermsPage() {
 
         {/* Sticky sidebar TOC */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+          <div className="sticky top-24 rounded-xl bg-surface-2 border border-border p-4">
+            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">
               In this document
             </p>
             <nav className="space-y-0.5">
@@ -117,7 +117,7 @@ export default function TermsPage() {
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className="block text-xs text-gray-500 hover:text-white py-1.5 px-2 rounded-md hover:bg-white/5 transition-colors leading-snug"
+                  className="block text-xs text-ink-muted hover:text-ink py-1.5 px-2 rounded-md hover:bg-surface-2 transition-colors leading-snug"
                 >
                   {item.label}
                 </a>
@@ -182,7 +182,7 @@ export default function TermsPage() {
           <section id="s3">
             <h2 className={H2}>3. Educational Nature of Content and Guidance</h2>
             <p className={P}>
-              <strong className="text-white">All content on the Platform is provided for
+              <strong className="text-ink">All content on the Platform is provided for
               educational and informational purposes only.</strong> This includes, without
               limitation, course videos, written lessons, prompt templates, community discussions,
               AI-generated responses, and advisory guidance provided through the Premium AI
@@ -258,7 +258,7 @@ export default function TermsPage() {
             <p className={P}>
               The Premium AI Guidance service (&ldquo;Premium Service&rdquo;) provides subscribers
               with personalised one-on-one advisory support focused on AI implementation,
-              workflows, tools, and strategy. The Premium Service is an <strong className="text-white">
+              workflows, tools, and strategy. The Premium Service is an <strong className="text-ink">
               educational advisory service</strong> — not a professional consulting, legal,
               financial, technical, or business services engagement.
             </p>
@@ -321,7 +321,7 @@ export default function TermsPage() {
             <h3 className={H3}>6.3 Premium AI Guidance — no-refund policy</h3>
             <p className={`${P} font-medium`}>
               Due to the personalised, time-invested nature of the Premium AI Guidance service,{" "}
-              <strong className="text-white">
+              <strong className="text-ink">
                 all payments for the Premium Service are non-refundable
               </strong>{" "}
               once a guidance session or billing period has commenced.
@@ -475,8 +475,8 @@ export default function TermsPage() {
             <p className={P}>
               To the fullest extent permitted by applicable law, the Platform and all content,
               services, and features provided through it are offered{" "}
-              <strong className="text-white">&ldquo;as is&rdquo;</strong> and{" "}
-              <strong className="text-white">&ldquo;as available,&rdquo;</strong> without
+              <strong className="text-ink">&ldquo;as is&rdquo;</strong> and{" "}
+              <strong className="text-ink">&ldquo;as available,&rdquo;</strong> without
               warranties of any kind, whether express, implied, statutory, or otherwise.
             </p>
             <p className={`${P} mt-3`}>
@@ -693,8 +693,8 @@ export default function TermsPage() {
             <p className={P}>
               Questions, concerns, or complaints regarding these Terms should be directed to:
             </p>
-            <div className="mt-4 rounded-xl bg-white/[0.03] border border-white/[0.06] p-5 text-sm text-gray-400">
-              <p className="font-semibold text-white mb-1">MG Creative Labs</p>
+            <div className="mt-4 rounded-xl bg-surface-2 border border-border p-5 text-sm text-ink-2">
+              <p className="font-semibold text-ink mb-1">MG Creative Labs</p>
               <p>
                 Email:{" "}
                 <a

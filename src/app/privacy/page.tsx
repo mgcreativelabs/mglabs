@@ -44,32 +44,32 @@ const TOC = [
   { id: "p15", label: "15. Contact Us"                                        },
 ];
 
-const H2 = "text-xl font-bold text-white mb-4 scroll-mt-28";
-const H3 = "text-base font-semibold text-gray-200 mt-6 mb-2";
-const P  = "text-gray-400 text-sm leading-relaxed";
-const UL = "list-disc pl-5 space-y-1.5 text-gray-400 text-sm leading-relaxed";
+const H2 = "text-xl font-bold text-ink mb-4 scroll-mt-28";
+const H3 = "text-base font-semibold text-ink mt-6 mb-2";
+const P  = "text-ink-2 text-sm leading-relaxed";
+const UL = "list-disc pl-5 space-y-1.5 text-ink-2 text-sm leading-relaxed";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen">
 
       {/* ── Page header ── */}
-      <div className="py-20 px-4 sm:px-6 border-b border-white/[0.06]">
+      <div className="py-20 px-4 sm:px-6 border-b border-border">
         <div className="max-w-4xl mx-auto">
           <Badge variant="blue" className="mb-5">
             <Shield className="w-3 h-3" /> Legal
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3">
+          <h1 className="text-4xl sm:text-5xl font-bold text-ink mb-3">
             Privacy{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <span className="text-brand-blue">
               Policy
             </span>
           </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-ink-muted">
             <span>Last updated: {LAST_UPDATED}</span>
-            <span className="text-gray-700">·</span>
+            <span className="text-ink-muted">·</span>
             <span>Version {VERSION}</span>
-            <span className="text-gray-700">·</span>
+            <span className="text-ink-muted">·</span>
             <Link href="/terms" className="text-blue-500 hover:text-blue-400 transition-colors flex items-center gap-1">
               Terms of Service <ArrowRight className="h-3 w-3" />
             </Link>
@@ -83,8 +83,8 @@ export default function PrivacyPage() {
           <div className="flex items-start gap-3">
             <Lock className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-white font-semibold text-sm mb-1">Plain-language summary</p>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-ink font-semibold text-sm mb-1">Plain-language summary</p>
+              <p className="text-ink-2 text-sm leading-relaxed">
                 We collect only what we need to run the Platform. We never sell your personal
                 data. We use Supabase for auth and storage, Vercel for hosting, Stripe for
                 payments, and Groq for AI processing. No online system is 100% secure — we take
@@ -101,8 +101,8 @@ export default function PrivacyPage() {
 
         {/* Sticky sidebar TOC */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+          <div className="sticky top-24 rounded-xl bg-surface-2 border border-border p-4">
+            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">
               In this document
             </p>
             <nav className="space-y-0.5">
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className="block text-xs text-gray-500 hover:text-white py-1.5 px-2 rounded-md hover:bg-white/5 transition-colors leading-snug"
+                  className="block text-xs text-ink-muted hover:text-ink py-1.5 px-2 rounded-md hover:bg-surface-2 transition-colors leading-snug"
                 >
                   {item.label}
                 </a>
@@ -171,7 +171,7 @@ export default function PrivacyPage() {
 
             <h3 className={H3}>2.3 AI chat messages (MG Labs AI)</h3>
             <p className={P}>
-              Messages you send to MG Labs AI (available at <code className="text-gray-300 bg-white/5 px-1 py-0.5 rounded">/mg-ai</code>)
+              Messages you send to MG Labs AI (available at <code className="text-ink-2 bg-surface-2 px-1 py-0.5 rounded">/mg-ai</code>)
               are transmitted in real time to Groq, Inc. for inference (AI response generation).
               We do not store the content of your AI chat sessions in our database. Groq processes
               messages under its own privacy policy. Do not submit sensitive personal information
@@ -237,7 +237,7 @@ export default function PrivacyPage() {
           <section id="p4">
             <h2 className={H2}>4. How We Share Your Information</h2>
             <p className={P}>
-              We <strong className="text-white">do not sell</strong> your personal information
+              We <strong className="text-ink">do not sell</strong> your personal information
               to third parties. We do not share your data with advertisers or data brokers.
             </p>
             <p className={`${P} mt-3`}>
@@ -245,24 +245,24 @@ export default function PrivacyPage() {
             </p>
             <ul className={`${UL} mt-3`}>
               <li>
-                <strong className="text-gray-200">Service providers:</strong> We share necessary
+                <strong className="text-ink">Service providers:</strong> We share necessary
                 data with our technical processors (listed in § 5) solely to operate the Platform.
               </li>
               <li>
-                <strong className="text-gray-200">Legal compliance:</strong> We may disclose
+                <strong className="text-ink">Legal compliance:</strong> We may disclose
                 personal data to comply with a legal obligation, court order, or lawful
                 government request, or to protect the rights, safety, or property of MG Creative
                 Labs, our users, or the public.
               </li>
               <li>
-                <strong className="text-gray-200">Business transfers:</strong> If MG Creative
+                <strong className="text-ink">Business transfers:</strong> If MG Creative
                 Labs is involved in a merger, acquisition, or sale of all or substantially all of
                 its assets, your personal data may be transferred as part of that transaction.
                 We will notify you via email and/or a prominent notice on the Platform before
                 your data becomes subject to a different privacy policy.
               </li>
               <li>
-                <strong className="text-gray-200">With your consent:</strong> We may share data
+                <strong className="text-ink">With your consent:</strong> We may share data
                 in other circumstances with your explicit prior consent.
               </li>
             </ul>
@@ -306,11 +306,11 @@ export default function PrivacyPage() {
               ].map((p) => (
                 <div
                   key={p.name}
-                  className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4"
+                  className="rounded-xl bg-surface-2 border border-border p-4"
                 >
-                  <p className="text-sm font-semibold text-white mb-0.5">{p.name}</p>
-                  <p className="text-xs text-gray-400">{p.role}</p>
-                  <p className="text-xs text-gray-600 mt-1">{p.note}</p>
+                  <p className="text-sm font-semibold text-ink mb-0.5">{p.name}</p>
+                  <p className="text-xs text-ink-2">{p.role}</p>
+                  <p className="text-xs text-ink-muted mt-1">{p.note}</p>
                 </div>
               ))}
             </div>
@@ -393,7 +393,7 @@ export default function PrivacyPage() {
 
             <h3 className={H3}>8.2 No absolute security guarantee</h3>
             <p className={P}>
-              <strong className="text-white">
+              <strong className="text-ink">
                 No method of electronic transmission or storage is 100% secure.
               </strong>{" "}
               While we take reasonable measures to protect your personal information, we cannot
@@ -439,23 +439,23 @@ export default function PrivacyPage() {
             <h3 className={H3}>9.1 Rights for all users</h3>
             <ul className={`${UL} mt-2`}>
               <li>
-                <strong className="text-gray-200">Access:</strong> Request a copy of the personal
+                <strong className="text-ink">Access:</strong> Request a copy of the personal
                 data we hold about you
               </li>
               <li>
-                <strong className="text-gray-200">Correction:</strong> Ask us to correct
+                <strong className="text-ink">Correction:</strong> Ask us to correct
                 inaccurate or incomplete data
               </li>
               <li>
-                <strong className="text-gray-200">Deletion:</strong> Request deletion of your
+                <strong className="text-ink">Deletion:</strong> Request deletion of your
                 personal data (subject to legal retention obligations)
               </li>
               <li>
-                <strong className="text-gray-200">Portability:</strong> Request your data in a
+                <strong className="text-ink">Portability:</strong> Request your data in a
                 portable, machine-readable format
               </li>
               <li>
-                <strong className="text-gray-200">Withdraw consent:</strong> Opt out of the
+                <strong className="text-ink">Withdraw consent:</strong> Opt out of the
                 newsletter or other consent-based processing at any time
               </li>
             </ul>
@@ -467,15 +467,15 @@ export default function PrivacyPage() {
             </p>
             <ul className={`${UL} mt-2`}>
               <li>
-                <strong className="text-gray-200">Right to restrict processing:</strong> Ask us
+                <strong className="text-ink">Right to restrict processing:</strong> Ask us
                 to restrict how we process your data in certain circumstances
               </li>
               <li>
-                <strong className="text-gray-200">Right to object:</strong> Object to processing
+                <strong className="text-ink">Right to object:</strong> Object to processing
                 based on legitimate interests, including profiling
               </li>
               <li>
-                <strong className="text-gray-200">Right to lodge a complaint:</strong> File a
+                <strong className="text-ink">Right to lodge a complaint:</strong> File a
                 complaint with your local supervisory authority (e.g., the ICO in the UK, or your
                 national DPA in the EU)
               </li>
@@ -569,7 +569,7 @@ export default function PrivacyPage() {
             </p>
             <ul className={`${UL} mt-3`}>
               <li>
-                <strong className="text-gray-200">Standard Contractual Clauses (SCCs)</strong>{" "}
+                <strong className="text-ink">Standard Contractual Clauses (SCCs)</strong>{" "}
                 where applicable with our sub-processors
               </li>
               <li>
@@ -649,8 +649,8 @@ export default function PrivacyPage() {
               For any questions, concerns, or requests relating to this Privacy Policy or the
               handling of your personal data, please contact us:
             </p>
-            <div className="mt-4 rounded-xl bg-white/[0.03] border border-white/[0.06] p-5 text-sm text-gray-400">
-              <p className="font-semibold text-white mb-1">MG Creative Labs — Privacy</p>
+            <div className="mt-4 rounded-xl bg-surface-2 border border-border p-5 text-sm text-ink-2">
+              <p className="font-semibold text-ink mb-1">MG Creative Labs — Privacy</p>
               <p>
                 Email:{" "}
                 <a
@@ -662,9 +662,9 @@ export default function PrivacyPage() {
               </p>
               <p className="mt-1">
                 Subject line:{" "}
-                <span className="text-gray-300">&ldquo;Privacy Request&rdquo;</span>
+                <span className="text-ink-2">&ldquo;Privacy Request&rdquo;</span>
               </p>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-ink-muted">
                 We aim to respond to all privacy enquiries within 30 days.
               </p>
             </div>

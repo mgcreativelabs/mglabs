@@ -84,25 +84,25 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="h-9 w-9 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-blue/30">
+            <div className="h-9 w-9 rounded-xl bg-brand-blue flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="font-display font-bold text-white text-lg">MG <span className="text-gradient">Creative Labs</span></span>
+            <span className="font-display font-bold text-ink text-lg">MG <span className="text-gradient">Creative Labs</span></span>
           </Link>
-          <h1 className="text-2xl font-display font-bold text-white">Set a new password</h1>
+          <h1 className="text-2xl font-display font-bold text-ink">Set a new password</h1>
         </div>
 
-        <div className="glass rounded-3xl p-8 border border-white/[0.06]">
+        <div className="glass rounded-3xl p-8 border border-border">
           {success ? (
             <div className="text-center">
               <div className="h-14 w-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-7 w-7 text-green-400" />
               </div>
-              <p className="text-gray-400 text-sm">Password updated. Redirecting you to your dashboard...</p>
+              <p className="text-ink-2 text-sm">Password updated. Redirecting you to your dashboard...</p>
             </div>
           ) : invalidLink ? (
             <div className="text-center">
-              <p className="text-gray-400 text-sm mb-6">
+              <p className="text-ink-2 text-sm mb-6">
                 This reset link is invalid or has expired. Request a new one to continue.
               </p>
               <Link href="/reset-password">
@@ -110,7 +110,7 @@ export default function UpdatePasswordPage() {
               </Link>
             </div>
           ) : !ready ? (
-            <p className="text-gray-500 text-sm text-center">Verifying your reset link...</p>
+            <p className="text-ink-muted text-sm text-center">Verifying your reset link...</p>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input

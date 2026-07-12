@@ -14,12 +14,6 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-surface relative overflow-hidden w-full">
 
-      {/* ── Ambient background ── */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-surface to-purple-900/20 w-full pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-40 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:72px_72px] pointer-events-none" />
-
       {/* ═══════════════════════════
           HERO
       ═══════════════════════════ */}
@@ -33,13 +27,13 @@ export default async function Home() {
 
         {/* Headline */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 max-w-5xl mx-auto leading-[1.05]">
-          <span className="block text-white">Build your first</span>
-          <span className="block bg-gradient-to-r from-brand-blue via-purple-400 to-brand-purple bg-clip-text text-transparent">
+          <span className="block text-ink">Build your first</span>
+          <span className="block text-brand-blue">
             AI tool in 20 minutes.
           </span>
         </h1>
 
-        <p className="text-gray-400 text-xl md:text-2xl max-w-2xl mx-auto mb-12 leading-relaxed">
+        <p className="text-ink-2 text-xl md:text-2xl max-w-2xl mx-auto mb-12 leading-relaxed">
           No experience needed. MG Labs takes you from your first AI experiment
           to a real, deployed product — step by step.
         </p>
@@ -48,14 +42,14 @@ export default async function Home() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 w-full px-4">
           <Link
             href="/start"
-            className="group px-8 py-4 bg-gradient-brand text-white rounded-xl font-semibold hover:scale-[1.02] transition-all duration-200 flex items-center gap-3 shadow-xl shadow-brand-blue/30 w-full sm:w-auto justify-center text-lg"
+            className="group px-8 py-4 bg-brand-blue text-white hover:bg-brand-blue-hover rounded-xl font-semibold hover:scale-[1.02] transition-all duration-200 flex items-center gap-3 w-full sm:w-auto justify-center text-lg"
           >
             Start Free AI Build
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/mg-ai"
-            className="px-8 py-4 rounded-xl font-medium text-gray-300 border border-white/10 hover:border-white/20 hover:text-white hover:bg-white/5 transition-all duration-200 w-full sm:w-auto flex items-center gap-2 justify-center"
+            className="px-8 py-4 rounded-xl font-medium text-ink-2 border border-border hover:border-border-strong hover:text-ink hover:bg-surface-2 transition-all duration-200 w-full sm:w-auto flex items-center gap-2 justify-center"
           >
             <Bot className="w-5 h-5" />
             Try MG AI free
@@ -63,14 +57,14 @@ export default async function Home() {
         </div>
 
         {/* Honest trust signals */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 text-sm text-ink-muted">
           {[
             "Free to start",
             "No credit card required",
             "No coding experience needed",
           ].map((item, i) => (
             <React.Fragment key={item}>
-              {i > 0 && <div className="hidden sm:block w-px h-4 bg-white/10" />}
+              {i > 0 && <div className="hidden sm:block w-px h-4 bg-surface-2" />}
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                 <span>{item}</span>
@@ -90,7 +84,7 @@ export default async function Home() {
             <p className="text-brand-blue text-sm font-semibold uppercase tracking-widest mb-3">
               How it works
             </p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white">
+            <h2 className="text-4xl md:text-5xl font-bold text-ink">
               From zero to AI product in 3 stages
             </h2>
           </div>
@@ -110,8 +104,8 @@ export default async function Home() {
               {
                 step: "02",
                 icon: <BookOpen className="w-6 h-6" />,
-                colorClass: "text-purple-400 bg-purple-400/10 border-purple-400/20",
-                ctaColor: "text-purple-400",
+                colorClass: "text-indigo-500 bg-indigo-400/10 border-indigo-400/20",
+                ctaColor: "text-indigo-500",
                 title: "Learn how it works",
                 desc: "5 free guided lessons — from 'what is AI' to building your first real logic system. No fluff. Just what you need to move forward.",
                 href: "/learn",
@@ -131,10 +125,10 @@ export default async function Home() {
               <Link
                 key={item.step}
                 href={item.href}
-                className="group relative p-8 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 flex flex-col overflow-hidden"
+                className="group relative p-8 rounded-2xl bg-surface-2 border border-border hover:border-border-strong transition-all duration-300 hover:-translate-y-1 flex flex-col overflow-hidden"
               >
                 {/* Watermark step number */}
-                <div className="absolute top-4 right-5 text-7xl font-black text-white/[0.04] select-none leading-none">
+                <div className="absolute top-4 right-5 text-7xl font-black text-ink/[0.04] select-none leading-none">
                   {item.step}
                 </div>
 
@@ -142,8 +136,8 @@ export default async function Home() {
                   {item.icon}
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed flex-1 mb-6">{item.desc}</p>
+                <h3 className="text-xl font-bold text-ink mb-3">{item.title}</h3>
+                <p className="text-ink-2 text-sm leading-relaxed flex-1 mb-6">{item.desc}</p>
 
                 <div className={`text-sm font-semibold flex items-center gap-1.5 ${item.ctaColor} group-hover:gap-2.5 transition-all`}>
                   {item.cta}
@@ -159,10 +153,10 @@ export default async function Home() {
       ═══════════════════════════ */}
       <section className="relative z-10 py-16 px-4 sm:px-6 w-full">
         <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden border border-brand-blue/30 bg-gradient-to-br from-brand-blue/10 via-surface-1 to-brand-purple/10 p-10 md:p-14">
+          <div className="relative rounded-3xl overflow-hidden border border-brand-blue/20 bg-brand-blue/5 p-10 md:p-14">
 
             {/* Top glow line */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-brand-blue/30" />
 
             <div className="flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-14">
 
@@ -171,10 +165,10 @@ export default async function Home() {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-blue/20 border border-brand-blue/30 text-brand-blue text-xs font-bold mb-5">
                   ⭐ Flagship Offer — Launch Program
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4 leading-tight">
                   Go from idea to deployed AI product in 4 weeks
                 </h2>
-                <p className="text-gray-400 leading-relaxed mb-7 max-w-xl">
+                <p className="text-ink-2 leading-relaxed mb-7 max-w-xl">
                   You bring the idea. We guide you through every decision — building,
                   connecting AI APIs, deploying, and handing you a real working product you own.
                 </p>
@@ -185,7 +179,7 @@ export default async function Home() {
                     "Step-by-step structure, not just tutorials",
                     "WhatsApp access throughout your build",
                   ].map((item) => (
-                    <li key={item} className="flex items-center gap-2.5 text-sm text-gray-300">
+                    <li key={item} className="flex items-center gap-2.5 text-sm text-ink-2">
                       <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                       {item}
                     </li>
@@ -193,7 +187,7 @@ export default async function Home() {
                 </ul>
                 <Link
                   href="/pricing#launch"
-                  className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-brand text-white rounded-xl font-semibold hover:scale-[1.02] transition-all shadow-lg shadow-brand-blue/30"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-blue text-white hover:bg-brand-blue-hover rounded-xl font-semibold hover:scale-[1.02] transition-all"
                 >
                   Apply for Launch Program — $500
                   <ArrowRight className="w-4 h-4" />
@@ -202,11 +196,11 @@ export default async function Home() {
 
               {/* Right: price callout */}
               <div className="md:text-right flex-shrink-0">
-                <div className="text-6xl md:text-7xl font-black text-white mb-2">$500</div>
-                <div className="text-gray-500 text-sm leading-relaxed">
+                <div className="text-6xl md:text-7xl font-black text-ink mb-2">$500</div>
+                <div className="text-ink-muted text-sm leading-relaxed">
                   One-time.<br />One project.<br />Real result.
                 </div>
-                <div className="mt-4 text-xs text-gray-600 line-through">
+                <div className="mt-4 text-xs text-ink-muted line-through">
                   vs $3,000+ hiring a developer
                 </div>
               </div>
@@ -222,13 +216,13 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto">
 
           <div className="text-center mb-16">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-3">
+            <p className="text-ink-muted text-sm font-semibold uppercase tracking-widest mb-3">
               The platform
             </p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-ink mb-4">
               Everything to build with AI
             </h2>
-            <p className="text-gray-400 max-w-xl mx-auto">
+            <p className="text-ink-2 max-w-xl mx-auto">
               From your first prompt to a live product — everything you need is here.
             </p>
           </div>
@@ -246,8 +240,8 @@ export default async function Home() {
               {
                 href: "/learn",
                 icon: <BookOpen className="w-6 h-6" />,
-                gradient: "from-purple-500/20 to-purple-500/5",
-                iconColor: "text-purple-400",
+                gradient: "from-indigo-500/15 to-indigo-500/5",
+                iconColor: "text-indigo-500",
                 title: "AI Lessons",
                 desc: "Structured lessons from basics to real AI systems. A free 5-lesson foundation path is included for everyone.",
               },
@@ -287,16 +281,16 @@ export default async function Home() {
               <Link
                 key={f.title}
                 href={f.href}
-                className="group p-7 rounded-2xl bg-white/[0.02] border border-white/[0.07] hover:bg-white/[0.05] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                className="group p-7 rounded-2xl bg-surface-2 border border-border hover:bg-surface-2 hover:border-border-strong transition-all duration-300 hover:-translate-y-1 flex flex-col"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-5 ${f.iconColor}`}>
                   {f.icon}
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-blue transition-colors">
+                <h3 className="text-lg font-bold text-ink mb-2 group-hover:text-brand-blue transition-colors">
                   {f.title}
                 </h3>
-                <p className="text-gray-500 text-sm leading-relaxed flex-1">{f.desc}</p>
-                <div className="mt-5 flex items-center gap-1 text-xs text-gray-600 group-hover:text-brand-blue transition-colors">
+                <p className="text-ink-muted text-sm leading-relaxed flex-1">{f.desc}</p>
+                <div className="mt-5 flex items-center gap-1 text-xs text-ink-muted group-hover:text-brand-blue transition-colors">
                   Explore <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -312,13 +306,13 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto">
 
           <div className="text-center mb-16">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-3">
+            <p className="text-ink-muted text-sm font-semibold uppercase tracking-widest mb-3">
               Need it done for you?
             </p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-ink mb-4">
               Hands-on services, when speed matters
             </h2>
-            <p className="text-gray-400 max-w-xl mx-auto">
+            <p className="text-ink-2 max-w-xl mx-auto">
               Beyond the platform — content production, freelance work, and ready-made digital products.
             </p>
           </div>
@@ -334,8 +328,8 @@ export default async function Home() {
               },
               {
                 icon: <Briefcase className="w-6 h-6" />,
-                gradient: "from-purple-500/20 to-purple-500/5",
-                iconColor: "text-purple-400",
+                gradient: "from-indigo-500/15 to-indigo-500/5",
+                iconColor: "text-indigo-500",
                 title: "Freelance Services",
                 desc: "Custom video editing, copywriting, web builds, design, and virtual assistance.",
               },
@@ -350,16 +344,16 @@ export default async function Home() {
               <Link
                 key={s.title}
                 href="/services"
-                className="group p-7 rounded-2xl bg-white/[0.02] border border-white/[0.07] hover:bg-white/[0.05] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                className="group p-7 rounded-2xl bg-surface-2 border border-border hover:bg-surface-2 hover:border-border-strong transition-all duration-300 hover:-translate-y-1 flex flex-col"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 ${s.iconColor}`}>
                   {s.icon}
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-blue transition-colors">
+                <h3 className="text-lg font-bold text-ink mb-2 group-hover:text-brand-blue transition-colors">
                   {s.title}
                 </h3>
-                <p className="text-gray-500 text-sm leading-relaxed flex-1">{s.desc}</p>
-                <div className="mt-5 flex items-center gap-1 text-xs text-gray-600 group-hover:text-brand-blue transition-colors">
+                <p className="text-ink-muted text-sm leading-relaxed flex-1">{s.desc}</p>
+                <div className="mt-5 flex items-center gap-1 text-xs text-ink-muted group-hover:text-brand-blue transition-colors">
                   See services <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -373,10 +367,10 @@ export default async function Home() {
       ═══════════════════════════ */}
       <section className="relative z-10 py-24 px-4 sm:px-6 w-full">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-ink mb-4">
             Your first AI product starts here.
           </h2>
-          <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
+          <p className="text-ink-2 text-lg mb-10 max-w-xl mx-auto">
             {ctaLabel
               ? `Join ${ctaLabel} builders already on MG Labs. Start free — no credit card, no experience needed.`
               : "Start free — no credit card, no experience needed. Build something real today."}
@@ -384,14 +378,14 @@ export default async function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/start"
-              className="group px-8 py-4 bg-gradient-brand text-white rounded-xl font-semibold hover:scale-[1.02] transition-all shadow-lg shadow-brand-blue/30 flex items-center gap-2 justify-center"
+              className="group px-8 py-4 bg-brand-blue text-white hover:bg-brand-blue-hover rounded-xl font-semibold hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
             >
               Start Free AI Build
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/pricing"
-              className="px-8 py-4 rounded-xl font-medium text-gray-300 border border-white/10 hover:border-white/20 hover:text-white transition-all flex items-center gap-2 justify-center"
+              className="px-8 py-4 rounded-xl font-medium text-ink-2 border border-border hover:border-border-strong hover:text-ink transition-all flex items-center gap-2 justify-center"
             >
               View pricing
             </Link>

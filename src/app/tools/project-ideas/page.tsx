@@ -33,21 +33,21 @@ function IdeaCard({
   return (
     <div className={`relative rounded-2xl border p-6 transition-all ${
       locked
-        ? "border-white/[0.05] bg-white/[0.01]"
-        : "border-white/[0.08] bg-white/[0.03] hover:border-brand-blue/30"
+        ? "border-border bg-surface-2"
+        : "border-border bg-surface-2 hover:border-brand-blue/30"
     }`}>
       {/* Lock overlay */}
       {locked && (
         <div className="absolute inset-0 rounded-2xl backdrop-blur-[2px] bg-surface/60 flex flex-col items-center justify-center z-10 gap-3">
-          <div className="w-10 h-10 rounded-full bg-surface-2 border border-white/10 flex items-center justify-center">
-            <Lock className="w-5 h-5 text-gray-500" />
+          <div className="w-10 h-10 rounded-full bg-surface-2 border border-border flex items-center justify-center">
+            <Lock className="w-5 h-5 text-ink-muted" />
           </div>
-          <p className="text-gray-500 text-sm text-center max-w-[200px] leading-snug">
+          <p className="text-ink-muted text-sm text-center max-w-[200px] leading-snug">
             Want us to help you build this?
           </p>
           <Link
             href="/pricing#launch"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-brand text-white hover:scale-[1.02] transition-all"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-brand-blue text-white hover:bg-brand-blue-hover hover:scale-[1.02] transition-all"
           >
             Join $500 Launch Program →
           </Link>
@@ -61,7 +61,7 @@ function IdeaCard({
             <div className="w-7 h-7 rounded-lg bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue text-xs font-bold">
               {index + 1}
             </div>
-            <h3 className="font-bold text-white">{idea.title}</h3>
+            <h3 className="font-bold text-ink">{idea.title}</h3>
           </div>
           <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-md font-medium ${
             idea.difficulty === "Beginner"
@@ -72,24 +72,24 @@ function IdeaCard({
           </span>
         </div>
 
-        <p className="text-gray-400 text-sm leading-relaxed mb-4">{idea.description}</p>
+        <p className="text-ink-2 text-sm leading-relaxed mb-4">{idea.description}</p>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Clock className="w-3.5 h-3.5 text-gray-600" />
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <Clock className="w-3.5 h-3.5 text-ink-muted" />
             {idea.build_time}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <TrendingUp className="w-3.5 h-3.5 text-gray-600" />
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <TrendingUp className="w-3.5 h-3.5 text-ink-muted" />
             {idea.income_potential}
           </div>
         </div>
 
         <div className="p-3 rounded-xl bg-brand-blue/5 border border-brand-blue/10">
-          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">
+          <p className="text-xs text-ink-muted font-semibold uppercase tracking-wider mb-1">
             First step
           </p>
-          <p className="text-xs text-gray-300 leading-relaxed">{idea.first_step}</p>
+          <p className="text-xs text-ink-2 leading-relaxed">{idea.first_step}</p>
         </div>
       </div>
     </div>
@@ -151,14 +151,14 @@ export default function ProjectIdeasPage() {
 
       {/* ── Header ── */}
       <section className="pt-24 pb-12 px-4 sm:px-6 max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-6">
-          <Lightbulb className="w-4 h-4 text-brand-purple" />
-          <span className="text-sm text-brand-purple font-medium">Free AI Tool</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-blue/10 border border-brand-blue/20 mb-6">
+          <Lightbulb className="w-4 h-4 text-brand-blue" />
+          <span className="text-sm text-brand-blue font-medium">Free AI Tool</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-ink mb-4 leading-tight">
           AI Project Idea Generator
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="text-ink-2 text-xl max-w-2xl mx-auto leading-relaxed">
           Tell us what you&apos;re interested in and your skill level.
           Get 5 AI project ideas you can actually build.
         </p>
@@ -166,12 +166,12 @@ export default function ProjectIdeasPage() {
 
       {/* ── Generator form ── */}
       <section className="px-4 sm:px-6 max-w-4xl mx-auto pb-16">
-        <div className="rounded-2xl bg-white/[0.03] border border-white/[0.07] p-6 mb-6">
+        <div className="rounded-2xl bg-surface-2 border border-border p-6 mb-6">
           <div className="grid sm:grid-cols-2 gap-5 mb-5">
 
             {/* Interest */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label className="block text-sm font-semibold text-ink mb-2">
                 What are you interested in? *
               </label>
               <input
@@ -179,14 +179,14 @@ export default function ProjectIdeasPage() {
                 value={interest}
                 onChange={(e) => setInterest(e.target.value)}
                 placeholder="e.g. fitness, restaurants, real estate, education..."
-                className="w-full bg-surface-1 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-blue/50 transition-colors"
+                className="w-full bg-surface-1 border border-border rounded-xl px-4 py-3 text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand-blue/50 transition-colors"
               />
               <div className="flex flex-wrap gap-2 mt-2">
                 {INTEREST_EXAMPLES.map((ex) => (
                   <button
                     key={ex}
                     onClick={() => setInterest(ex)}
-                    className="text-xs px-2.5 py-1 rounded-lg bg-surface-3 border border-white/[0.06] text-gray-500 hover:text-white hover:border-brand-purple/30 transition-all"
+                    className="text-xs px-2.5 py-1 rounded-lg bg-surface-3 border border-border text-ink-muted hover:text-ink hover:border-brand-blue/30 transition-all"
                   >
                     {ex}
                   </button>
@@ -196,7 +196,7 @@ export default function ProjectIdeasPage() {
 
             {/* Skill level */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label className="block text-sm font-semibold text-ink mb-2">
                 Your skill level
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -206,8 +206,8 @@ export default function ProjectIdeasPage() {
                     onClick={() => setSkillLevel(level)}
                     className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all ${
                       skillLevel === level
-                        ? "bg-brand-purple/20 border-brand-purple/50 text-white"
-                        : "bg-white/[0.02] border-white/[0.07] text-gray-500 hover:text-gray-300 hover:border-white/20"
+                        ? "bg-brand-blue/20 border-brand-blue/50 text-white"
+                        : "bg-surface-2 border-border text-ink-muted hover:text-ink-2 hover:border-border-strong"
                     }`}
                   >
                     {level}
@@ -218,15 +218,15 @@ export default function ProjectIdeasPage() {
 
             {/* Goal */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Your goal <span className="text-gray-600 font-normal">(optional)</span>
+              <label className="block text-sm font-semibold text-ink mb-2">
+                Your goal <span className="text-ink-muted font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 placeholder="e.g. make money, build a portfolio, learn..."
-                className="w-full bg-surface-1 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-blue/50 transition-colors"
+                className="w-full bg-surface-1 border border-border rounded-xl px-4 py-3 text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand-blue/50 transition-colors"
               />
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function ProjectIdeasPage() {
           <button
             onClick={handleGenerate}
             disabled={!interest.trim() || loading}
-            className="w-full sm:w-auto px-8 py-3 bg-gradient-brand text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-all shadow-lg shadow-brand-blue/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-2 justify-center"
+            className="w-full sm:w-auto px-8 py-3 bg-brand-blue text-white hover:bg-brand-blue-hover rounded-xl font-semibold text-sm hover:scale-[1.02] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-2 justify-center"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Generating ideas...</>
@@ -256,10 +256,10 @@ export default function ProjectIdeasPage() {
         {result?.ideas && (
           <div className="animate-fade-up">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold text-ink">
                 Your 5 AI project ideas
               </h2>
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-ink-muted">
                 First 3 free · Last 2 with Launch Program
               </span>
             </div>
@@ -276,25 +276,25 @@ export default function ProjectIdeasPage() {
             </div>
 
             {/* Bottom CTA */}
-            <div className="mt-8 p-8 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-purple/10 border border-brand-blue/20 text-center">
-              <h3 className="text-xl font-bold text-white mb-3">
+            <div className="mt-8 p-8 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 text-center">
+              <h3 className="text-xl font-bold text-ink mb-3">
                 Found one you want to build?
               </h3>
-              <p className="text-gray-400 text-sm max-w-md mx-auto mb-5 leading-relaxed">
+              <p className="text-ink-2 text-sm max-w-md mx-auto mb-5 leading-relaxed">
                 The Launch Program guides you from this idea list to a deployed,
                 working AI product — in 4 weeks with expert support.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href="/pricing#launch"
-                  className="px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-brand text-white shadow-lg shadow-brand-blue/30 hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
+                  className="px-6 py-3 rounded-xl font-semibold text-sm bg-brand-blue text-white hover:bg-brand-blue-hover hover:scale-[1.02] transition-all flex items-center gap-2 justify-center"
                 >
                   Apply for Launch Program — $500
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/start"
-                  className="px-6 py-3 rounded-xl font-medium text-sm text-gray-300 border border-white/10 hover:border-white/20 hover:text-white transition-all text-center"
+                  className="px-6 py-3 rounded-xl font-medium text-sm text-ink-2 border border-border hover:border-border-strong hover:text-ink transition-all text-center"
                 >
                   Try the free builder first
                 </Link>

@@ -52,11 +52,11 @@ export default function AboutOwnerPage() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <Badge variant="blue" className="mb-5">Founder & Creator</Badge>
-            <h1 className="text-5xl font-display font-bold text-white leading-tight mb-4">
+            <h1 className="text-5xl font-display font-bold text-ink leading-tight mb-4">
               Mehdi<br />
               <span className="text-gradient">Guemdani</span>
             </h1>
-            <p className="text-gray-400 text-lg leading-relaxed mb-6">
+            <p className="text-ink-2 text-lg leading-relaxed mb-6">
               Founder of MG Creative Labs. Builder, educator, and AI practitioner helping creators master the tools reshaping how we work and build.
             </p>
 
@@ -77,14 +77,14 @@ export default function AboutOwnerPage() {
           {/* Avatar placeholder */}
           <div className="flex justify-center">
             <div className="relative">
-              <div className="h-64 w-64 rounded-3xl bg-gradient-to-br from-brand-blue/30 to-brand-purple/30 border border-white/10 flex items-center justify-center">
-                <div className="h-20 w-20 rounded-2xl bg-gradient-brand flex items-center justify-center shadow-xl shadow-brand-blue/30">
+              <div className="h-64 w-64 rounded-3xl bg-brand-blue/10 border border-border flex items-center justify-center">
+                <div className="h-20 w-20 rounded-2xl bg-brand-blue flex items-center justify-center">
                   <Zap className="h-10 w-10 text-white" />
                 </div>
               </div>
-              <div className="absolute -bottom-3 -right-3 glass rounded-2xl px-4 py-2 border border-white/10">
-                <p className="text-xs font-semibold text-white">MG Creative Labs</p>
-                <p className="text-[10px] text-gray-500">Est. 2024</p>
+              <div className="absolute -bottom-3 -right-3 glass rounded-2xl px-4 py-2 border border-border">
+                <p className="text-xs font-semibold text-ink">MG Creative Labs</p>
+                <p className="text-[10px] text-ink-muted">Est. 2024</p>
               </div>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default function AboutOwnerPage() {
         <div className="flex flex-wrap gap-4">
           <a
             href="mailto:mgcreativelabs@technologist.com"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-ink-2 hover:text-ink transition-colors"
           >
             <Mail className="h-4 w-4 text-brand-blue" />
             mgcreativelabs@technologist.com
@@ -105,18 +105,18 @@ export default function AboutOwnerPage() {
             href="https://mglabs.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-ink-2 hover:text-ink transition-colors"
           >
-            <Globe className="h-4 w-4 text-brand-purple" />
+            <Globe className="h-4 w-4 text-brand-blue" />
             mglabs.vercel.app
           </a>
           <a
             href="https://github.com/mgcreativelabs"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-ink-2 hover:text-ink transition-colors"
           >
-            <ExternalLink className="h-4 w-4 text-gray-400" />
+            <ExternalLink className="h-4 w-4 text-ink-2" />
             mgcreativelabs
           </a>
         </div>
@@ -127,10 +127,10 @@ export default function AboutOwnerPage() {
         <div className="grid md:grid-cols-2 gap-12">
           <div>
             <Badge variant="purple" className="mb-4">Story</Badge>
-            <h2 className="text-3xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl font-display font-bold text-ink mb-4">
               Why I built MG Creative Labs
             </h2>
-            <div className="space-y-4 text-gray-400 leading-relaxed">
+            <div className="space-y-4 text-ink-2 leading-relaxed">
               <p>
                 I started learning about AI at a time when the best resources were locked behind expensive courses, dense academic papers, or YouTube videos that spent 20 minutes getting to the point.
               </p>
@@ -145,14 +145,14 @@ export default function AboutOwnerPage() {
 
           <div>
             <Badge variant="success" className="mb-4">Skills</Badge>
-            <h2 className="text-3xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl font-display font-bold text-ink mb-4">
               What I work with
             </h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
                 <span
                   key={skill}
-                  className="px-3 py-1.5 rounded-lg bg-surface-2 border border-white/[0.06] text-sm text-gray-300"
+                  className="px-3 py-1.5 rounded-lg bg-surface-2 border border-border text-sm text-ink-2"
                 >
                   {skill}
                 </span>
@@ -165,13 +165,13 @@ export default function AboutOwnerPage() {
       {/* Values */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
         <Badge variant="blue" className="mb-4">Values</Badge>
-        <h2 className="text-3xl font-display font-bold text-white mb-8">How I think</h2>
+        <h2 className="text-3xl font-display font-bold text-ink mb-8">How I think</h2>
         <div className="grid sm:grid-cols-2 gap-5">
           {values.map((v) => (
-            <Card key={v.title} className="border border-white/[0.06] p-6">
+            <Card key={v.title} className="border border-border p-6">
               <div className="text-2xl mb-3">{v.emoji}</div>
-              <h3 className="font-semibold text-white mb-2">{v.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{v.desc}</p>
+              <h3 className="font-semibold text-ink mb-2">{v.title}</h3>
+              <p className="text-sm text-ink-2 leading-relaxed">{v.desc}</p>
             </Card>
           ))}
         </div>
@@ -179,11 +179,11 @@ export default function AboutOwnerPage() {
 
       {/* CTA */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16 text-center">
-        <div className="glass rounded-3xl p-12 border border-white/[0.06]">
-          <h2 className="text-3xl font-display font-bold text-white mb-4">
+        <div className="glass rounded-3xl p-12 border border-border">
+          <h2 className="text-3xl font-display font-bold text-ink mb-4">
             Want to work together or just say hi?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+          <p className="text-ink-2 mb-8 max-w-lg mx-auto">
             Whether you have a question, a collaboration idea, or feedback on MG Creative Labs — I read everything and reply to most things.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
