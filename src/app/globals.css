@@ -5,32 +5,61 @@
    TAILWIND v4 THEME TOKENS
    These replace tailwind.config.ts theme.extend — custom colors
    and fonts are now defined here so they're picked up correctly.
+
+   IMPORTANT: every color below points at a CSS variable (defined
+   in :root / .dark further down), NOT a hardcoded hex. That's
+   what makes bg-surface-1, text-ink, border-border, etc. actually
+   flip when <html> gets the .dark class — before this change these
+   were static hex values baked into @theme, so dark: variants had
+   no variable to redefine and nothing could ever go dark.
 ═══════════════════════════════════════════════════════════════ */
 @theme {
-  /* Brand */
+  /* Brand — same in both themes, brand blue doesn't change */
   --color-brand-blue:       #0071E3;
   --color-brand-blue-hover: #005BB5;
 
-  /* Surfaces (light) */
-  --color-surface:    #FFFFFF;
-  --color-surface-1:  #FAFAFA;
-  --color-surface-2:  #F5F5F7;
-  --color-surface-3:  #EFEFF1;
-  --color-surface-4:  #E5E5E7;
+  /* Surfaces */
+  --color-surface:    var(--surface);
+  --color-surface-1:  var(--surface-1);
+  --color-surface-2:  var(--surface-2);
+  --color-surface-3:  var(--surface-3);
+  --color-surface-4:  var(--surface-4);
 
   /* Borders */
-  --color-border:        #E5E5E7;
-  --color-border-strong: #D2D2D7;
+  --color-border:        var(--border-c);
+  --color-border-strong: var(--border-strong);
 
   /* Text */
-  --color-ink:        #111111;
-  --color-ink-2:       #6E6E73;
-  --color-ink-muted:   #8E8E93;
+  --color-ink:        var(--ink);
+  --color-ink-2:       var(--ink-2);
+  --color-ink-muted:   var(--ink-muted);
 
-  /* Status */
-  --color-success: #34C759;
-  --color-warning: #FF9F0A;
-  --color-danger:  #FF3B30;
+  /* Status — slightly brighter in dark mode for contrast, see .dark block */
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-danger:  var(--status-danger);
+
+  /* shadcn/ui standard tokens — kept in sync with the brand tokens
+     above so components pulled via `npx shadcn add ...` in the
+     future theme correctly with zero extra work. */
+  --color-background:       var(--surface);
+  --color-foreground:       var(--ink);
+  --color-card:              var(--surface);
+  --color-card-foreground:   var(--ink);
+  --color-popover:           var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-primary:           var(--color-brand-blue);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary:          var(--surface-2);
+  --color-secondary-foreground: var(--ink);
+  --color-muted:              var(--surface-2);
+  --color-muted-foreground:   var(--ink-2);
+  --color-accent:             var(--surface-2);
+  --color-accent-foreground:  var(--ink);
+  --color-destructive:        var(--status-danger);
+  --color-destructive-foreground: #FFFFFF;
+  --color-input:              var(--border-c);
+  --color-ring:                var(--color-brand-blue);
 
   --font-sans:    "Inter", system-ui, sans-serif;
   --font-display: "Inter", system-ui, sans-serif;
@@ -41,6 +70,52 @@
    <html class="dark"> enables all dark: variants
 ═══════════════════════════════════════════════════════════════ */
 @variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME VARIABLES — the actual color values per theme.
+   :root = light (default). .dark overrides every variable.
+   Not pure black per the brief — elegant dark grays instead.
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+  --radius: 0.875rem;
+
+  --surface:        #FFFFFF;
+  --surface-1:       #FAFAFA;
+  --surface-2:       #F5F5F7;
+  --surface-3:       #EFEFF1;
+  --surface-4:       #E5E5E7;
+
+  --border-c:        #E5E5E7;
+  --border-strong:   #D2D2D7;
+
+  --ink:              #111111;
+  --ink-2:             #6E6E73;
+  --ink-muted:         #8E8E93;
+
+  --status-success: #34C759;
+  --status-warning: #FF9F0A;
+  --status-danger:  #FF3B30;
+}
+
+.dark {
+  --surface:        #1C1C1E;
+  --surface-1:       #202022;
+  --surface-2:       #2C2C2E;
+  --surface-3:       #38383A;
+  --surface-4:       #48484A;
+
+  --border-c:        #38383A;
+  --border-strong:   #48484A;
+
+  --ink:              #F5F5F7;
+  --ink-2:             #A1A1A6;
+  --ink-muted:         #7C7C80;
+
+  --status-success: #30D158;
+  --status-warning: #FF9F0A;
+  --status-danger:  #FF453A;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    BASE LAYER
@@ -63,32 +138,30 @@
     box-sizing: border-box;
   }
 
-  :root {
-    --font-inter: "Inter", system-ui, sans-serif;
-    --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
-    --border: 240 6% 90%;
-    --radius: 0.875rem;
-  }
-
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevents a light-theme flash before ThemeProvider hydrates,
+       and tells native form controls / scrollbars which palette
+       to render in. next-themes toggles the .dark class on <html>
+       and keeps color-scheme in sync via its own script. */
+    color-scheme: light dark;
   }
 
   body {
-    background-color: #FFFFFF;
-    color: #111111;
+    background-color: var(--surface);
+    color: var(--ink);
     font-family: var(--font-inter);
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   ::-webkit-scrollbar              { width: 6px; }
-  ::-webkit-scrollbar-track        { background: #FAFAFA; }
-  ::-webkit-scrollbar-thumb        { background: #D2D2D7; border-radius: 3px; }
+  ::-webkit-scrollbar-track        { background: var(--surface-1); }
+  ::-webkit-scrollbar-thumb        { background: var(--border-strong); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover  { background: #0071E3; }
-  ::selection                      { background: rgba(0, 113, 227, 0.15); color: #111111; }
+  ::selection                      { background: rgba(0, 113, 227, 0.15); color: var(--ink); }
 
   :focus-visible {
     outline: 2px solid #0071E3;
@@ -116,26 +189,32 @@
 /* Kept as a class for compatibility with components still referencing
    .glass; resolves to a plain elevated card, no blur/transparency. */
 .glass {
-  background: #FFFFFF;
-  border: 1px solid #E5E5E7;
+  background: var(--surface);
+  border: 1px solid var(--border-c);
 }
 
 .glass-hover:hover {
-  background: #FAFAFA;
-  border-color: #D2D2D7;
+  background: var(--surface-1);
+  border-color: var(--border-strong);
   transition: all 0.3s ease;
 }
 
-/* Glow utilities kept as no-op-safe soft shadows (no colored glow) */
+/* Glow utilities kept as no-op-safe soft shadows (no colored glow).
+   Dark mode uses a stronger shadow since black-on-black shadows
+   are invisible — see .dark override below. */
 .glow-blue,
 .glow-purple {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+.dark .glow-blue,
+.dark .glow-purple {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* Mesh background kept as class for compatibility; resolves to the
    plain secondary surface, no radial color blobs. */
 .mesh-bg {
-  background-color: #FAFAFA;
+  background-color: var(--surface-1);
 }
 
 .card-hover {
@@ -144,7 +223,10 @@
 .card-hover:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  border-color: #D2D2D7;
+  border-color: var(--border-strong);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
 /* ═══════════════════════════════════════════════════════════════

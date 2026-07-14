@@ -15,7 +15,7 @@ export function ServicesGrid() {
           key={service.id}
           className={`relative rounded-2xl p-7 flex flex-col transition-all duration-300 ${
             service.featured
-              ? "bg-white border-2 border-brand-blue/40 shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
+              ? "bg-surface border-2 border-brand-blue/40 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
               : "glass border border-border hover:border-border-strong"
           }`}
         >

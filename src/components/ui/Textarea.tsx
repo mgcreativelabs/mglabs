@@ -20,7 +20,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            "w-full rounded-[14px] bg-white border border-border text-ink placeholder:text-ink-muted",
+            "w-full rounded-[14px] bg-surface border border-border text-ink placeholder:text-ink-muted",
             "px-4 py-3 text-sm transition-all duration-250 resize-none",
             "focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20",
             error && "border-status-danger/50",

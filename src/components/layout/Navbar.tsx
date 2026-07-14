@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const navLinks = [
   { label: "Build",    href: "/start",         icon: Rocket,    highlight: "blue"   },
@@ -61,8 +62,8 @@ export function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
         scrolled
-          ? "bg-white/90 backdrop-blur-xl border-b border-border"
-          : "bg-white border-b border-transparent"
+          ? "bg-surface/90 backdrop-blur-xl border-b border-border"
+          : "bg-surface border-b border-transparent"
       )}
     >
       <nav className="w-full max-w-7xl mx-auto px-6 lg:px-8">
@@ -126,6 +127,8 @@ export function Navbar() {
               </>
             )}
 
+            <ThemeToggle className="hidden sm:flex" />
+
             {/* Hamburger */}
             <button
               className="lg:hidden p-2 rounded-lg text-ink-2 hover:text-ink hover:bg-surface-1 transition-colors"
@@ -139,7 +142,7 @@ export function Navbar() {
 
         {/* Mobile dropdown */}
         {isOpen && (
-          <div className="lg:hidden pb-4 border-t border-border mt-2 bg-white -mx-6 px-6">
+          <div className="lg:hidden pb-4 border-t border-border mt-2 bg-surface -mx-6 px-6">
             <div className="pt-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
@@ -166,6 +169,11 @@ export function Navbar() {
                   )}
                 </Link>
               ))}
+
+              <div className="pt-3 border-t border-border flex items-center justify-between">
+                <span className="text-sm font-medium text-ink-2">Theme</span>
+                <ThemeToggle />
+              </div>
 
               <div className="pt-3 border-t border-border flex flex-col gap-2">
                 {user ? (

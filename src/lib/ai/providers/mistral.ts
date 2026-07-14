@@ -4,9 +4,8 @@
 // is OpenAI-compatible, same shape as the existing Groq call.
 // Free tier (rate-limited, no card required): MISTRAL_API_KEY.
 // ============================================================
-import type { ChatAdapter, ChatMessage, ChatResult, StreamChunk } from "@/lib/ai/types";
+import type { ChatAdapter, ChatMessage, ChatResult } from "@/lib/ai/types";
 import { AIProviderError } from "@/lib/ai/types";
-import { readOpenAICompatibleSSE } from "@/lib/ai/providers/sse";
 
 const SYSTEM_PROMPT =
   "You are MG Labs AI, a helpful AI assistant for MG Creative Labs — an AI education platform. " +
@@ -49,37 +48,5 @@ export const mistralAdapter: ChatAdapter = {
       data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
 
     return { content, raw: data };
-  },
-
-  async *chatStream(model: string, messages: ChatMessage[]): AsyncGenerator<StreamChunk, void, unknown> {
-    const apiKey = process.env.MISTRAL_API_KEY;
-    if (!apiKey) {
-      throw new AIProviderError(
-        "Mistral API key not configured. Add MISTRAL_API_KEY to your Vercel env vars.",
-        500
-      );
-    }
-
-    const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
-        max_tokens: 1024,
-        temperature: 0.7,
-        stream: true,
-      }),
-    });
-
-    if (!res.ok || !res.body) {
-      const errText = await res.text().catch(() => "");
-      throw new AIProviderError(`Mistral API error: ${res.status} — ${errText}`, res.status);
-    }
-
-    yield* readOpenAICompatibleSSE(res.body);
   },
 };

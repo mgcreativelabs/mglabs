@@ -62,7 +62,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="h-9 w-9 rounded-lg bg-white border border-border flex items-center justify-center text-ink-2 hover:text-ink hover:border-brand-blue/30 transition-all duration-250"
+                  className="h-9 w-9 rounded-lg bg-surface border border-border flex items-center justify-center text-ink-2 hover:text-ink hover:border-brand-blue/30 transition-all duration-250"
                 >
                   <Icon className="h-4 w-4" />
                 </a>

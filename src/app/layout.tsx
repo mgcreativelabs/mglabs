@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import React from "react";
 
 // ─────────────────────────────────────────────────────────
@@ -56,20 +57,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning is required by next-themes: it sets the
+    // .dark class on <html> via an inline script *before* React hydrates
+    // (so there's no flash of the wrong theme), which means the server
+    // and client HTML for this one attribute intentionally differ.
+    <html lang="en" suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-surface-1 text-ink">
-        <Navbar />
-        {/*
-          pt-16 = 64px = exact height of the fixed navbar.
-          This pushes ALL page content below the navbar globally.
-          Individual pages should NOT add their own pt-16 —
-          doing so double-stacks the padding. See the
-          pt16-cleanup notes for the list of pages to fix.
-        */}
-        <main className="pt-16">
-          {children}
-        </main>
-        <Footer />
+        <ThemeProvider>
+          <Navbar />
+          {/*
+            pt-16 = 64px = exact height of the fixed navbar.
+            This pushes ALL page content below the navbar globally.
+            Individual pages should NOT add their own pt-16 —
+            doing so double-stacks the padding. See the
+            pt16-cleanup notes for the list of pages to fix.
+          */}
+          <main className="pt-16">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -30,6 +30,7 @@ import { useChatHistory } from "@/lib/hooks/useChatHistory";
 import { readSSE } from "@/lib/ai/readSSE";
 import { ChatSidebar } from "./ChatSidebar";
 import { CodeBlock } from "./CodeBlock";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 // ── Types ────────────────────────────────────────────────────
 interface Attachment {
@@ -943,6 +944,8 @@ export function MGAIChat() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
+
           {/* Voice mode toggle */}
           <button
             onClick={() => {

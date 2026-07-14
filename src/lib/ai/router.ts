@@ -7,7 +7,7 @@
 // adapter in ./providers, registering it below, and adding its
 // models to src/lib/data/ai-models.ts. Nothing else changes.
 // ============================================================
-import type { ChatAdapter, ChatMessage, ChatResult, StreamChunk } from "@/lib/ai/types";
+import type { ChatAdapter, ChatMessage, ChatResult } from "@/lib/ai/types";
 import { AIProviderError } from "@/lib/ai/types";
 import { groqAdapter } from "@/lib/ai/providers/groq";
 import { geminiAdapter } from "@/lib/ai/providers/gemini";
@@ -38,37 +38,4 @@ export async function routeChat(
   }
 
   return adapter.chat(modelId, messages);
-}
-
-/**
- * Streaming counterpart to routeChat. If the resolved adapter hasn't
- * implemented chatStream yet, falls back to a single non-streamed
- * chunk from chat() — callers (the /api/chat route) don't need to
- * know which path was taken, they just consume the async generator.
- */
-export async function* routeChatStream(
-  modelId: string,
-  messages: ChatMessage[]
-): AsyncGenerator<StreamChunk, void, unknown> {
-  const model = TEXT_MODELS.find((m) => m.id === modelId);
-  if (!model) {
-    throw new AIProviderError(`Unknown model id: ${modelId}`, 400);
-  }
-
-  const adapter = ADAPTERS[model.provider];
-  if (!adapter) {
-    throw new AIProviderError(
-      `No adapter registered for provider "${model.provider}".`,
-      500
-    );
-  }
-
-  if (adapter.chatStream) {
-    yield* adapter.chatStream(modelId, messages);
-    return;
-  }
-
-  const result = await adapter.chat(modelId, messages);
-  yield { delta: result.content };
-  if (result.citations?.length) yield { citations: result.citations };
 }
